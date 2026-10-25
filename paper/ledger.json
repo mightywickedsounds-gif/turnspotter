@@ -1,0 +1,33 @@
+{
+ "start": 50,
+ "balance": 50,
+ "startedAt": 1792965702982,
+ "trades": [],
+ "equity": [
+  {
+   "t": 1792965702982,
+   "value": 50
+  }
+ ],
+ "config": {
+  "start": 50,
+  "stakePct": 0.1,
+  "minStake": 1,
+  "feePct": 0.001,
+  "bustBuffer": 3,
+  "maxMult": 50,
+  "coins": [
+   "BTC",
+   "ETH",
+   "SOL",
+   "XRP",
+   "DOGE"
+  ],
+  "tf": "15m",
+  "tfMin": 15,
+  "lookMin": 60,
+  "conf": 0.58,
+  "need": 2000
+ },
+ "lastRun": 1792965702982
+}
