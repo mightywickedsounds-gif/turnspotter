@@ -179,6 +179,8 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
 .moreGrid .range{margin-top:12px}
 .score{margin-top:16px}
 .foot{margin-top:4px}
+.ppTop{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.spark{width:min(300px,100%);height:60px}
 #log td{border-bottom:1px solid var(--edge)}
 @media (max-width:760px){.moreGrid,.fold .controls{grid-template-columns:1fr}}
 </style>
@@ -211,6 +213,16 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <div class="chartWrap"><canvas id="chart" aria-label="Price over the last 24 hours with the calls the AI made"></canvas><span class="pulse" id="pulse" hidden></span></div>
     <div class="legend"><span style="color:var(--up)">● UP call</span><span style="color:var(--down)">● DOWN call</span><span>✓ right · ✕ wrong</span></div>
     <div class="tablewrap"><table><tbody id="log"></tbody></table></div>
+  </section>
+
+  <section class="card" id="paper" hidden>
+    <div class="rowHead"><h2>Paper trading</h2><span class="record" id="ppMeta"></span></div>
+    <div class="ppTop">
+      <div><div class="coinName">$50 of fake money, following every call</div><span class="price" id="ppBal">—</span> <span class="chg" id="ppChg"></span></div>
+      <svg class="spark" id="ppSpark" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true"></svg>
+    </div>
+    <div class="tablewrap"><table><tbody id="ppLog"></tbody></table></div>
+    <p class="note">Simulated Trench-style trades: 10% of the balance per trade, multiplier set so the bust price is 3× the typical move away, 0.1% fee. Trench doesn't publish its exact formulas, so real results will differ.</p>
   </section>
 
   <details class="card fold" id="settings">
@@ -867,6 +879,31 @@ $("watch").addEventListener("click", e => { const b = e.target.closest(".chip");
 setInterval(tick, 1000);
 setInterval(fetchTicker, 3000);
 requestAnimationFrame(animate);
+
+// ───────── paper trading panel (ledger written by the paper/trader.mjs job) ─────────
+async function loadPaper(){
+  try{
+    const L = await (await fetch("paper/ledger.json?" + Date.now(), {cache:"no-store"})).json();
+    const open = L.trades.filter(t => t.status === "open"), closed = L.trades.filter(t => t.status !== "open");
+    const value = L.balance + open.reduce((s,t) => s + t.stake, 0), chg = value / L.start - 1;
+    $("paper").hidden = false;
+    $("ppBal").textContent = "$" + value.toFixed(2);
+    $("ppChg").textContent = (chg >= 0 ? "▲ " : "▼ ") + Math.abs(chg*100).toFixed(1) + "%";
+    $("ppChg").className = "chg " + (chg >= 0 ? "win" : "loss");
+    const won = closed.filter(t => t.pnl > 0).length, mins = Math.round((Date.now() - L.lastRun) / 60000);
+    $("ppMeta").innerHTML = `${closed.length} trades · <b class="${closed.length && won/closed.length >= .5 ? "win" : "loss"}">${won} won</b> · updated ${mins < 1 ? "just now" : mins + " min ago"}`;
+    const eq = L.equity.map(e => e.value);
+    if(eq.length > 1){ const lo = Math.min(...eq, L.start), hi = Math.max(...eq, L.start), y = v => 56 - (v - lo) / ((hi - lo) || 1) * 52;
+      const pts = eq.map((v,i) => `${(i/(eq.length-1)*300).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+      $("ppSpark").innerHTML = `<line x1="0" x2="300" y1="${y(L.start)}" y2="${y(L.start)}" stroke="var(--faint)" stroke-dasharray="3 4"/>
+        <polyline points="${pts}" fill="none" stroke="${chg >= 0 ? "var(--up)" : "var(--down)"}" stroke-width="2" vector-effect="non-scaling-stroke"/>`; }
+    $("ppLog").innerHTML = L.trades.slice(-6).reverse().map(t => `<tr><td>${fmtT(t.openedAt)}</td><td>${t.coin}</td>
+      <td><span class="pill ${t.dir > 0 ? "up" : "down"}">${t.dir > 0 ? "▲ UP" : "▼ DOWN"}</span></td><td>$${t.stake.toFixed(2)} × ${t.mult}</td>
+      <td class="${t.status === "open" ? "pend" : t.pnl > 0 ? "win" : "loss"}">${t.status === "open" ? "open…" : t.status === "busted" ? "busted −$" + t.stake.toFixed(2) : (t.pnl > 0 ? "+$" : "−$") + Math.abs(t.pnl).toFixed(2)}</td></tr>`).join("")
+      || `<tr><td colspan="5" class="pend">No trades yet. It trades whenever the site makes a call.</td></tr>`;
+  }catch(e){ $("paper").hidden = true; }
+}
+loadPaper(); setInterval(loadPaper, 60000);
 window.addEventListener("resize", () => S.A && drawChart(S.candles, S.A, Math.round(1440 / TF[S.tf].min)));
 renderWatch();
 loadHistory();
