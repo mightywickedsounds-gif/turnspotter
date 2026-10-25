@@ -130,10 +130,34 @@ ordinary calls in testing, so the site now warns you about them.
 - **Watchlist:** a strip of all five coins showing which ones have a call right now. Tap one to switch.
 - **App icon:** add the site to your phone's home screen and it opens like an app.
 
+### Round 2: the Memory brain (`research/experiments2.py`)
+
+Tested the same way, on 2013–2017 hourly Bitcoin data, confident calls only:
+
+| Setup | 1 candle ahead | 4 candles ahead |
+|---|---|---|
+| Round 1 model | 58.5% | 56.3% |
+| Round 1 model with twice the history | 58.2% | 55.8% |
+| Memory brain alone (60 most similar past moments) | 57.6% | 56.9% |
+| Blend of both | 59.8% | 58.4% |
+| **Both must agree (shipped)** | **60.8%** | **58.9%** |
+
+The website's own code, backtested the same way: 60.3% (1 ahead) and 59.6% (4 ahead), against a
+52–53% "always guess up" baseline. Bounce and roll-over setups were right only 33–40% of the time,
+the fourth test in a row where they failed, so the site now skips them.
+
+### Round 2: new on the website
+- **Two brains:** the Trend brain plus the Memory brain. A call needs both to agree.
+- **Full redesign:** dark trading-cockpit look, a live dial with a needle, a glowing chart, mood
+  lighting that shifts with the call, price flashes, a range bar for today's low-to-high, and a
+  scorecard ring.
+- The TradingView indicator still runs only the Trend brain. The Memory brain is too heavy for
+  TradingView's script limits.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
 - `tradingview/TrenchAI_Direction.pine`: the indicator (paste into TradingView)
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)
-- `research/experiments.py`: tests of candidate upgrades (`python3 experiments.py`)
+- `research/experiments.py`, `research/experiments2.py`: tests of candidate upgrades
 - `research/btc_1h_2011_2017.csv`: the hourly BTC data used for testing

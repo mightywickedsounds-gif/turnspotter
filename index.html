@@ -4,185 +4,275 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Turn Spotter</title>
-<meta name="theme-color" content="#0d131c">
+<meta name="theme-color" content="#06080f">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Turn Spotter">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap">
 <style>
-/* Layout: one column instrument panel — verdict on top, chart, then the evidence (checklist, log, scorecard). */
+/* Layout: night-trading cockpit. Top bar + coin ticker, then a hero with the verdict and a live dial,
+   the facts strip, the chart, and the evidence below. Deliberately dark-only. */
 :root{
-  --bg:#f3f5f8; --panel:#ffffff; --ink:#14202e; --muted:#5d6b7c; --line:#dde3ea;
-  --accent:#2f5bd3; --on-accent:#ffffff; --up:#0f9d63; --down:#d6453d; --warn:#c98a06;
-  --up-soft:#e3f5ec; --down-soft:#fbe7e5; --warn-soft:#fbf1d9; --neutral-soft:#eef1f5;
-  --display:"Archivo",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
-  color-scheme:light;
-}
-@media (prefers-color-scheme:dark){:root{
-  --bg:#0d131c; --panel:#151d29; --ink:#e6ecf3; --muted:#8c9aab; --line:#253142;
-  --accent:#7d9dff; --on-accent:#0d131c; --up:#34d08b; --down:#ff6b61; --warn:#f0b43c;
-  --up-soft:#11291f; --down-soft:#2e1617; --warn-soft:#2c2412; --neutral-soft:#1b2433;
+  --bg:#06080f; --bg-2:#0b0f1d; --panel:rgba(20,26,48,.62); --panel-solid:#11172b; --edge:rgba(140,155,255,.13); --edge-hi:rgba(140,155,255,.28);
+  --ink:#eaf0ff; --muted:#8b95bd; --faint:#4a5378;
+  --up:#3ee6a2; --down:#ff5d73; --warn:#ffc24b; --accent:#8b7bff; --cyan:#45d4ff;
+  --mood:#8b7bff;
+  --display:"Unbounded",system-ui,sans-serif; --body:"Manrope",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
   color-scheme:dark;
-}}
+}
 *{box-sizing:border-box}
-html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);
-  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px))}
-.wrap{max-width:1040px;margin:0 auto;display:grid;gap:16px}
-header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
-h1{font:800 22px/1.1 var(--display);letter-spacing:-.01em;margin:0}
-h1 small{display:block;font:500 13px var(--body);color:var(--muted);letter-spacing:0;margin-top:4px}
-.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-select,button{font:500 14px var(--body);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
-button.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
-.verdict{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;border-width:2px}
-.verdict.up{border-color:var(--up);background:var(--up-soft)}
-.verdict.down{border-color:var(--down);background:var(--down-soft)}
-.verdict.warn{border-color:var(--warn);background:var(--warn-soft)}
-.eyebrow{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.state{font:800 clamp(26px,5vw,40px)/1.05 var(--display);margin:6px 0;text-wrap:balance}
-.verdict.up .state{color:var(--up)} .verdict.down .state{color:var(--down)} .verdict.warn .state{color:var(--warn)}
-.why{color:var(--muted);max-width:60ch;margin:0}
-.price{text-align:right;font-variant-numeric:tabular-nums}
-.price b{display:block;font:600 28px var(--mono)}
-.price span{font:400 13px var(--mono);color:var(--muted)}
-.meters{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.meter .bar{height:10px;border-radius:5px;background:var(--neutral-soft);overflow:hidden;margin-top:8px}
-.meter .fill{height:100%;width:0;border-radius:5px;transition:width .4s}
-.meter .num{font:600 26px var(--mono);font-variant-numeric:tabular-nums}
-.meter.b .fill{background:var(--up)} .meter.t .fill{background:var(--down)}
-.meter p{margin:4px 0 0;color:var(--muted);font-size:13px}
-canvas{width:100%;height:320px;display:block}
-.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-top:8px}
-.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-h2{font:700 16px var(--display);margin:0 0 10px}
-ul.check{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-ul.check li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:baseline;font-size:14px}
-ul.check li .v{font:400 12px var(--mono);color:var(--muted)}
-.dot{font:600 13px var(--mono)} .dot.on{color:var(--up)} .dot.ont{color:var(--down)} .dot.off{color:var(--muted)}
-.sub{font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px}
-.tablewrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
-th{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
-td{padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-.pill{font:600 11px var(--mono);padding:2px 8px;border-radius:999px}
-.pill.up{background:var(--up-soft);color:var(--up)} .pill.down{background:var(--down-soft);color:var(--down)}
-.win{color:var(--up)} .loss{color:var(--down)} .pend{color:var(--muted)}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.stat b{display:block;font:600 24px var(--mono);font-variant-numeric:tabular-nums}
-.stat span{font-size:12px;color:var(--muted)}
-.note{font-size:13px;color:var(--muted);margin:10px 0 0}
-.status{font:400 12px var(--mono);color:var(--muted)}
-.err{color:var(--down)}
-.watch{display:flex;flex-wrap:wrap;gap:8px}
-.chip{display:flex;align-items:center;gap:8px;font:500 13px var(--body);padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);overflow-x:hidden;
+  padding-block:max(14px,env(safe-area-inset-top,0px)) 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body[data-mood="up"]{--mood:var(--up)} body[data-mood="down"]{--mood:var(--down)} body[data-mood="warn"]{--mood:var(--warn)}
+.bgfx{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(60rem 40rem at 10% -10%, color-mix(in srgb, var(--mood) 22%, transparent), transparent 60%),
+    radial-gradient(50rem 40rem at 110% 110%, rgba(69,212,255,.14), transparent 60%),
+    linear-gradient(var(--bg), var(--bg-2));
+  transition:background 1.2s}
+.bgfx::after{content:"";position:absolute;inset:0;opacity:.35;
+  background-image:linear-gradient(rgba(140,155,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(140,155,255,.06) 1px,transparent 1px);
+  background-size:44px 44px;mask-image:radial-gradient(ellipse at 50% 0%,#000 30%,transparent 75%)}
+.wrap{max-width:1120px;margin:0 auto;display:grid;gap:14px}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.brand svg{width:38px;height:38px;flex:none;filter:drop-shadow(0 0 12px rgba(62,230,162,.35))}
+.brand h1{font:800 18px/1 var(--display);letter-spacing:.08em;margin:0;text-transform:uppercase}
+.brand small{display:block;font:500 12px var(--body);color:var(--muted);letter-spacing:0;text-transform:none;margin-top:5px}
+.live{display:inline-flex;align-items:center;gap:8px;font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  padding:7px 12px;border:1px solid var(--edge);border-radius:999px;background:var(--panel)}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--up);box-shadow:0 0 0 0 rgba(62,230,162,.6);animation:ping 1.8s infinite}
+.live.off i{background:var(--down);animation:none}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(62,230,162,.55)}80%,100%{box-shadow:0 0 0 10px rgba(62,230,162,0)}}
+
+/* ticker */
+.watch{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.watch::-webkit-scrollbar{display:none}
+.chip{flex:none;display:flex;align-items:center;gap:10px;font:700 13px var(--body);padding:8px 14px;border-radius:12px;
+  border:1px solid var(--edge);background:var(--panel);color:var(--ink);cursor:pointer;backdrop-filter:blur(10px);transition:border-color .2s,transform .2s}
+.chip:hover{border-color:var(--edge-hi);transform:translateY(-1px)}
 .chip b{font:600 12px var(--mono)} .chip .u{color:var(--up)} .chip .d{color:var(--down)} .chip .n{color:var(--muted)}
-.chip[aria-current="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
-.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.fact b{display:block;font:600 24px var(--mono);font-variant-numeric:tabular-nums;margin-top:4px}
-.fact p{margin:4px 0 0;color:var(--muted);font-size:13px}
-.model{margin:0;font-size:14px}
-.model b{font:600 14px var(--mono)}
-@media (max-width:720px){.cols,.meters,.facts{grid-template-columns:1fr}.verdict{grid-template-columns:1fr}.price{text-align:left}canvas{height:240px}}
-@media (prefers-reduced-motion:reduce){.meter .fill{transition:none}}
+.chip[aria-current="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 0 24px -6px var(--accent)}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:8px}
+select,button{font:600 13px var(--body);color:var(--ink);background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:9px 12px;cursor:pointer;backdrop-filter:blur(10px)}
+select{appearance:none;padding-right:30px;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 15px) 52%,calc(100% - 10px) 52%;background-size:5px 5px;background-repeat:no-repeat}
+select option{background:var(--panel-solid)}
+button.alert{background:linear-gradient(135deg,var(--accent),var(--cyan));border:0;color:#07091a;font-weight:800}
+button.alert.on{background:var(--panel);color:var(--up);border:1px solid var(--up)}
+select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+/* cards */
+.card{background:var(--panel);border:1px solid var(--edge);border-radius:18px;padding:18px;min-width:0;backdrop-filter:blur(14px);position:relative}
+.eyebrow{font:600 10.5px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+h2{font:700 13px var(--display);letter-spacing:.06em;text-transform:uppercase;margin:0 0 12px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
+.verdict{display:flex;flex-direction:column;gap:12px;border-color:color-mix(in srgb,var(--mood) 45%,transparent);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--mood) 18%,transparent),0 30px 80px -40px var(--mood);transition:box-shadow 1s,border-color 1s}
+.state{font:800 clamp(28px,5.2vw,52px)/1.02 var(--display);letter-spacing:-.01em;margin:0;text-wrap:balance;color:var(--ink)}
+body[data-mood] .state{color:var(--mood);text-shadow:0 0 34px color-mix(in srgb,var(--mood) 45%,transparent)}
+.why{color:var(--muted);margin:0;max-width:56ch}
+.priceRow{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:auto}
+.price{font:700 clamp(28px,4vw,40px)/1 var(--mono);font-variant-numeric:tabular-nums;transition:color .6s}
+.price.flash-up{color:var(--up)} .price.flash-down{color:var(--down)}
+.chg{font:600 13px var(--mono)}
+.range{display:grid;gap:6px}
+.rangeBar{position:relative;height:10px;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--down) 55%,transparent),rgba(140,155,255,.12) 25%,rgba(140,155,255,.12) 75%,color-mix(in srgb,var(--up) 55%,transparent))}
+.rangeBar i{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;background:var(--ink);border:3px solid var(--bg);transform:translate(-50%,-50%);box-shadow:0 0 14px var(--mood);transition:left .6s}
+.rangeLbl{display:flex;justify-content:space-between;font:500 11px var(--mono);color:var(--muted)}
+
+/* dial */
+.dialCard{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.dial{width:100%;max-width:340px}
+.dial .needle{transform-origin:150px 150px;transition:transform 1s cubic-bezier(.2,.9,.25,1.2)}
+.dialNum{font:800 40px/1 var(--display);margin-top:-4px}
+.dialSub{font:500 12px var(--body);color:var(--muted)}
+.brains{width:100%;display:grid;gap:10px;margin-top:10px;text-align:left}
+.brain{display:grid;grid-template-columns:118px 1fr 48px;gap:10px;align-items:center;font-size:13px}
+.brain span:first-child{font-weight:700}
+.brain .b{height:8px;border-radius:999px;background:rgba(140,155,255,.12);position:relative;overflow:hidden}
+.brain .b::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--faint)}
+.brain .b i{position:absolute;top:0;bottom:0;border-radius:999px;transition:all .8s}
+.brain b{font:600 12px var(--mono);text-align:right}
+.agree{font:700 12px var(--mono);letter-spacing:.06em;padding:6px 12px;border-radius:999px;margin-top:4px;border:1px solid var(--edge)}
+.agree.yes{color:var(--up);border-color:color-mix(in srgb,var(--up) 50%,transparent);background:color-mix(in srgb,var(--up) 10%,transparent)}
+.agree.no{color:var(--muted)}
+
+/* facts */
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.fact b{display:block;font:700 26px var(--mono);font-variant-numeric:tabular-nums;margin-top:6px}
+.fact p{margin:4px 0 0;color:var(--muted);font-size:12.5px}
+.win{color:var(--up)} .loss{color:var(--down)} .pend{color:var(--muted)}
+
+/* chart */
+.chartWrap{position:relative}
+canvas{width:100%;height:340px;display:block}
+.pulse{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 0 rgba(69,212,255,.6);animation:ping2 1.6s infinite;pointer-events:none}
+@keyframes ping2{0%{box-shadow:0 0 0 0 rgba(69,212,255,.6)}80%,100%{box-shadow:0 0 0 14px rgba(69,212,255,0)}}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font:500 11.5px var(--mono);color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+
+/* bottom */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.score{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.ring{width:96px;height:96px;flex:none}
+.ring text{font:800 20px var(--display);fill:var(--ink)}
+.stats{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.stats b{color:var(--ink);font:600 14px var(--mono)}
+.tablewrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th{font:600 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px;border-bottom:1px solid var(--edge)}
+td[colspan]{white-space:normal;font-family:var(--body)}
+td{padding:9px 8px;border-bottom:1px solid var(--edge);white-space:nowrap;font-family:var(--mono)}
+.pill{font:700 11px var(--mono);padding:3px 9px;border-radius:999px}
+.pill.up{background:color-mix(in srgb,var(--up) 14%,transparent);color:var(--up)} .pill.down{background:color-mix(in srgb,var(--down) 14%,transparent);color:var(--down)}
+details{border-top:1px solid var(--edge);margin-top:4px;padding-top:12px}
+summary{cursor:pointer;font:700 13px var(--body);color:var(--ink);list-style:none}
+summary::after{content:" +";color:var(--muted)} details[open] summary::after{content:" −"}
+.sub{font:600 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+ul.check{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+ul.check li{display:grid;grid-template-columns:18px 1fr auto;gap:8px;align-items:baseline;font-size:13.5px}
+ul.check li .v{font:400 11.5px var(--mono);color:var(--muted)}
+.dot{font:700 12px var(--mono)} .dot.on{color:var(--up)} .dot.ont{color:var(--down)} .dot.off{color:var(--faint)}
+.status{font:400 11.5px var(--mono);color:var(--muted);margin:0}
+.err{color:var(--down)}
+.note{font-size:12.5px;color:var(--muted);margin:0;max-width:90ch}
+
+@media (max-width:860px){.hero,.cols{grid-template-columns:1fr}}
+@media (max-width:640px){.facts{grid-template-columns:1fr}canvas{height:250px}.brain{grid-template-columns:96px 1fr 44px}.card{padding:15px;border-radius:16px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<div class="bgfx" aria-hidden="true"></div>
 <div class="wrap">
-  <header>
-    <h1>Turn Spotter<small>Watches the whole day, learns from it, and calls the next move</small></h1>
-    <div class="controls">
-      <select id="coin" aria-label="Coin">
-        <option value="BTC">Bitcoin (BTC)</option><option value="ETH">Ethereum (ETH)</option>
-        <option value="SOL">Solana (SOL)</option><option value="XRP">XRP</option><option value="DOGE">Dogecoin (DOGE)</option>
-      </select>
-      <select id="tf" aria-label="Candle size">
-        <option value="1m">1-minute candles</option><option value="5m">5-minute candles</option><option value="15m" selected>15-minute candles</option>
-      </select>
-      <select id="look" aria-label="How far ahead to predict">
-        <option value="5">Predict 5 min ahead</option><option value="15">Predict 15 min ahead</option><option value="30">Predict 30 min ahead</option>
-        <option value="60" selected>Predict 1 hour ahead</option><option value="240">Predict 4 hours ahead</option>
-      </select>
-      <select id="strict" aria-label="How picky the model is">
-        <option value="0.58" selected>Normal: more calls</option><option value="0.62">Strict: fewer, better calls</option><option value="0.66">Very strict: fewest, best calls</option>
-      </select>
-      <button id="alerts" class="primary" type="button">Turn on alerts</button>
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#0d131c"/><path d="M88 176 L204 336 L300 252 L424 140" fill="none" stroke="#3ee6a2" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/><circle cx="204" cy="336" r="34" fill="#8b7bff"/></svg>
+      <h1>Turn Spotter<small>Two AI brains watching the market all day</small></h1>
     </div>
+    <span class="live off" id="live"><i></i><span id="liveTxt">Connecting</span></span>
   </header>
 
   <nav class="watch" id="watch" aria-label="All coins"></nav>
 
-  <section class="panel verdict" id="verdict">
-    <div>
+  <div class="controls">
+    <select id="coin" aria-label="Coin">
+      <option value="BTC">Bitcoin</option><option value="ETH">Ethereum</option><option value="SOL">Solana</option><option value="XRP">XRP</option><option value="DOGE">Dogecoin</option>
+    </select>
+    <select id="tf" aria-label="Candle size">
+      <option value="1m">1-min candles</option><option value="5m">5-min candles</option><option value="15m" selected>15-min candles</option>
+    </select>
+    <select id="look" aria-label="How far ahead to predict">
+      <option value="5">Next 5 min</option><option value="15">Next 15 min</option><option value="30">Next 30 min</option><option value="60" selected>Next 1 hour</option><option value="240">Next 4 hours</option>
+    </select>
+    <select id="strict" aria-label="How picky the model is">
+      <option value="0.58" selected>Normal: more calls</option><option value="0.62">Strict: fewer, better</option><option value="0.66">Very strict: fewest, best</option>
+    </select>
+    <button id="alerts" class="alert" type="button">Turn on alerts</button>
+  </div>
+
+  <section class="hero">
+    <div class="card verdict">
       <div class="eyebrow" id="vEyebrow">Loading today's market…</div>
-      <div class="state" id="vState">Watching</div>
-      <p class="why" id="vWhy">Pulling the last 24 hours of candles so the model has seen the whole day.</p>
+      <p class="state" id="vState">Warming up</p>
+      <p class="why" id="vWhy">Pulling the last day of candles so both brains have seen the whole day.</p>
+      <div class="priceRow"><span class="price" id="pNow">—</span><span class="chg" id="pChg"></span></div>
+      <div class="range">
+        <div class="rangeBar"><i id="rangeDot" style="left:50%"></i></div>
+        <div class="rangeLbl"><span id="rLo">24h low</span><span id="rPos">where price sits in today's range</span><span id="rHi">24h high</span></div>
+      </div>
     </div>
-    <div class="price"><b id="pNow">—</b><span id="pDay">24h range —</span></div>
+    <div class="card dialCard">
+      <div class="eyebrow">Chance price is higher in <span id="dLook">1 hour</span></div>
+      <svg class="dial" viewBox="0 0 300 175" role="img" aria-label="Dial showing the chance of UP">
+        <defs>
+          <linearGradient id="arc" x1="0" x2="1"><stop offset="0" stop-color="#ff5d73"/><stop offset=".42" stop-color="#4a5378"/><stop offset=".58" stop-color="#4a5378"/><stop offset="1" stop-color="#3ee6a2"/></linearGradient>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <path d="M30 150 A120 120 0 0 1 270 150" fill="none" stroke="rgba(140,155,255,.10)" stroke-width="22" stroke-linecap="round"/>
+        <path d="M30 150 A120 120 0 0 1 270 150" fill="none" stroke="url(#arc)" stroke-width="10" stroke-linecap="round" filter="url(#glow)"/>
+        <g id="ticks" stroke="#eaf0ff" stroke-width="2" opacity=".5"></g>
+        <text x="30" y="172" fill="#8b95bd" font-size="11" font-family="JetBrains Mono" text-anchor="middle">DOWN</text>
+        <text x="270" y="172" fill="#8b95bd" font-size="11" font-family="JetBrains Mono" text-anchor="middle">UP</text>
+        <g class="needle" id="needle"><path d="M145 150 L150 42 L155 150 Z" fill="#eaf0ff" style="filter:drop-shadow(0 0 6px rgba(234,240,255,.6))"/><circle cx="150" cy="150" r="10" fill="#eaf0ff"/><circle cx="150" cy="150" r="4" fill="#06080f"/></g>
+      </svg>
+      <div class="dialNum" id="dNum">—</div>
+      <div class="dialSub" id="dSub">calls fire past the white marks</div>
+      <div class="brains">
+        <div class="brain"><span>Trend brain</span><div class="b"><i id="bT"></i></div><b id="bTn">—</b></div>
+        <div class="brain"><span>Memory brain</span><div class="b"><i id="bM"></i></div><b id="bMn">—</b></div>
+      </div>
+      <span class="agree no" id="agree">Waiting for both brains</span>
+    </div>
   </section>
 
   <section class="facts">
-    <div class="panel fact"><div class="eyebrow">Typical move in <span id="fLook">1 hour</span></div><b id="fMove">—</b>
+    <div class="card fact"><div class="eyebrow">Typical move · <span id="fLook">1 hour</span></div><b id="fMove">—</b>
       <p>If your Trench bust price is closer than this, ordinary wiggles can wipe you out even when the call is right.</p></div>
-    <div class="panel fact"><div class="eyebrow">Latest call resolves in</div><b id="fCount">—</b><p id="fCountSub">No open call.</p></div>
-    <div class="panel fact"><div class="eyebrow">Model's recent record</div><b id="fRec">—</b><p id="fRecSub">Last 100 confident calls with known outcomes.</p></div>
+    <div class="card fact"><div class="eyebrow">Latest call resolves in</div><b id="fCount">—</b><p id="fCountSub">No open call.</p></div>
+    <div class="card fact"><div class="eyebrow">Recent record</div><b id="fRec">—</b><p id="fRecSub">Every confident moment in the last 100, not just the calls in the scorecard.</p></div>
   </section>
 
-  <section class="meters">
-    <div class="panel meter b">
-      <div class="eyebrow">Bottom score · turn up</div>
-      <div class="num" id="mB">0</div><div class="bar"><div class="fill" id="mBf"></div></div>
-      <p>How stretched to the downside price is, whether it is curling up, and how strongly the model leans UP.</p>
-    </div>
-    <div class="panel meter t">
-      <div class="eyebrow">Top score · turn down</div>
-      <div class="num" id="mT">0</div><div class="bar"><div class="fill" id="mTf"></div></div>
-      <p>How stretched to the upside price is, whether it is rolling over, and how strongly the model leans DOWN.</p>
-    </div>
-  </section>
-
-  <section class="panel">
+  <section class="card">
     <h2>Last 24 hours</h2>
-    <canvas id="chart" aria-label="Price chart of the last 24 hours with UP and DOWN calls"></canvas>
+    <div class="chartWrap"><canvas id="chart" aria-label="Price chart of the last 24 hours with UP and DOWN calls"></canvas><span class="pulse" id="pulse" hidden></span></div>
     <div class="legend">
-      <span><i style="background:var(--ink)"></i>Price</span>
+      <span><i style="background:var(--cyan)"></i>Price</span>
       <span><i style="background:var(--accent)"></i>Fair price (24h VWAP)</span>
-      <span><i style="background:var(--muted)"></i>24h high / low</span>
-      <span style="color:var(--up)">▲ UP call</span>
-      <span style="color:var(--down)">▼ DOWN call</span>
+      <span><i style="background:var(--faint)"></i>24h high / low</span>
+      <span style="color:var(--up)">● UP call</span><span style="color:var(--down)">● DOWN call</span>
     </div>
   </section>
 
   <section class="cols">
-    <div class="panel">
-      <h2>What it's seeing right now</h2>
-      <div class="sub">Learning model</div><p class="model" id="mdl">Warming up…</p>
-      <div class="sub">Stretched low?</div><ul class="check" id="ckB"></ul>
-      <div class="sub">Turning up?</div><ul class="check" id="ckBT"></ul>
-      <div class="sub">Stretched high?</div><ul class="check" id="ckT"></ul>
-      <div class="sub">Turning down?</div><ul class="check" id="ckTT"></ul>
-    </div>
-    <div class="panel">
-      <h2>How good have its calls been?</h2>
-      <div class="stats">
-        <div class="stat"><b id="sAll">—</b><span>right, all loaded history</span></div>
-        <div class="stat"><b id="sDay">—</b><span>right, last 24h</span></div>
-        <div class="stat"><b id="sN">—</b><span>calls checked</span></div>
+    <div class="card">
+      <h2>Scorecard</h2>
+      <div class="score">
+        <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(140,155,255,.12)" stroke-width="9"/>
+          <circle id="ringArc" cx="50" cy="50" r="42" fill="none" stroke="var(--up)" stroke-width="9" stroke-linecap="round" stroke-dasharray="0 264" transform="rotate(-90 50 50)"/>
+          <text id="ringTxt" x="50" y="57" text-anchor="middle">—</text></svg>
+        <div class="stats">
+          <span>Right, all loaded history: <b id="sAll">—</b></span>
+          <span>Right, last 24h: <b id="sDay">—</b></span>
+          <span>Calls checked: <b id="sN">—</b></span>
+          <span>A call is right if price is on the called side <b id="hLbl">1 hour</b> later. 50% is a coin flip.</span>
+        </div>
       </div>
-      <p class="note" id="sNote">A call counts as right if price is on the called side <b id="hLbl">1 hour</b> later. 50% is a coin flip.</p>
-      <div class="sub">Calls in the last 24h</div>
       <div class="tablewrap"><table><thead><tr><th>Time</th><th>Call</th><th>Price</th><th>Result</th></tr></thead><tbody id="log"></tbody></table></div>
+    </div>
+    <div class="card">
+      <h2>Under the hood</h2>
+      <p class="note" id="mdl">Both brains are learning from today's candles.</p>
+      <details>
+        <summary>Stretch checklist</summary>
+        <div class="sub">Stretched low?</div><ul class="check" id="ckB"></ul>
+        <div class="sub">Curling up?</div><ul class="check" id="ckBT"></ul>
+        <div class="sub">Stretched high?</div><ul class="check" id="ckT"></ul>
+        <div class="sub">Rolling over?</div><ul class="check" id="ckTT"></ul>
+      </details>
+      <details>
+        <summary>How it works</summary>
+        <p class="note" style="margin-top:10px">The <b>Trend brain</b> is a learning model that updates on every candle, looking at momentum, RSI, trend, volume and volatility. The <b>Memory brain</b> searches the loaded history for the 60 moments that looked most like right now and checks what happened next. A call only fires when the Trend brain is confident <b>and</b> the Memory brain agrees. If their recent calls drop under 52% right, calls pause until they recover.</p>
+        <p class="note" style="margin-top:10px">Backtested on 2013–2017 hourly Bitcoin data, calls were right about 59–61% of the time against a 52–53% baseline. Calls made right after price got stretched (bounce or roll-over setups) were right only 33–40% of the time, so the site skips them. Past results don't guarantee future ones.</p>
+      </details>
     </div>
   </section>
 
   <p class="status" id="status">Starting…</p>
-  <p class="note">Tested on six years of hourly Bitcoin data, this model's confident calls were right about 56–60% of the time. Spotting "really low" on its own was no better than a coin flip, and calls made while price was stretched did worse than ordinary calls, so stretch is shown as a warning, not a reason to trade. Past hit rates don't guarantee future ones. Not financial advice. Only stake what you can afford to lose.</p>
+  <p class="note">Not financial advice. Trench multipliers can wipe out a stake on a small move against you. Only stake what you can afford to lose.</p>
 </div>
 
 <script>
@@ -198,7 +288,7 @@ const SOURCES = [
   {name:"Coinbase",   kind:"coinbase", host:"https://api.exchange.coinbase.com", sym:c=>c+"-USD"},
 ];
 const COINS = ["BTC","ETH","SOL","XRP","DOGE"];
-const S = {conf:0.58, watch:{}, watchTimer:null, coin:"BTC", tf:"15m", look:60, candles:[], src:null, timer:null, gen:0, lastAlertT:0, alertsOn:false, A:null};
+const S = {caches:{}, conf:0.58, watch:{}, watchTimer:null, coin:"BTC", tf:"15m", look:60, candles:[], src:null, timer:null, gen:0, lastAlertT:0, alertsOn:false, A:null};
 const $ = id => document.getElementById(id);
 
 // ───────── data ─────────
@@ -291,7 +381,7 @@ const mean = x => x.reduce((s,v)=>s+v,0)/x.length;
 const sdev = x => { const m = mean(x); return Math.sqrt(mean(x.map(v => (v-m)**2))); };
 const clamp01 = x => Math.max(0, Math.min(1, x));
 
-function analyze(C, dayBars, H, conf){
+function analyze(C, dayBars, H, conf, cache){
   const n = C.length, c = C.map(k=>k.c), h = C.map(k=>k.h), l = C.map(k=>k.l), v = C.map(k=>k.v);
   const R = rsi(c), e9 = ema(c, 9);
   const m12 = ema(c,12), m26 = ema(c,26), macd = m12.map((x,i)=>x-m26[i]), sig = ema(macd,9), hist = macd.map((x,i)=>x-sig[i]);
@@ -350,17 +440,24 @@ function analyze(C, dayBars, H, conf){
     const sum = (arr, f) => arr.reduce((s,x)=>s+f(x),0);
     P.push({B, T, BT, TT, sB:sum(B,x=>x.s*x.w), sT:sum(T,x=>x.s*x.w), tB:sum(BT,x=>x.on?x.w:0), tT:sum(TT,x=>x.on?x.w:0)});
   }
-  const prob = learn(C, H), chk = selfCheck(c, prob, H, conf);
+  const trend = learn(C, H), mem = memory(C, trend.X, H, n - 1100, cache);
+  // a call needs both brains leaning the same way: Trend brain confident, Memory brain at least 55/45
+  const agree = trend.map((p, i) => !isNaN(p) && !isNaN(mem[i]) && Math.sign(p - .5) === Math.sign(mem[i] - .5) && Math.abs(mem[i] - .5) >= .05);
+  const prob = trend.map((p, i) => agree[i] ? p : NaN);   // no call unless both brains agree
+  const chk = selfCheck(c, prob, H, conf);
   const sdr = rolling(c.map((x,i) => i ? Math.log(x/c[i-1]) : 0), 50, sdev);
   // recent stretch: was price stretched at any point in the last 6 candles?
   for(let i=0;i<n;i++){ if(!P[i]) continue; let mb=0, mt=0; for(let j=Math.max(0,i-5);j<=i;j++){ if(P[j]){ mb=Math.max(mb,P[j].sB); mt=Math.max(mt,P[j].sT);} }
     const pu = prob[i], p = P[i];
-    p.prob = pu; p.rB = mb; p.rT = mt; p.paused = chk.paused[i]; p.record = chk.record[i];
+    p.prob = trend[i]; p.trend = trend[i]; p.mem = mem[i]; p.agree = agree[i]; p.rB = mb; p.rT = mt; p.paused = chk.paused[i]; p.record = chk.record[i];
     p.move = sdr[i] * Math.sqrt(H);   // typical % move over the prediction window (1 standard deviation)
     p.modelUp = !p.paused && !isNaN(pu) && pu >= conf; p.modelDown = !p.paused && !isNaN(pu) && pu <= 1 - conf;
     // a turn call needs the stretch + the turn + the learning model agreeing
     p.up = mb >= .5 && p.tB >= .55 && p.modelUp;
     p.down = mt >= .5 && p.tT >= .55 && p.modelDown;
+    // bounce / roll-over calls tested worse than a coin flip in every backtest, so they are skipped
+    if(p.up) p.modelUp = false;
+    if(p.down) p.modelDown = false;
     const edge = isNaN(pu) ? 0 : (pu - .5) * 2;
     p.scoreB = Math.round(100*clamp01(.4*mb + .25*p.tB + .35*clamp01(edge/((conf-.5)*2)) ));
     p.scoreT = Math.round(100*clamp01(.4*mt + .25*p.tT + .35*clamp01(-edge/((conf-.5)*2)) ));
@@ -370,15 +467,14 @@ function analyze(C, dayBars, H, conf){
   const sigs = []; let lastU = -99, lastD = -99;
   for(let i=1;i<n-1;i++){
     const p = P[i], q = P[i-1] || {}; if(!p) continue;
-    const u = p.up || p.modelUp, d = p.down || p.modelDown;
-    if(u && !(q.up || q.modelUp) && i-lastU >= 6){ lastU = i; sigs.push({i, dir:1, kind:p.up ? "turn" : "model"}); }
-    if(d && !(q.down || q.modelDown) && i-lastD >= 6){ lastD = i; sigs.push({i, dir:-1, kind:p.down ? "turn" : "model"}); }
+    if(p.modelUp && !q.modelUp && i-lastU >= 6){ lastU = i; sigs.push({i, dir:1}); }
+    if(p.modelDown && !q.modelDown && i-lastD >= 6){ lastD = i; sigs.push({i, dir:-1}); }
   }
   for(const s of sigs){
     s.t = C[s.i].t; s.price = c[s.i];
     if(s.i + H <= n-2){ const mv = (c[s.i+H]-c[s.i])/c[s.i]; s.move = mv; s.win = s.dir > 0 ? mv > 0 : mv < 0; }
   }
-  return {P, sigs, vwap, hiD, loD, n, prob};
+  return {P, sigs, vwap, hiD, loD, n, prob, trend, mem};
 }
 
 // Online logistic regression: the same model as the TradingView indicator.
@@ -410,6 +506,36 @@ function learn(C, H, lr = .02, l2 = 1e-4){
     if(j >= 0 && X[j]){ const y = c[i] > c[j] ? 1 : 0, p = sig(dot(X[j])); for(let k=0;k<K;k++) w[k] += lr*((y-p)*X[j][k] - l2*w[k]); seen++; }
     if(X[i] && seen >= 150) out[i] = sig(dot(X[i]));
   }
+  out.X = X;
+  return out;
+}
+
+// "Memory brain": for each candle, find the 60 most similar past moments whose outcome
+// H candles later is already known, and report how often price went up after them.
+function quickselect(d, idx, k){
+  let lo = 0, hi = idx.length - 1;
+  while(lo < hi){
+    const pv = d[idx[(lo + hi) >> 1]]; let i = lo, j = hi;
+    while(i <= j){ while(d[idx[i]] < pv) i++; while(d[idx[j]] > pv) j--; if(i <= j){ const t = idx[i]; idx[i] = idx[j]; idx[j] = t; i++; j--; } }
+    if(k <= j) hi = j; else if(k >= i) lo = i; else break;
+  }
+}
+function memory(C, X, H, from, cache){
+  const n = C.length, c = C.map(k=>k.c), out = new Array(n).fill(NaN), K = 60, F = 10;
+  const d = new Float64Array(n);
+  for(let t=Math.max(from, 0); t<n; t++){
+    if(!X[t]) continue;
+    const key = C[t].t;
+    if(t < n-1 && cache && cache.has(key)){ out[t] = cache.get(key); continue; }
+    const pool = [];
+    for(let j=0; j+H<=t; j++) if(X[j] && c[j+H] !== c[j]) pool.push(j);
+    if(pool.length < 200) continue;
+    for(const j of pool){ let s = 0; for(let f=0; f<F; f++){ const e = X[j][f] - X[t][f]; s += e*e; } d[j] = s; }
+    quickselect(d, pool, K);
+    let ups = 0; for(let m=0; m<K; m++){ const j = pool[m]; if(c[j+H] > c[j]) ups++; }
+    out[t] = (ups + 1) / (K + 2);
+    if(t < n-1 && cache) cache.set(key, out[t]);
+  }
   return out;
 }
 
@@ -431,80 +557,112 @@ function selfCheck(c, prob, H, conf){
 // ───────── render ─────────
 const fmtP = x => x >= 1000 ? x.toLocaleString(undefined,{maximumFractionDigits:0}) : x >= 1 ? x.toFixed(2) : x.toFixed(4);
 const fmtT = t => new Date(t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
-function setStatus(msg, err){ const el = $("status"); el.textContent = msg; el.className = "status" + (err ? " err" : ""); }
+function setStatus(msg, err){ const el = $("status"); el.textContent = msg; el.className = "status" + (err ? " err" : "");
+  $("live").classList.toggle("off", !!err); $("liveTxt").textContent = err ? "Offline" : S.src ? "Live · " + S.src.name : "Connecting"; }
+function cacheFor(coin){ const k = coin + "|" + S.tf + "|" + horizon(); return S.caches[k] || (S.caches[k] = new Map()); }
+const pctTxt = x => Math.round(x * 100) + "%";
 
 function render(){
   const C = S.candles, dayBars = Math.round(1440 / TF[S.tf].min), H = horizon();
-  const A = analyze(C, dayBars, H, S.conf); S.A = A;
+  const A = analyze(C, dayBars, H, S.conf, cacheFor(S.coin)); S.A = A;
   const i = C.length-1, p = A.P[i], k = C[i];
   if(!p) return;
-  const dayStart = C[Math.max(0, i-dayBars+1)].t;
+  const dayStart = C[Math.max(0, i-dayBars+1)].t, look = lookLabel();
+  const hasT = !isNaN(p.trend), hasM = !isNaN(p.mem);
 
-  // verdict
-  const v = $("verdict"); v.className = "panel verdict";
-  const look = lookLabel(), chance = isNaN(p.prob) ? null : Math.round(p.prob*100);
-  let state, why, eyebrow = S.coin + " · " + S.tf + " candles · next " + look + " · live";
-  if(p.up){ v.classList.add("up"); state = "UP · bouncing off a low";
-    why = `Price got stretched low, is curling back up, and the model gives a ${chance}% chance it's higher in ${look}. Careful: in testing, bounce calls were less reliable than ordinary calls.`; }
-  else if(p.down){ v.classList.add("down"); state = "DOWN · rolling off a high";
-    why = `Price got stretched high, is rolling over, and the model gives a ${100-chance}% chance it's lower in ${look}. Careful: in testing, roll-over calls were less reliable than ordinary calls.`; }
-  else if(p.paused){ v.classList.add("warn"); state = "Paused · model on a cold streak";
-    why = `Its last 100 confident calls were right only ${Math.round(p.record*100)}% of the time, so it's holding back until it's back above 52%. Markets change, and this is the model admitting it.`; }
-  else if(p.modelUp){ v.classList.add("up"); state = "Leaning UP";
-    why = `The model gives a ${chance}% chance price is higher in ${look}.`; }
-  else if(p.modelDown){ v.classList.add("down"); state = "Leaning DOWN";
-    why = `The model gives a ${100-chance}% chance price is lower in ${look}.`; }
-  else if(p.sB >= .5){ v.classList.add("warn"); state = "Really low · no turn confirmed";
-    why = "Price is stretched to the downside, but the model doesn't see an edge either way yet. Falling prices can keep falling. Wait for a call."; }
-  else if(p.sT >= .5){ v.classList.add("warn"); state = "Really high · no turn confirmed";
-    why = "Price is stretched to the upside, but the model doesn't see an edge either way yet. Wait for a call."; }
+  // verdict + mood
+  let mood = "", state, why;
+  if(p.modelUp){ mood = "up"; state = "Call: UP";
+    why = `Both brains lean UP. The Trend brain gives ${pctTxt(p.trend)} and the Memory brain found ${pctTxt(p.mem)} of look-alike moments went higher over the next ${look}.`; }
+  else if(p.modelDown){ mood = "down"; state = "Call: DOWN";
+    why = `Both brains lean DOWN. The Trend brain gives ${pctTxt(1-p.trend)} and the Memory brain found ${pctTxt(1-p.mem)} of look-alike moments went lower over the next ${look}.`; }
+  else if(p.paused){ mood = "warn"; state = "Paused · cold streak";
+    why = `The last 100 calls were right only ${pctTxt(p.record)} of the time, so calls are paused until they're back above 52%. Markets change, and this is the model admitting it.`; }
+  else if(p.up || p.down){ mood = "warn"; state = p.up ? "Bounce setup · skipped" : "Roll-over setup · skipped";
+    why = `Price got stretched and is turning, and the brains lean that way, but in every backtest these setups were right less than half the time. Sitting this one out.`; }
+  else if(p.sB >= .5 || p.sT >= .5){ mood = "warn"; state = p.sB >= .5 ? "Really low · no call" : "Really high · no call";
+    why = "Price is stretched for the day, but stretch alone was no better than a coin flip in testing. Falling prices can keep falling. Wait for a call."; }
   else { state = "No edge right now";
-    why = chance === null ? "The model is still learning from today's candles." : `The model's chance of UP is ${chance}%, too close to a coin flip. Sit this one out.`; }
-  $("vEyebrow").textContent = eyebrow; $("vState").textContent = state; $("vWhy").textContent = why;
-  $("pNow").textContent = fmtP(k.c);
-  $("pDay").textContent = "24h " + fmtP(A.loD[i]) + " – " + fmtP(A.hiD[i]);
+    why = !hasT || !hasM ? "Both brains are still learning from today's candles."
+      : !p.agree ? "The two brains disagree on direction, so there's no call. Sit this one out."
+      : `The brains agree but aren't confident enough (calls fire at ${pctTxt(S.conf)}). Sit this one out.`; }
+  if(mood) document.body.dataset.mood = mood; else delete document.body.dataset.mood;
+  $("vEyebrow").textContent = `${S.coin} · ${S.tf} candles · next ${look}`;
+  $("vState").textContent = state; $("vWhy").textContent = why;
+
+  // price + day range
+  const pe = $("pNow"), prev = S.lastPrice;
+  pe.textContent = fmtP(k.c);
+  if(prev !== undefined && prev !== k.c && S.lastCoin === S.coin){ pe.classList.remove("flash-up","flash-down"); void pe.offsetWidth;
+    pe.classList.add(k.c > prev ? "flash-up" : "flash-down"); clearTimeout(S.flashT); S.flashT = setTimeout(() => pe.classList.remove("flash-up","flash-down"), 900); }
+  S.lastPrice = k.c; S.lastCoin = S.coin;
+  const open24 = C[Math.max(0, i-dayBars+1)].o, chg = (k.c - open24) / open24;
+  $("pChg").textContent = (chg >= 0 ? "▲ " : "▼ ") + Math.abs(chg*100).toFixed(2) + "% 24h"; $("pChg").className = "chg " + (chg >= 0 ? "win" : "loss");
+  const lo = A.loD[i], hi = A.hiD[i], pos = hi > lo ? (k.c - lo) / (hi - lo) : .5;
+  $("rangeDot").style.left = (pos * 100).toFixed(1) + "%";
+  $("rLo").textContent = fmtP(lo); $("rHi").textContent = fmtP(hi);
+  $("rPos").textContent = pos < .25 ? "near today's low" : pos > .75 ? "near today's high" : "mid-range today";
+
+  // dial
+  $("dLook").textContent = look;
+  if(hasT){ $("needle").style.transform = `rotate(${(p.trend - .5) * 180}deg)`; $("dNum").textContent = pctTxt(p.trend);
+    $("dNum").style.color = p.modelUp ? "var(--up)" : p.modelDown ? "var(--down)" : "var(--ink)"; }
+  const tk = [S.conf, 1 - S.conf].map(v => { const a = (v - .5) * Math.PI, x1 = 150 + 104*Math.sin(a), y1 = 150 - 104*Math.cos(a), x2 = 150 + 136*Math.sin(a), y2 = 150 - 136*Math.cos(a);
+    return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`; }).join("");
+  $("ticks").innerHTML = tk;
+  const bar = (id, v) => { const el = $(id); if(isNaN(v)){ el.style.width = "0"; return; }
+    const w = Math.abs(v - .5) * 100; el.style.left = v >= .5 ? "50%" : (50 - w) + "%"; el.style.width = w + "%"; el.style.background = v >= .5 ? "var(--up)" : "var(--down)"; };
+  bar("bT", p.trend); bar("bM", p.mem);
+  $("bTn").textContent = hasT ? pctTxt(p.trend) : "—"; $("bMn").textContent = hasM ? pctTxt(p.mem) : "—";
+  const ag = $("agree");
+  ag.className = "agree " + (p.agree ? "yes" : "no");
+  ag.textContent = !hasT || !hasM ? "Waiting for both brains" : p.agree ? `✓ Brains agree · ${p.trend > .5 ? "UP" : "DOWN"}` : "✕ Brains disagree · no call";
 
   // facts
   $("fLook").textContent = look;
   $("fMove").textContent = isNaN(p.move) ? "—" : "±" + (p.move*100).toFixed(2) + "%";
-  $("fRec").textContent = isNaN(p.record) ? "—" : Math.round(p.record*100) + "%";
+  $("fRec").textContent = isNaN(p.record) ? "—" : pctTxt(p.record);
   $("fRec").className = isNaN(p.record) ? "" : p.record >= .52 ? "win" : "loss";
-  $("fRecSub").textContent = isNaN(p.record) ? "Not enough finished calls yet." : p.paused ? "Under 52%, so calls are paused." : "Last 100 confident calls with known outcomes.";
+  $("fRecSub").textContent = isNaN(p.record) ? "Not enough finished calls yet." : p.paused ? "Under 52%, so calls are paused." : "Every confident moment in the last 100, not just the calls in the scorecard.";
+  tick();
+
+  // watchlist
   S.watch[S.coin] = watchEntry(p);
   renderWatch();
 
-  // meters
-  $("mB").textContent = p.scoreB; $("mBf").style.width = p.scoreB + "%";
-  $("mT").textContent = p.scoreT; $("mTf").style.width = p.scoreT + "%";
-
-  // checklists
+  // under the hood
   const ck = (id, arr, cls) => { $(id).innerHTML = arr.map(x =>
     `<li><span class="dot ${x.on ? cls : "off"}">${x.on ? "●" : "○"}</span><span>${x.k}</span><span class="v">${x.val || ""}</span></li>`).join(""); };
-  $("mdl").innerHTML = chance === null ? "Still learning…" : `Chance price is higher in ${look}: <b>${chance}%</b>. Calls fire at ${Math.round(S.conf*100)}% or more either way.`;
   ck("ckB", p.B, "on"); ck("ckBT", p.BT, "on"); ck("ckT", p.T, "ont"); ck("ckTT", p.TT, "ont");
+  $("mdl").innerHTML = !hasT || !hasM ? "Both brains are still learning from today's candles."
+    : `Trend brain: <b>${pctTxt(p.trend)}</b> chance of UP. Memory brain: <b>${pctTxt(p.mem)}</b> of the 60 most similar past moments went up over the next ${look}. Calls fire when both agree and the Trend brain reaches ${pctTxt(S.conf)} either way.`;
 
   // scorecard
   const done = A.sigs.filter(s => s.win !== undefined), today = done.filter(s => s.t >= dayStart);
-  const pct = a => a.length ? Math.round(100 * a.filter(s => s.win).length / a.length) + "%" : "—";
-  $("sAll").textContent = pct(done); $("sDay").textContent = pct(today); $("sN").textContent = done.length;
+  const rate = a => a.length ? a.filter(s => s.win).length / a.length : NaN;
+  const all = rate(done);
+  $("sAll").textContent = isNaN(all) ? "—" : pctTxt(all); $("sDay").textContent = isNaN(rate(today)) ? "—" : pctTxt(rate(today)); $("sN").textContent = done.length;
+  $("ringArc").setAttribute("stroke-dasharray", `${isNaN(all) ? 0 : (all * 264).toFixed(1)} 264`);
+  $("ringArc").setAttribute("stroke", isNaN(all) ? "var(--faint)" : all >= .52 ? "var(--up)" : "var(--down)");
+  $("ringTxt").textContent = isNaN(all) ? "—" : pctTxt(all);
   $("hLbl").textContent = look;
   const recent = A.sigs.filter(s => s.t >= dayStart).reverse();
   $("log").innerHTML = recent.length ? recent.map(s => `<tr><td>${fmtT(s.t)}</td>
-    <td><span class="pill ${s.dir > 0 ? "up" : "down"}">${s.dir > 0 ? "▲ UP" : "▼ DOWN"}</span>${s.kind === "turn" ? (s.dir > 0 ? " from a low" : " from a high") : ""}</td>
+    <td><span class="pill ${s.dir > 0 ? "up" : "down"}">${s.dir > 0 ? "▲ UP" : "▼ DOWN"}</span></td>
     <td>${fmtP(s.price)}</td>
-    <td class="${s.win === undefined ? "pend" : s.win ? "win" : "loss"}">${s.win === undefined ? "waiting…" : (s.win ? "right " : "wrong ") + (s.move*100).toFixed(2) + "%"}</td></tr>`).join("")
-    : `<tr><td colspan="4" class="pend">No calls yet in the last 24h. The model only calls when it's confident.</td></tr>`;
+    <td class="${s.win === undefined ? "pend" : s.win ? "win" : "loss"}">${s.win === undefined ? "open…" : (s.win ? "✓ " : "✕ ") + (s.move*100).toFixed(2) + "%"}</td></tr>`).join("")
+    : `<tr><td colspan="4" class="pend">No calls in the last 24h. The brains only call when they agree and are confident.</td></tr>`;
 
   drawChart(C, A, dayBars);
-  setStatus("Live from " + S.src.name + " · " + C.length + " candles studied · model trained on " + (C.length - H) + " known outcomes · updated " + new Date().toLocaleTimeString());
+  setStatus(`${C.length} candles studied · updated ${new Date().toLocaleTimeString()}`);
   maybeAlert(A, C);
 }
 
 function watchEntry(p){
   if(!p) return {cls:"n", txt:"…"};
+  if(p.modelUp) return {cls:"u", txt:"▲ UP"};
+  if(p.modelDown) return {cls:"d", txt:"▼ DOWN"};
   if(p.paused) return {cls:"n", txt:"paused"};
-  if(p.modelUp) return {cls:"u", txt:"▲ " + Math.round(p.prob*100) + "%"};
-  if(p.modelDown) return {cls:"d", txt:"▼ " + Math.round((1-p.prob)*100) + "%"};
   return {cls:"n", txt:"no edge"};
 }
 function renderWatch(){
@@ -516,9 +674,9 @@ async function scanWatch(){
   for(const coin of COINS){
     if(coin === S.coin || gen !== S.gen) continue;
     try{
-      const c = await load(S.src, coin, S.tf, 1000, false);
+      const c = await load(S.src, coin, S.tf, 1500, false);
       if(gen !== S.gen) return;
-      const A = analyze(c, dayBars, H, S.conf);
+      const A = analyze(c, dayBars, H, S.conf, cacheFor(coin));
       S.watch[coin] = watchEntry(A.P[c.length-1]);
     }catch(e){ S.watch[coin] = {cls:"n", txt:"no data"}; }
     renderWatch();
@@ -537,49 +695,54 @@ function tick(){
 function horizon(){ return Math.max(1, Math.round(S.look / TF[S.tf].min)); }
 function lookLabel(){ const m = horizon() * TF[S.tf].min; return m >= 60 ? (m/60) + (m === 60 ? " hour" : " hours") : m + " min"; }
 function css(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
 function drawChart(C, A, dayBars){
   const cv = $("chart"), dpr = window.devicePixelRatio || 1, W = cv.clientWidth, Hh = cv.clientHeight;
+  if(!W) return;
   cv.width = W*dpr; cv.height = Hh*dpr;
   const g = cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,Hh);
   const n = C.length, a = Math.max(0, n-dayBars), view = C.slice(a);
-  const padL = 8, padR = 64, padT = 12, padB = 22;
+  const padL = 4, padR = 66, padT = 14, padB = 24;
   let lo = Infinity, hi = -Infinity;
   view.forEach((k,j) => { lo = Math.min(lo, k.l, A.vwap[a+j]); hi = Math.max(hi, k.h, A.vwap[a+j]); });
-  const pad = (hi-lo)*.06; lo -= pad; hi += pad;
+  const pad = (hi-lo)*.08; lo -= pad; hi += pad;
   const X = j => padL + (j + .5) * (W-padL-padR) / view.length, Y = p => padT + (hi-p)/(hi-lo) * (Hh-padT-padB);
-  const ink = css("--ink"), muted = css("--muted"), line = css("--line"), up = css("--up"), down = css("--down"), acc = css("--accent");
-  g.font = "11px JetBrains Mono, monospace"; g.textBaseline = "middle";
+  const muted = css("--muted"), faint = css("--faint"), up = css("--up"), down = css("--down"), acc = css("--accent"), cyan = css("--cyan");
+  g.font = "11px JetBrains Mono, monospace";
   // grid + price labels
   for(let s=0;s<=4;s++){ const p = lo + (hi-lo)*s/4, y = Y(p);
-    g.strokeStyle = line; g.lineWidth = 1; g.beginPath(); g.moveTo(padL,y); g.lineTo(W-padR,y); g.stroke();
-    g.fillStyle = muted; g.textAlign = "left"; g.fillText(fmtP(p), W-padR+6, y); }
-  // time labels
+    g.strokeStyle = "rgba(140,155,255,.07)"; g.lineWidth = 1; g.beginPath(); g.moveTo(padL,y); g.lineTo(W-padR,y); g.stroke();
+    g.fillStyle = muted; g.textAlign = "left"; g.textBaseline = "middle"; g.fillText(fmtP(p), W-padR+8, y); }
   g.textAlign = "center"; g.textBaseline = "alphabetic";
   const ticks = W < 600 ? 2 : 4;
   for(let s=0;s<=ticks;s++){ const j = Math.min(view.length-1, Math.round((view.length-1)*s/ticks)); g.fillStyle = muted; g.fillText(fmtT(view[j].t), Math.min(Math.max(X(j),30), W-padR-30), Hh-6); }
   // day hi/lo
-  g.setLineDash([4,4]); g.strokeStyle = muted;
+  g.setLineDash([3,5]); g.strokeStyle = faint;
   [A.hiD[n-1], A.loD[n-1]].forEach(p => { g.beginPath(); g.moveTo(padL,Y(p)); g.lineTo(W-padR,Y(p)); g.stroke(); });
   g.setLineDash([]);
-  // candles
-  const bw = Math.max(1, (W-padL-padR)/view.length*.7);
-  view.forEach((k,j) => { const col = k.c >= k.o ? up : down, x = X(j);
-    g.strokeStyle = col; g.globalAlpha = .55; g.beginPath(); g.moveTo(x,Y(k.h)); g.lineTo(x,Y(k.l)); g.stroke();
-    g.globalAlpha = .8; g.fillStyle = col; g.fillRect(x-bw/2, Y(Math.max(k.o,k.c)), bw, Math.max(1, Math.abs(Y(k.o)-Y(k.c)))); });
+  // wicks, faint
+  view.forEach((k,j) => { g.strokeStyle = k.c >= k.o ? up : down; g.globalAlpha = .22; g.beginPath(); g.moveTo(X(j),Y(k.h)); g.lineTo(X(j),Y(k.l)); g.stroke(); });
   g.globalAlpha = 1;
-  // close line
-  g.strokeStyle = ink; g.lineWidth = 1.4; g.beginPath(); view.forEach((k,j) => j ? g.lineTo(X(j),Y(k.c)) : g.moveTo(X(j),Y(k.c))); g.stroke();
+  // price area + glowing line
+  const grad = g.createLinearGradient(0, padT, 0, Hh-padB); grad.addColorStop(0, "rgba(69,212,255,.28)"); grad.addColorStop(1, "rgba(69,212,255,0)");
+  g.beginPath(); view.forEach((k,j) => j ? g.lineTo(X(j),Y(k.c)) : g.moveTo(X(j),Y(k.c)));
+  g.lineTo(X(view.length-1), Hh-padB); g.lineTo(X(0), Hh-padB); g.closePath(); g.fillStyle = grad; g.fill();
+  g.save(); g.shadowColor = cyan; g.shadowBlur = 12; g.strokeStyle = cyan; g.lineWidth = 2; g.lineJoin = "round";
+  g.beginPath(); view.forEach((k,j) => j ? g.lineTo(X(j),Y(k.c)) : g.moveTo(X(j),Y(k.c))); g.stroke(); g.restore();
   // vwap
-  g.strokeStyle = acc; g.lineWidth = 1.6; g.beginPath(); view.forEach((k,j) => j ? g.lineTo(X(j),Y(A.vwap[a+j])) : g.moveTo(X(j),Y(A.vwap[a+j]))); g.stroke();
-  // signals
-  A.sigs.filter(s => s.i >= a).forEach(s => { const j = s.i-a, x = X(j), k = C[s.i];
-    g.fillStyle = s.dir > 0 ? up : down; g.beginPath();
-    if(s.dir > 0){ const y = Y(k.l)+8; g.moveTo(x,y-6); g.lineTo(x-6,y+5); g.lineTo(x+6,y+5); }
-    else { const y = Y(k.h)-8; g.moveTo(x,y+6); g.lineTo(x-6,y-5); g.lineTo(x+6,y-5); }
-    g.closePath(); g.fill(); });
-  // last price tag
-  const last = C[n-1].c, y = Y(last); g.fillStyle = ink; g.fillRect(W-padR+2, y-9, padR-4, 18);
-  g.fillStyle = css("--panel"); g.textAlign = "left"; g.textBaseline = "middle"; g.font = "600 11px JetBrains Mono, monospace"; g.fillText(fmtP(last), W-padR+6, y);
+  g.strokeStyle = acc; g.globalAlpha = .8; g.lineWidth = 1.5; g.setLineDash([6,4]);
+  g.beginPath(); view.forEach((k,j) => j ? g.lineTo(X(j),Y(A.vwap[a+j])) : g.moveTo(X(j),Y(A.vwap[a+j]))); g.stroke();
+  g.setLineDash([]); g.globalAlpha = 1;
+  // calls
+  A.sigs.filter(s => s.i >= a).forEach(s => { const x = X(s.i-a), y = Y(C[s.i].c), col = s.dir > 0 ? up : down;
+    g.save(); g.shadowColor = col; g.shadowBlur = 14; g.fillStyle = col; g.beginPath(); g.arc(x, y, 5, 0, Math.PI*2); g.fill(); g.restore();
+    g.strokeStyle = col; g.lineWidth = 1.5; g.beginPath(); g.arc(x, y, 9, 0, Math.PI*2); g.globalAlpha = .45; g.stroke(); g.globalAlpha = 1;
+    if(s.win !== undefined){ g.fillStyle = s.win ? up : down; g.font = "700 10px JetBrains Mono, monospace"; g.fillText(s.win ? "✓" : "✕", x, s.dir > 0 ? y + 22 : y - 14); g.font = "11px JetBrains Mono, monospace"; } });
+  // last price tag + pulse
+  const last = C[n-1].c, y = Y(last);
+  g.fillStyle = cyan; g.beginPath(); g.roundRect ? g.roundRect(W-padR+3, y-10, padR-5, 20, 6) : g.rect(W-padR+3, y-10, padR-5, 20); g.fill();
+  g.fillStyle = "#06080f"; g.textAlign = "left"; g.textBaseline = "middle"; g.font = "700 11px JetBrains Mono, monospace"; g.fillText(fmtP(last), W-padR+8, y);
+  const pu = $("pulse"); pu.hidden = false; pu.style.left = X(view.length-1) + "px"; pu.style.top = y + "px";
 }
 
 // ───────── alerts ─────────
@@ -596,13 +759,14 @@ function maybeAlert(A, C){
   const s = A.sigs[A.sigs.length-1];
   if(!s || s.t <= S.lastAlertT || s.i < C.length-3) return;
   S.lastAlertT = s.t; beep(s.dir);
-  const msg = `${S.coin} ${s.dir > 0 ? "UP" : "DOWN"} call${s.kind === "turn" ? (s.dir > 0 ? " (bouncing off a low)" : " (rolling off a high)") : ""} at ${fmtP(s.price)}, next ${lookLabel()}`;
-  try{ if("Notification" in window && Notification.permission === "granted") new Notification("Turn Spotter", {body: msg}); }catch(e){}
+  const msg = `${S.coin} ${s.dir > 0 ? "UP" : "DOWN"} call at ${fmtP(s.price)} for the next ${lookLabel()}`;
+  try{ if("Notification" in window && Notification.permission === "granted") new Notification("Turn Spotter", {body: msg, icon: "icon-192.png"}); }catch(e){}
   document.title = (s.dir > 0 ? "▲ " : "▼ ") + S.coin + " · Turn Spotter";
 }
 $("alerts").addEventListener("click", async () => {
   S.alertsOn = !S.alertsOn;
-  $("alerts").textContent = S.alertsOn ? "Alerts on" : "Turn on alerts";
+  $("alerts").textContent = S.alertsOn ? "🔔 Alerts on" : "Turn on alerts";
+  $("alerts").classList.toggle("on", S.alertsOn);
   if(S.alertsOn){
     beep(1);
     try{ if("Notification" in window && Notification.permission === "default") await Notification.requestPermission(); }catch(e){}
@@ -611,17 +775,19 @@ $("alerts").addEventListener("click", async () => {
 });
 
 // ───────── boot ─────────
-try{ const saved = JSON.parse(localStorage.getItem("turnspotter") || "{}"); if(saved.coin) $("coin").value = S.coin = saved.coin; if(saved.tf) $("tf").value = S.tf = saved.tf; if(saved.look) $("look").value = S.look = saved.look; if(saved.conf) $("strict").value = String(S.conf = saved.conf); }catch(e){}
+try{ const saved = JSON.parse(localStorage.getItem("turnspotter") || "{}");
+  if(saved.coin) $("coin").value = S.coin = saved.coin; if(saved.tf) $("tf").value = S.tf = saved.tf;
+  if(saved.look) $("look").value = S.look = saved.look; if(saved.conf) $("strict").value = String(S.conf = saved.conf); }catch(e){}
 const save = () => { try{ localStorage.setItem("turnspotter", JSON.stringify({coin:S.coin, tf:S.tf, look:S.look, conf:S.conf})); }catch(e){} };
 $("coin").addEventListener("change", e => { S.coin = e.target.value; save(); loadHistory(); });
 $("tf").addEventListener("change", e => { S.tf = e.target.value; save(); loadHistory(); });
-$("look").addEventListener("change", e => { S.look = +e.target.value; save(); render(); scanWatch(); });
-$("strict").addEventListener("change", e => { S.conf = +e.target.value; save(); render(); scanWatch(); });
+$("look").addEventListener("change", e => { S.look = +e.target.value; save(); S.watch = {}; render(); scanWatch(); });
+$("strict").addEventListener("change", e => { S.conf = +e.target.value; save(); S.watch = {}; render(); scanWatch(); });
 $("watch").addEventListener("click", e => { const b = e.target.closest(".chip"); if(!b || b.dataset.coin === S.coin) return;
   S.coin = $("coin").value = b.dataset.coin; save(); loadHistory(); });
 setInterval(tick, 1000);
 window.addEventListener("resize", () => S.A && drawChart(S.candles, S.A, Math.round(1440 / TF[S.tf].min)));
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => S.A && render());
+renderWatch();
 loadHistory();
 </script>
 </body>
