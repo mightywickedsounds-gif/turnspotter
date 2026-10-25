@@ -2,8 +2,9 @@
 
 Live crypto direction-prediction website for use alongside Trench.io, hosted on GitHub Pages from `main` (root): https://mightywickedsounds-gif.github.io/turnspotter/
 
-- `index.html`: the whole website, a single self-contained page (no build step). Pulls candles in the browser from Binance, then Binance US, then Coinbase. Model code lives between `/*LOGIC-START*/` and `/*LOGIC-END*/`: the Trend brain (`learn`, online logistic regression), the Memory brain (`memory`, nearest neighbours), and `selfCheck` (pauses calls under 52%). A call needs both brains to agree.
+- `index.html`: the whole website, a single self-contained page (no build step). Pulls candles in the browser from Binance, then Binance US, then Coinbase. Model code lives between `/*LOGIC-START*/` and `/*LOGIC-END*/`. Calls come from the Experience brain (`experience`), logistic-regression weights in the `/*MODEL-START*/` block, written by `research/train.py` and retrained weekly by `.github/workflows/fetch-data.yml`. `learn` (the live learner) is shown for comparison only.
 - `tradingview/TrenchAI_Direction.pine`: TradingView Pine v6 version of the Trend brain.
-- `research/`: walk-forward backtests on `btc_1h_2011_2017.csv` (cleaned hourly BTC data). `experiments*.py` holds the tests behind each upgrade.
+- `research/`: `data/*.csv.gz` holds 2023+ candles for 5 coins (with taker volume), refreshed weekly. `experiments3-5.py` and `train.py` work on that data; older experiments use `btc_1h_2011_2017.csv`. Always score with a one-candle entry delay too: Binance US bid/ask bounce inflates same-candle results.
+- `paper/trader.mjs`: paper trader, run every 15 minutes by `.github/workflows/paper-trade.yml`, which writes `paper/ledger.json`. The ledger's `status` field records live per-coin diagnostics.
 
 The owner isn't a programmer: explain changes in plain English. Backtest any change to the signal logic on the research data before shipping, and report the results honestly, including when an idea fails. Log each round in README.md.

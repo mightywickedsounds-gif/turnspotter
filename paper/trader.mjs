@@ -15,7 +15,7 @@ const CFG = {
   bustBuffer: 3,        // bust price sits 3x the typical move away
   maxMult: 50,
   coins: ["BTC", "ETH", "SOL", "XRP", "DOGE"],
-  tf: "15m", tfMin: 15, lookMin: 60, conf: 0.58, need: 2000,
+  tf: "15m", tfMin: 15, lookMin: 60, conf: 0.55, need: 2000,   // same as the site's defaults
 };
 const H = CFG.lookMin / CFG.tfMin;
 const LEDGER = new URL("./ledger.json", import.meta.url);

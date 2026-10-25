@@ -1,9 +1,11 @@
 name: Fetch research data
 on:
+  schedule:
+    - cron: "17 4 * * 1"   # every Monday: fresh data, retrain the Experience brain
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [research/fetch_data.py, .github/workflows/fetch-data.yml]
+    paths: [research/fetch_data.py, research/train.py, .github/workflows/fetch-data.yml]
 permissions:
   contents: write
 jobs:
@@ -15,11 +17,15 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: python research/fetch_data.py
+      - run: pip install pandas scikit-learn
+      - name: Retrain the Experience brain
+        working-directory: research
+        run: python train.py
       - name: Save data to the repository
         run: |
           git config user.name "turnspotter-bot"
           git config user.email "turnspotter-bot@users.noreply.github.com"
-          git add research/data
-          git commit -m "Update research data" || exit 0
+          git add research/data index.html
+          git commit -m "Weekly data refresh and Experience brain retrain" || exit 0
           git pull --rebase origin main
           git push

@@ -260,14 +260,12 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <summary>Settings</summary>
     <div class="controls">
       <label>How far ahead<select id="look">
-        <option value="5">5 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60" selected>1 hour</option><option value="240">4 hours</option>
+        <option value="60" selected>1 hour</option><option value="240">4 hours</option>
       </select></label>
       <label>How picky<select id="strict">
-        <option value="0.58" selected>Normal: more calls</option><option value="0.62">Picky: fewer, better calls</option><option value="0.66">Very picky: fewest, best calls</option>
+        <option value="0.55" selected>Normal: more calls</option><option value="0.56">Picky: fewer, better calls</option><option value="0.58">Very picky: fewest, best calls</option>
       </select></label>
-      <label>Candle size<select id="tf">
-        <option value="1m">1 minute</option><option value="5m">5 minutes</option><option value="15m" selected>15 minutes</option>
-      </select></label>
+      <select id="tf" hidden><option value="15m" selected>15m</option></select>
       <select id="coin" hidden><option value="BTC">BTC</option><option value="ETH">ETH</option><option value="SOL">SOL</option><option value="XRP">XRP</option><option value="DOGE">DOGE</option></select>
     </div>
     <p class="note">Set "How far ahead" to how long your Trench trade stays open.</p>
@@ -307,10 +305,10 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
         </svg>
         <div class="dialNum" id="dNum">—</div>
         <div class="brains">
-          <div class="brain"><span>Trend brain</span><div class="b"><i id="bT"></i></div><b id="bTn">—</b></div>
-          <div class="brain"><span>Memory brain</span><div class="b"><i id="bM"></i></div><b id="bMn">—</b></div>
+          <div class="brain"><span>Experience brain</span><div class="b"><i id="bT"></i></div><b id="bTn">—</b></div>
+          <div class="brain"><span>Live learner</span><div class="b"><i id="bM"></i></div><b id="bMn">—</b></div>
         </div>
-        <span class="agree no" id="agree">Waiting for both brains</span>
+        <span class="agree yes" id="agree">Calls come from the Experience brain</span>
       </div>
     </div>
     <div class="score">
@@ -334,8 +332,8 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </details>
     <details>
       <summary>How it works</summary>
-      <p class="note" style="margin-top:10px">Two AIs watch the market. The <b>Trend brain</b> learns from every candle, looking at momentum, RSI, trend, volume and volatility. The <b>Memory brain</b> finds the 60 past moments that looked most like right now and checks what happened next. A call only fires when the Trend brain is confident <b>and</b> the Memory brain agrees. If their recent calls drop under 52% right, calls pause until they recover.</p>
-      <p class="note" style="margin-top:10px">Backtested on 2013–2017 hourly Bitcoin data, calls were right about 59–61% of the time against a 52–53% baseline. Bounce and roll-over setups were right only 33–40% of the time, so the site skips them. Past results don't guarantee future ones.</p>
+      <p class="note" style="margin-top:10px">Calls come from the <b>Experience brain</b>: a model trained on every 15-minute candle of all five coins since January 2023, retrained every week. It looks at recent moves, RSI, trend, where price sits in its daily range, volume and volatility. A call fires when its confidence passes your "How picky" setting.</p>
+      <p class="note" style="margin-top:10px">Tested on 16 months of data it had never seen (July 2025 to October 2026), calls were right 54–58% of the time, or 53–56% if you entered 15 minutes late. The main pattern it found: in today's market, short moves tend to partly reverse. The old live learner, which bet on moves continuing, was no better than a coin flip there. Past results don't guarantee future ones.</p>
     </details>
     <p class="status" id="status">Starting…</p>
   </details>
@@ -356,7 +354,7 @@ const SOURCES = [
   {name:"Coinbase",   kind:"coinbase", host:"https://api.exchange.coinbase.com", sym:c=>c+"-USD"},
 ];
 const COINS = ["BTC","ETH","SOL","XRP","DOGE"];
-const S = {caches:{}, conf:0.58, watch:{}, watchTimer:null, coin:"BTC", tf:"15m", look:60, candles:[], src:null, timer:null, gen:0, lastAlertT:0, alertsOn:false, A:null};
+const S = {caches:{}, conf:0.55, watch:{}, watchTimer:null, coin:"BTC", tf:"15m", look:60, candles:[], src:null, timer:null, gen:0, lastAlertT:0, alertsOn:false, A:null};
 const $ = id => document.getElementById(id);
 
 // ───────── data ─────────
@@ -435,6 +433,11 @@ async function poll(){
 }
 
 /*LOGIC-START*/
+/*MODEL-START*/
+// Experience brain weights: logistic regression trained on all five coins' 15-minute candles since 2023.
+// Written by research/train.py on 2026-10-25. Out-of-sample check (last 16 months): {"1": {"0.55": {"share": 0.201, "now": 0.571, "delayed": 0.53}, "0.56": {"share": 0.122, "now": 0.5779, "delayed": 0.5294}, "0.58": {"share": 0.037, "now": 0.5846, "delayed": 0.53}}, "4": {"0.55": {"share": 0.253, "now": 0.557, "delayed": 0.5346}, "0.56": {"share": 0.167, "now": 0.561, "delayed": 0.537}, "0.58": {"share": 0.061, "now": 0.5681, "delayed": 0.536}}, "16": {"0.55": {"share": 0.161, "now": 0.5414, "delayed": 0.534}, "0.56": {"share": 0.095, "now": 0.5502, "delayed": 0.5423}, "0.58": {"share": 0.028, "now": 0.5673, "delayed": 0.5576}}}
+const EXPERIENCE = {"trained": "2026-10-25", "feats": ["ret1", "ret3", "ret12", "ret48", "rsi", "trend", "range_pos", "vol_z", "vol_regime", "volmom"], "models": {"1": {"w": [-0.05586, -0.07228, 0.02894, -0.01964, -0.12551, 0.08392, -0.14497, 0.00864, 0.0435, 0.06372], "b": 0.02221}, "4": {"w": [-0.04361, -0.04672, 0.03276, 0.00035, -0.21678, 0.02915, -0.11777, -0.00273, 0.0793, 0.04757], "b": 0.0379}, "16": {"w": [-0.02665, -0.03736, 0.01628, 0.0531, -0.08837, -0.15792, -0.07465, 0.00314, 0.12601, 0.02585], "b": 0.03286}}};
+/*MODEL-END*/
 // ───────── indicators ─────────
 function ema(a, n){ const k = 2/(n+1), o = new Array(a.length); let p = a[0]; for(let i=0;i<a.length;i++){ p = i ? a[i]*k + p*(1-k) : a[0]; o[i] = p; } return o; }
 function wilder(a, n){ const o = new Array(a.length).fill(NaN); let s = 0; for(let i=0;i<a.length;i++){ if(i < n){ s += a[i]; if(i === n-1) o[i] = s/n; } else o[i] = (o[i-1]*(n-1) + a[i])/n; } return o; }
@@ -508,24 +511,21 @@ function analyze(C, dayBars, H, conf, cache){
     const sum = (arr, f) => arr.reduce((s,x)=>s+f(x),0);
     P.push({B, T, BT, TT, sB:sum(B,x=>x.s*x.w), sT:sum(T,x=>x.s*x.w), tB:sum(BT,x=>x.on?x.w:0), tT:sum(TT,x=>x.on?x.w:0)});
   }
-  const trend = learn(C, H), mem = memory(C, trend.X, H, n - 1100, cache);
-  // a call needs both brains leaning the same way: Trend brain confident, Memory brain at least 55/45
-  const agree = trend.map((p, i) => !isNaN(p) && !isNaN(mem[i]) && Math.sign(p - .5) === Math.sign(mem[i] - .5) && Math.abs(mem[i] - .5) >= .05);
-  const prob = trend.map((p, i) => agree[i] ? p : NaN);   // no call unless both brains agree
-  const chk = selfCheck(c, prob, H, conf);
+  // Calls come from the Experience brain (trained once on years of data, see research/train.py).
+  // The live learner is still computed, but only shown for comparison: on 2025-26 data it was a coin flip.
+  const trend = learn(C, H), prob = experience(trend.X, H);
+  const chk = selfCheck(c, prob, H, conf);   // recent record only; pausing hurt this model in testing, so it never pauses
   const sdr = rolling(c.map((x,i) => i ? Math.log(x/c[i-1]) : 0), 50, sdev);
   // recent stretch: was price stretched at any point in the last 6 candles?
   for(let i=0;i<n;i++){ if(!P[i]) continue; let mb=0, mt=0; for(let j=Math.max(0,i-5);j<=i;j++){ if(P[j]){ mb=Math.max(mb,P[j].sB); mt=Math.max(mt,P[j].sT);} }
     const pu = prob[i], p = P[i];
-    p.prob = trend[i]; p.trend = trend[i]; p.mem = mem[i]; p.agree = agree[i]; p.rB = mb; p.rT = mt; p.paused = chk.paused[i]; p.record = chk.record[i];
+    p.prob = pu; p.exp = pu; p.trend = trend[i]; p.rB = mb; p.rT = mt; p.paused = false; p.record = chk.record[i];
     p.move = sdr[i] * Math.sqrt(H);   // typical % move over the prediction window (1 standard deviation)
-    p.modelUp = !p.paused && !isNaN(pu) && pu >= conf; p.modelDown = !p.paused && !isNaN(pu) && pu <= 1 - conf;
-    // a turn call needs the stretch + the turn + the learning model agreeing
+    p.modelUp = !isNaN(pu) && pu >= conf; p.modelDown = !isNaN(pu) && pu <= 1 - conf;
+    // label calls that come right after a stretched move (bounce / roll-over); they are not skipped any more:
+    // in 2023-26 data short moves tend to reverse, and the Experience brain was tested with them included
     p.up = mb >= .5 && p.tB >= .55 && p.modelUp;
     p.down = mt >= .5 && p.tT >= .55 && p.modelDown;
-    // bounce / roll-over calls tested worse than a coin flip in every backtest, so they are skipped
-    if(p.up) p.modelUp = false;
-    if(p.down) p.modelDown = false;
     const edge = isNaN(pu) ? 0 : (pu - .5) * 2;
     p.scoreB = Math.round(100*clamp01(.4*mb + .25*p.tB + .35*clamp01(edge/((conf-.5)*2)) ));
     p.scoreT = Math.round(100*clamp01(.4*mt + .25*p.tT + .35*clamp01(-edge/((conf-.5)*2)) ));
@@ -542,7 +542,7 @@ function analyze(C, dayBars, H, conf, cache){
     s.t = C[s.i].t; s.price = c[s.i];
     if(s.i + H <= n-2){ const mv = (c[s.i+H]-c[s.i])/c[s.i]; s.move = mv; s.win = s.dir > 0 ? mv > 0 : mv < 0; }
   }
-  return {P, sigs, vwap, hiD, loD, n, prob, trend, mem};
+  return {P, sigs, vwap, hiD, loD, n, prob, trend};
 }
 
 // Online logistic regression: the same model as the TradingView indicator.
@@ -578,33 +578,10 @@ function learn(C, H, lr = .02, l2 = 1e-4){
   return out;
 }
 
-// "Memory brain": for each candle, find the 60 most similar past moments whose outcome
-// H candles later is already known, and report how often price went up after them.
-function quickselect(d, idx, k){
-  let lo = 0, hi = idx.length - 1;
-  while(lo < hi){
-    const pv = d[idx[(lo + hi) >> 1]]; let i = lo, j = hi;
-    while(i <= j){ while(d[idx[i]] < pv) i++; while(d[idx[j]] > pv) j--; if(i <= j){ const t = idx[i]; idx[i] = idx[j]; idx[j] = t; i++; j--; } }
-    if(k <= j) hi = j; else if(k >= i) lo = i; else break;
-  }
-}
-function memory(C, X, H, from, cache){
-  const n = C.length, c = C.map(k=>k.c), out = new Array(n).fill(NaN), K = 60, F = 10;
-  const d = new Float64Array(n);
-  for(let t=Math.max(from, 0); t<n; t++){
-    if(!X[t]) continue;
-    const key = C[t].t;
-    if(t < n-1 && cache && cache.has(key)){ out[t] = cache.get(key); continue; }
-    const pool = [];
-    for(let j=0; j+H<=t; j++) if(X[j] && c[j+H] !== c[j]) pool.push(j);
-    if(pool.length < 200) continue;
-    for(const j of pool){ let s = 0; for(let f=0; f<F; f++){ const e = X[j][f] - X[t][f]; s += e*e; } d[j] = s; }
-    quickselect(d, pool, K);
-    let ups = 0; for(let m=0; m<K; m++){ const j = pool[m]; if(c[j+H] > c[j]) ups++; }
-    out[t] = (ups + 1) / (K + 2);
-    if(t < n-1 && cache) cache.set(key, out[t]);
-  }
-  return out;
+// Experience brain: logistic regression with weights trained offline (EXPERIENCE, written by research/train.py)
+function experience(X, H){
+  const m = EXPERIENCE.models[H];
+  return X.map(x => !m || !x ? NaN : 1 / (1 + Math.exp(-(m.b + m.w.reduce((s, w, k) => s + w * x[k], 0)))));
 }
 
 // Self-check: pause calls while the model's last 100 confident calls (outcomes already known) are under 52% right.
@@ -636,24 +613,18 @@ function render(){
   const i = C.length-1, p = A.P[i], k = C[i];
   if(!p) return;
   const dayStart = C[Math.max(0, i-dayBars+1)].t, look = lookLabel();
-  const hasT = !isNaN(p.trend), hasM = !isNaN(p.mem);
+  const hasE = !isNaN(p.exp), hasT = !isNaN(p.trend);
 
   // verdict + mood
   let mood = "", state, why;
-  if(p.modelUp){ mood = "up"; state = "Call: UP";
-    why = `Both brains lean UP. The Trend brain gives ${pctTxt(p.trend)} and the Memory brain found ${pctTxt(p.mem)} of look-alike moments went higher over the next ${look}.`; }
-  else if(p.modelDown){ mood = "down"; state = "Call: DOWN";
-    why = `Both brains lean DOWN. The Trend brain gives ${pctTxt(1-p.trend)} and the Memory brain found ${pctTxt(1-p.mem)} of look-alike moments went lower over the next ${look}.`; }
-  else if(p.paused){ mood = "warn"; state = "Paused · cold streak";
-    why = `The last 100 calls were right only ${pctTxt(p.record)} of the time, so calls are paused until they're back above 52%. Markets change, and this is the model admitting it.`; }
-  else if(p.up || p.down){ mood = "warn"; state = p.up ? "Bounce setup · skipped" : "Roll-over setup · skipped";
-    why = `Price got stretched and is turning, and the brains lean that way, but in every backtest these setups were right less than half the time. Sitting this one out.`; }
+  if(p.modelUp){ mood = "up"; state = p.up ? "Call: UP · bounce" : "Call: UP";
+    why = `The Experience brain gives ${pctTxt(p.exp)} for higher over the next ${look}.${p.up ? " Price just got stretched low and is curling up; in 2023–26 data short drops tended to bounce back." : ""}`; }
+  else if(p.modelDown){ mood = "down"; state = p.down ? "Call: DOWN · roll-over" : "Call: DOWN";
+    why = `The Experience brain gives ${pctTxt(1-p.exp)} for lower over the next ${look}.${p.down ? " Price just got stretched high and is rolling over; in 2023–26 data short pops tended to fade." : ""}`; }
   else if(p.sB >= .5 || p.sT >= .5){ mood = "warn"; state = p.sB >= .5 ? "Really low · no call" : "Really high · no call";
-    why = "Price is stretched for the day, but stretch alone was no better than a coin flip in testing. Falling prices can keep falling. Wait for a call."; }
+    why = "Price is stretched for the day, but the Experience brain isn't confident about what comes next. Wait for a call."; }
   else { state = "No edge right now";
-    why = !hasT || !hasM ? "Both brains are still learning from today's candles."
-      : !p.agree ? "The two brains disagree on direction, so there's no call. Sit this one out."
-      : `The brains agree but aren't confident enough (calls fire at ${pctTxt(S.conf)}). Sit this one out.`; }
+    why = !hasE ? "Still reading today's candles." : `The Experience brain gives ${pctTxt(p.exp)} for UP, too close to a coin flip (calls fire at ${pctTxt(S.conf)} either way).`; }
   if(mood) document.body.dataset.mood = mood; else delete document.body.dataset.mood;
   // the simple answer
   const NAMES = {BTC:"Bitcoin", ETH:"Ethereum", SOL:"Solana", XRP:"XRP", DOGE:"Dogecoin"};
@@ -661,13 +632,10 @@ function render(){
   let big = "WAIT", sub;
   // quote the real track record, not the model's raw confidence (which runs hotter than reality)
   const doneAll = A.sigs.filter(s => s.win !== undefined), hit = doneAll.length >= 10 ? doneAll.filter(s => s.win).length / doneAll.length : NaN;
-  const record = !isNaN(hit) ? `Calls like this were right ${pctTxt(hit)} of the time recently.` : "Calls like this were right about 60% of the time in testing.";
+  const record = !isNaN(hit) ? `Calls like this were right ${pctTxt(hit)} of the time recently.` : "Calls like this were right about 54–57% of the time in testing.";
   if(p.modelUp){ big = "UP ▲"; sub = `Likely higher in ${look}. ${record}`; }
   else if(p.modelDown){ big = "DOWN ▼"; sub = `Likely lower in ${look}. ${record}`; }
-  else if(!hasT || !hasM) sub = "Still learning today's market…";
-  else if(p.paused) sub = "The AI has been wrong a lot lately, so it's sitting out until it gets back on track.";
-  else if(p.up || p.down) sub = "Price is turning around, but turnarounds haven't been reliable. Don't bet on this one.";
-  else if(!p.agree) sub = "The two AIs disagree on the direction. No bet.";
+  else if(!hasE) sub = "Reading today's market…";
   else sub = "Not confident either way right now. No bet.";
   const bc = $("bigCall");
   if(bc.dataset.v !== big){ bc.dataset.v = big; const [w, arrow] = big.split(" ");
@@ -689,18 +657,17 @@ function render(){
 
   // dial
   $("dLook").textContent = look;
-  if(hasT){ $("needle").style.transform = `rotate(${(p.trend - .5) * 180}deg)`; $("dNum").textContent = pctTxt(p.trend);
+  if(hasE){ $("needle").style.transform = `rotate(${(p.exp - .5) * 180}deg)`; $("dNum").textContent = pctTxt(p.exp);
     $("dNum").style.color = p.modelUp ? "var(--up)" : p.modelDown ? "var(--down)" : "var(--ink)"; }
   const tk = [S.conf, 1 - S.conf].map(v => { const a = (v - .5) * Math.PI, x1 = 150 + 104*Math.sin(a), y1 = 150 - 104*Math.cos(a), x2 = 150 + 136*Math.sin(a), y2 = 150 - 136*Math.cos(a);
     return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`; }).join("");
   $("ticks").innerHTML = tk;
   const bar = (id, v) => { const el = $(id); if(isNaN(v)){ el.style.width = "0"; return; }
     const w = Math.abs(v - .5) * 100; el.style.left = v >= .5 ? "50%" : (50 - w) + "%"; el.style.width = w + "%"; el.style.background = v >= .5 ? "var(--up)" : "var(--down)"; };
-  bar("bT", p.trend); bar("bM", p.mem);
-  $("bTn").textContent = hasT ? pctTxt(p.trend) : "—"; $("bMn").textContent = hasM ? pctTxt(p.mem) : "—";
-  const ag = $("agree");
-  ag.className = "agree " + (p.agree ? "yes" : "no");
-  ag.textContent = !hasT || !hasM ? "Waiting for both brains" : p.agree ? `✓ Brains agree · ${p.trend > .5 ? "UP" : "DOWN"}` : "✕ Brains disagree · no call";
+  bar("bT", p.exp); bar("bM", p.trend);
+  $("bTn").textContent = hasE ? pctTxt(p.exp) : "—"; $("bMn").textContent = hasT ? pctTxt(p.trend) : "—";
+  $("agree").className = "agree yes";
+  $("agree").textContent = `Calls come from the Experience brain · trained ${EXPERIENCE.trained}`;
 
   // facts
   $("fLook").textContent = look;
@@ -718,8 +685,8 @@ function render(){
   const ck = (id, arr, cls) => { $(id).innerHTML = arr.map(x =>
     `<li><span class="dot ${x.on ? cls : "off"}">${x.on ? "●" : "○"}</span><span>${x.k}</span><span class="v">${x.val || ""}</span></li>`).join(""); };
   ck("ckB", p.B, "on"); ck("ckBT", p.BT, "on"); ck("ckT", p.T, "ont"); ck("ckTT", p.TT, "ont");
-  $("mdl").innerHTML = !hasT || !hasM ? "Both brains are still learning from today's candles."
-    : `Trend brain: <b>${pctTxt(p.trend)}</b> chance of UP. Memory brain: <b>${pctTxt(p.mem)}</b> of the 60 most similar past moments went up over the next ${look}. Calls fire when both agree and the Trend brain reaches ${pctTxt(S.conf)} either way.`;
+  $("mdl").innerHTML = !hasE ? "Reading today's candles."
+    : `Experience brain: <b>${pctTxt(p.exp)}</b> chance of UP over the next ${look}. Live learner: <b>${pctTxt(p.trend)}</b> (shown for comparison only; it was no better than a coin flip on 2025–26 data). Calls fire when the Experience brain reaches ${pctTxt(S.conf)} either way.`;
 
   // scorecard
   const done = A.sigs.filter(s => s.win !== undefined), today = done.filter(s => s.t >= dayStart);
@@ -910,8 +877,8 @@ $("alerts").addEventListener("click", async () => {
 
 // ───────── boot ─────────
 try{ const saved = JSON.parse(localStorage.getItem("turnspotter") || "{}");
-  if(saved.coin) $("coin").value = S.coin = saved.coin; if(saved.tf) $("tf").value = S.tf = saved.tf;
-  if(saved.look) $("look").value = S.look = saved.look; if(saved.conf) $("strict").value = String(S.conf = saved.conf); }catch(e){}
+  if(saved.coin) $("coin").value = S.coin = saved.coin;
+  if([60,240].includes(+saved.look)) $("look").value = S.look = +saved.look; if([.55,.56,.58].includes(+saved.conf)) $("strict").value = String(S.conf = +saved.conf); }catch(e){}
 const save = () => { try{ localStorage.setItem("turnspotter", JSON.stringify({coin:S.coin, tf:S.tf, look:S.look, conf:S.conf})); }catch(e){} };
 $("coin").addEventListener("change", e => { S.coin = e.target.value; save(); loadHistory(); });
 $("tf").addEventListener("change", e => { S.tf = e.target.value; save(); loadHistory(); });

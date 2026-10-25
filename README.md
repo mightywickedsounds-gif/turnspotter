@@ -163,10 +163,47 @@ the fourth test in a row where they failed, so the site now skips them.
 - The main line quotes the real track record ("calls like this were right 62% of the time") instead
   of the model's raw confidence, which runs hotter than reality.
 
+### Round 4: real recent data changed everything (`research/experiments3-5.py`, `research/train.py`)
+
+GitHub's servers downloaded 15-minute and 1-hour candles for all five coins from January 2023 to
+October 2026, including buyer/seller ("taker") flow. Findings:
+
+- **Short moves now tend to reverse.** On every coin, in every year from 2023 to 2026, the next hour
+  went the opposite way to the last 15 minutes to 4 hours about 52% of the time. In 2013–2017 moves
+  tended to continue. The live learner bets on moves continuing, which is why it stopped working.
+- **The old site model on 2025–26 data:** 54.6% right at the moment of the call, but only **51.2%**
+  with a 15-minute entry delay. That's a coin flip, and the self-check correctly paused it, which is
+  why everything said WAIT.
+- **Taker flow** looked huge on DOGE/XRP 15-minute data but disappeared at 1 hour and with a delay.
+  It's most likely an artifact of Binance US being a thin market, so it's not used.
+- **Bitcoin leading the other coins:** no usable effect at these timeframes.
+- **Boosted trees** were no better than a simple model.
+
+**Shipped: the Experience brain.** A simple model trained once on all five coins since 2023,
+retrained every Monday by GitHub. On 16 months it never saw (July 2025 to October 2026), using the
+site's own code:
+
+| How far ahead | Strictness | Calls per 100 candles | Right at the call | Right with 15-min late entry |
+|---|---|---|---|---|
+| 1 hour | Normal (55%) | 7.6 | 55.6% | 52.6% |
+| 1 hour | Very picky (58%) | 2.7 | 56.2% | 53.3% |
+| 4 hours | Picky (56%) | 2.3 | 54.9% | 54.7% |
+| 15 minutes | Normal | 8.2 | 54.1% | 49.6% (removed) |
+
+The self-check pause and the Memory brain were dropped, because both hurt with this model.
+
+### Round 4: other changes
+- **Live motion:** price refreshes every 3 seconds, the chart glides, the glow breathes. The page
+  also has load, call-change and chart draw-in animations (off for people who ask for reduced motion).
+- **Paper trading:** `paper/trader.mjs` runs every 15 minutes on GitHub with $50 of fake money.
+  It follows the site's calls, Trench-style (assumed rules in the file), and shows the P&L on the site.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
 - `tradingview/TrenchAI_Direction.pine`: the indicator (paste into TradingView)
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)
-- `research/experiments.py`, `research/experiments2.py`: tests of candidate upgrades
+- `research/experiments*.py`: tests of candidate upgrades; `research/train.py`: trains the Experience brain
+- `research/data/`: 2023–2026 candles for all five coins (refreshed weekly)
+- `paper/`: the paper trader and its ledger
 - `research/btc_1h_2011_2017.csv`: the hourly BTC data used for testing
