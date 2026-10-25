@@ -186,6 +186,38 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 @media (max-width:860px){.moves{grid-template-columns:repeat(3,1fr)}.bookStats{grid-template-columns:1fr 1fr}.bkMid{grid-column:1/-1;order:3}}
 @media (max-width:420px){.chip .spk{display:none}}
 
+
+/* live bot */
+#botCard{border-color:color-mix(in srgb,var(--warn) 35%,var(--edge))}
+.botClockWrap{font:700 14px var(--mono);padding:6px 12px;border-radius:999px;background:rgba(255,194,75,.1);color:var(--warn)}
+.botTop{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+.botChart{width:100%;height:90px}
+.goal{display:grid;gap:6px;margin:12px 0}
+.goalBar{height:12px;border-radius:999px;background:rgba(140,155,255,.1);overflow:hidden}
+.goalBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--cyan),var(--up));box-shadow:0 0 16px var(--cyan);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.botGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:16px;align-items:start}
+.botCtl{display:grid;gap:12px}
+.botOpts{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px}
+.botOpts label{display:grid;gap:6px;font:600 12px var(--body);color:var(--muted)}
+.place.stop{background:linear-gradient(135deg,var(--down),#ff9a6b)}
+.tpBar{position:relative;height:22px;border-radius:8px;background:rgba(140,155,255,.08);overflow:hidden;display:flex;justify-content:space-between;align-items:center;padding:0 8px;font:600 10px var(--mono);color:var(--muted)}
+.tpBar i{position:absolute;top:0;bottom:0;transition:width .5s}
+.tpBar .lossSide{right:50%;background:linear-gradient(270deg,color-mix(in srgb,var(--down) 70%,transparent),var(--down))}
+.tpBar .winSide{left:50%;background:linear-gradient(90deg,color-mix(in srgb,var(--up) 70%,transparent),var(--up))}
+.tpBar span{position:relative;z-index:1}
+.botLog{list-style:none;margin:0;padding:0;display:grid;gap:6px;max-height:330px;overflow:auto}
+.botLog li{display:grid;grid-template-columns:64px 1fr;gap:8px;font:500 13px/1.4 var(--body);padding:8px 10px;border-radius:10px;background:rgba(140,155,255,.05);border-left:3px solid var(--faint)}
+.botLog li time{font:500 11px var(--mono);color:var(--muted);padding-top:2px}
+.botLog li.up{border-left-color:var(--up)} .botLog li.down{border-left-color:var(--down)}
+.botLog li.win{border-left-color:var(--up);background:color-mix(in srgb,var(--up) 9%,transparent)} .botLog li.loss{border-left-color:var(--down);background:color-mix(in srgb,var(--down) 9%,transparent)}
+.botLog li.sys{border-left-color:var(--accent)}
+.botLog li.new{animation:slideIn .5s cubic-bezier(.2,.8,.2,1)}
+.shake{animation:shake .5s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.confetti{position:fixed;inset:0;z-index:30;pointer-events:none}
+@media (max-width:860px){.botGrid{grid-template-columns:1fr}.botTop{grid-template-columns:1fr}}
+@media (max-width:420px){.botOpts{grid-template-columns:1fr 1fr}.botOpts label:first-child{grid-column:1/-1}}
+
 /* live buys & sells */
 .tug{display:grid;gap:6px;margin:4px 0 12px}
 .tugLbl{display:flex;justify-content:space-between;gap:8px;font:600 12px var(--mono);color:var(--muted)}
@@ -359,12 +391,37 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <div class="moves" id="moves" role="group" aria-label="Price change over different time windows"></div>
     <div class="lens">
       <label class="sl" for="lens">Trench lens: what these moves look like at your multiplier <b id="lensV">×25</b></label>
-      <input type="range" id="lens" min="1" max="100" step="1" value="25" aria-label="Trench multiplier">
+      <input type="range" id="lens" min="1" max="1000" step="1" value="25" aria-label="Trench multiplier">
       <p class="lensTxt" id="lensTxt"></p>
     </div>
     <div class="call" id="bigCall">…</div>
     <p class="callSub" id="bigSub">Reading today's market…</p>
     <div id="countLine" hidden><p class="countLine">This call gets checked in <b id="fCount">—</b></p><div class="cbar"><i id="cbarFill"></i></div></div>
+  </section>
+
+  <section class="card" id="botCard">
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 16h6"/></svg>AI bot · live run</h2>
+      <span class="botClockWrap">⏱ <b id="botClock">60:00</b></span></div>
+    <div class="botTop">
+      <div><div class="coinName">Bot's fake money</div><span class="price" id="botVal">$50.00</span> <span class="chg" id="botRet"></span>
+        <div class="acctSub" id="botStats"></div></div>
+      <svg class="botChart" id="botChart" viewBox="0 0 400 100" preserveAspectRatio="none" aria-label="Bot money over time; dashed yellow line is the goal"></svg>
+    </div>
+    <div class="goal"><div class="goalBar"><i id="botGoalFill"></i></div><span class="acctSub" id="botGoalTxt"></span></div>
+    <div class="botGrid">
+      <div class="botCtl">
+        <div id="botPos" class="pos"></div>
+        <div class="botOpts">
+          <label>Style<select id="botStyle"><option value="trench1000">Trench max ×1000</option><option value="degen">All-in degen</option><option value="aggressive">Aggressive</option><option value="careful">Careful</option></select></label>
+          <label>Start<span class="money"><span>$</span><input type="number" id="botStartAmt" value="50" min="5"></span></label>
+          <label>Goal<span class="money"><span>$</span><input type="number" id="botGoal" value="500" min="10"></span></label>
+        </div>
+        <label class="auto"><input type="checkbox" id="botFollow" checked> <span>Switch the screen to whatever coin the bot is trading</span></label>
+        <button type="button" class="place" id="botStartBtn">Start the bot</button>
+        <p class="note" id="botNote">Runs while this page is open, with fake money. For any fair gamble, the chance of reaching 10× before $0 is about 1 in 10.</p>
+      </div>
+      <div class="botMind"><div class="sub">What the bot is thinking</div><ul class="botLog" id="botLog"></ul></div>
+    </div>
   </section>
 
   <section class="card">
@@ -427,7 +484,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
           <div class="dirBtns"><button type="button" class="dirBtn up" data-dir="1" aria-pressed="true">▲ UP</button><button type="button" class="dirBtn down" data-dir="-1" aria-pressed="false">▼ DOWN</button></div>
           <label class="sl">Stake <b id="tkStakeV">$5.00</b><input type="range" id="tkStake" min="1" max="50" step="0.5" value="5"></label>
           <div class="quick"><button type="button" data-pct="10">10%</button><button type="button" data-pct="25">25%</button><button type="button" data-pct="50">50%</button><button type="button" data-pct="100">All in</button></div>
-          <label class="sl">Multiplier <b id="tkMultV">×10</b><input type="range" id="tkMult" min="1" max="100" step="1" value="10"></label>
+          <label class="sl">Multiplier <b id="tkMultV">×10</b><input type="range" id="tkMult" min="1" max="1000" step="1" value="10"></label>
           <div class="quick" id="tkDur"><button type="button" data-min="60" aria-pressed="true">1 hour</button><button type="button" data-min="240" aria-pressed="false">4 hours</button></div>
           <div class="risk" id="tkRisk"></div>
           <button type="button" class="place" id="tkPlace">Place trade</button>
@@ -1304,6 +1361,7 @@ function closePosition(p, price, status){
 // every new price: check busts and expiries
 function onPrice(coin, price){
   S.prices[coin] = price;
+  if(BOT.running && BOT.pos && BOT.pos.coin === coin) botTick();
   for(const p of PR.positions.filter(x => x.coin === coin)){
     if(p.dir > 0 ? price <= p.bust : price >= p.bust) closePosition(p, p.bust, "busted");
     else if(Date.now() >= p.expiresAt) closePosition(p, price);
@@ -1332,7 +1390,7 @@ async function settleStale(){
 }
 // auto-follow: take each fresh call on any coin, with the user's own stake and risk settings
 function practiceOnAnalysis(coin, A, C){
-  S.hist[coin] = C;
+  S.hist[coin] = C; S.lastP[coin] = A.P[C.length-1];
   if(!S.prices[coin] || coin !== S.coin) S.prices[coin] = C[C.length-1].c;
   if(!PR.auto.on || PR.positions.some(p => p.coin === coin)) return;
   const s = A.sigs[A.sigs.length-1];
@@ -1552,7 +1610,7 @@ function renderMoves(){
 $("moves").addEventListener("click", e => { const b = e.target.closest(".mv"); if(!b) return; S.refMs = +b.dataset.ms; renderMoves(); });
 $("lens").addEventListener("input", e => { S.lens = +e.target.value; $("lensV").textContent = "×" + S.lens; renderMoves();
   try{ localStorage.setItem("turnspotter-lens", S.lens); }catch(err){} });
-try{ const l = +localStorage.getItem("turnspotter-lens"); if(l >= 1 && l <= 100){ S.lens = l; $("lens").value = l; $("lensV").textContent = "×" + l; } }catch(e){}
+try{ const l = +localStorage.getItem("turnspotter-lens"); if(l >= 1 && l <= 1000){ S.lens = l; $("lens").value = l; $("lensV").textContent = "×" + l; } }catch(e){}
 setInterval(() => { if(!document.hidden) renderMoves(); }, 250);
 
 // ───────── chart: hover crosshair + drag to measure ─────────
@@ -1709,6 +1767,154 @@ if(!reduceMotion){
         if(d < 130){ g.strokeStyle = `rgba(${tint},${(.18 * (1 - d / 130)).toFixed(3)})`; g.lineWidth = 1; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); } } }
   })(0);
 }
+
+// ───────── live AI bot: trades $50 on screen, aiming for a goal before the clock runs out ─────────
+// Fake money only. Each style decides stake, multiplier, take-profit and how long to hold.
+const BOT_KEY = "turnspotter-livebot";
+const STYLES = {
+  // Trench's maximum: a 0.1% move doubles the stake or busts it. Fees are left out here: at 0.1% of the
+  // position, a ×1000 trade's fee would equal its whole stake, and Trench doesn't publish its real fee.
+  trench1000: {name:"Trench max ×1000", stake:1.00, fixed:1000, tp:1.00, hold:5, noFee:true},
+  degen:      {name:"All-in degen", stake:1.00, move:.60, min:10, max:100, tp:.60, hold:10},
+  aggressive: {name:"Aggressive",   stake:.50,  move:.35, min:5,  max:60,  tp:.40, hold:15},
+  careful:    {name:"Careful",      stake:.20,  move:.15, min:2,  max:25,  tp:.25, hold:20},
+};
+const BOT = (() => { try{ const d = JSON.parse(localStorage.getItem(BOT_KEY)); if(d && d.log) return d; }catch(e){} return null; })()
+  || {running:false, style:"trench1000", start:50, goal:500, cash:50, pos:null, trades:[], log:[], curve:[], endsAt:0, startedAt:0, follow:true, nextAt:0, done:null};
+S.lastP = {};
+function saveBot(){ try{ localStorage.setItem(BOT_KEY, JSON.stringify(BOT)); }catch(e){} }
+function say(text, cls){ BOT.log.push({t:Date.now(), text, cls}); if(BOT.log.length > 80) BOT.log.shift(); saveBot(); renderBotLog(); }
+function botValue(){ const p = BOT.pos; return BOT.cash + (p ? p.stake + (priceOf(p.coin) ? pnlOf(p, priceOf(p.coin)) : 0) : 0); }
+
+function botStart(){
+  const st = Math.max(5, +$("botStartAmt").value || 50), goal = Math.max(st * 1.1, +$("botGoal").value || 500);
+  Object.assign(BOT, {running:true, style:$("botStyle").value, start:st, goal, cash:st, pos:null, trades:[], log:[], curve:[{t:Date.now(), v:st}],
+    startedAt:Date.now(), endsAt:Date.now() + 60 * 60000, nextAt:Date.now() + 2000, done:null});
+  say(`Starting with $${st.toFixed(2)}. Goal: $${goal.toFixed(0)} in 60 minutes. Style: ${STYLES[BOT.style].name}. Odds of a 10× run are about ${Math.round(100 * st / goal)}%, so let's see.`, "sys");
+  renderBot();
+}
+function botStop(reason){
+  if(BOT.pos && priceOf(BOT.pos.coin)) botClose(priceOf(BOT.pos.coin), "time");
+  BOT.running = false; BOT.done = reason; saveBot();
+  const v = botValue(), r = v / BOT.start - 1;
+  if(reason === "goal"){ say(`🎯 Goal hit: $${v.toFixed(2)}. That's ${(r * 100).toFixed(0)}% up. Quitting while ahead.`, "win"); confetti(); }
+  else if(reason === "bust") say(`💥 Busted to $${v.toFixed(2)}. That's how a 1-in-10 shot usually ends.`, "loss");
+  else if(reason === "time") say(`⏱ Time's up. Finished at $${v.toFixed(2)} (${r >= 0 ? "+" : ""}${(r * 100).toFixed(1)}%).`, r >= 0 ? "win" : "loss");
+  else say(`Stopped at $${v.toFixed(2)}.`, "sys");
+  renderBot();
+}
+// pick a coin and a side: the AI's lean for every coin, plus live buying/selling and the order book for the coin on screen
+function botDecide(){
+  const style = STYLES[BOT.style], picks = [];
+  for(const coin of COINS){
+    const p = S.lastP[coin]; if(!p || isNaN(p.exp) || !priceOf(coin)) continue;
+    let score = (p.exp - .5) * 10, why = [`AI leans ${p.exp >= .5 ? "UP" : "DOWN"} ${Math.round(Math.max(p.exp, 1 - p.exp) * 100)}%`];
+    if(coin === S.coin){
+      const f = flowSums(60000), ft = f.buy + f.sell;
+      if(ft){ const lean = f.buy / ft - .5; score += lean * .6; why.push(`buyers ${Math.round(100 * f.buy / ft)}% of the last minute`); }
+      if(BOOK.mid && BOOK.coin === coin){ const c = bookCurves(), b = c.bid[BINS - 1], a = c.ask[BINS - 1], sh = b / ((a + b) || 1);
+        score += (sh - .5) * .4; why.push(sh > .55 ? "more buy orders waiting below" : sh < .45 ? "more sell orders stacked above" : "order book balanced"); }
+    }
+    picks.push({coin, score, why, move:p.move || .01});
+  }
+  if(!picks.length){ say("Still loading prices for the coins. Waiting a moment…", "sys"); BOT.nextAt = Date.now() + 5000; return; }
+  picks.sort((x, y) => Math.abs(y.score) - Math.abs(x.score));
+  const best = picks[0], dir = best.score >= 0 ? 1 : -1, move15 = best.move / 2;
+  const mult = style.fixed || Math.max(style.min, Math.min(style.max, Math.round(style.move / move15)));
+  const stake = Math.max(1, Math.min(BOT.cash, BOT.cash * style.stake));
+  const conviction = Math.abs(best.score) > .8 ? "Strong read" : Math.abs(best.score) > .35 ? "Decent read" : "Weak read, but we're gambling";
+  say(`${conviction} on ${best.coin}: ${best.why.join(", ")}. Going ${dir > 0 ? "▲ UP" : "▼ DOWN"} with $${stake.toFixed(2)} at ×${mult}. Bust is a ${(100 / mult).toFixed(2)}% move away; a normal 15 minutes moves about ${(move15 * 100).toFixed(2)}%.`, dir > 0 ? "up" : "down");
+  const price = priceOf(best.coin);
+  BOT.cash -= stake;
+  BOT.pos = {coin:best.coin, dir, entry:price, stake, mult, fee:style.noFee ? 0 : stake * mult * FEE, bust:price * (1 - dir / mult), openedAt:Date.now(), until:Date.now() + style.hold * 60000};
+  if(BOT.follow && best.coin !== S.coin){ S.coin = $("coin").value = best.coin; save(); loadHistory(); }
+  saveBot(); renderBot();
+}
+function botClose(price, why){
+  const p = BOT.pos; if(!p) return;
+  const pnl = why === "bust" ? -p.stake : pnlOf(p, price);
+  BOT.cash += p.stake + pnl; BOT.pos = null;
+  BOT.trades.push({...p, exit:price, pnl, why, closedAt:Date.now()});
+  BOT.curve.push({t:Date.now(), v:BOT.cash});
+  const msg = {bust:"💥 Busted", tp:"💰 Took profit", time:"⏱ Closed on time", flip:"↩ Bailed"}[why] || "Closed";
+  say(`${msg} on ${p.coin}: ${pnl >= 0 ? "+" : "−"}$${Math.abs(pnl).toFixed(2)} (${(pnl / p.stake * 100).toFixed(0)}% of the stake). Balance $${BOT.cash.toFixed(2)}.`, pnl >= 0 ? "win" : "loss");
+  if(why === "bust") $("botCard").classList.add("shake"), setTimeout(() => $("botCard").classList.remove("shake"), 600);
+  BOT.nextAt = Date.now() + 8000;
+  saveBot();
+}
+function botTick(){
+  if(!BOT.running) return;
+  const p = BOT.pos, now = Date.now();
+  if(p){
+    const price = priceOf(p.coin);
+    if(price){
+      const pnl = pnlOf(p, price);
+      if(p.dir > 0 ? price <= p.bust : price >= p.bust) botClose(p.bust, "bust");
+      else if(pnl >= p.stake * STYLES[BOT.style].tp) botClose(price, "tp");
+      else if(now >= p.until) botClose(price, "time");
+    }
+  }
+  const v = botValue();
+  if(v >= BOT.goal) return botStop("goal");
+  if(!BOT.pos && BOT.cash < 1) return botStop("bust");
+  if(now >= BOT.endsAt) return botStop("time");
+  if(!BOT.pos && now >= BOT.nextAt) botDecide();
+  if((BOT.curve.at(-1)?.t || 0) < now - 5000) BOT.curve.push({t:now, v});
+  renderBot();
+}
+function renderBotLog(){
+  $("botLog").innerHTML = BOT.log.slice(-30).reverse().map((l, i) => `<li class="${l.cls || ""}${i === 0 ? " new" : ""}"><time>${new Date(l.t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"}).replace(/ ?[AP]M/, "")}</time><span>${l.text}</span></li>`).join("")
+    || `<li class="sys"><span>Press <b>Start the bot</b> and it will begin trading on its own.</span></li>`;
+}
+function renderBot(){
+  const v = botValue(), r = v / BOT.start - 1, prog = Math.max(0, Math.min(1, Math.log(Math.max(v, .01) / BOT.start) / Math.log(BOT.goal / BOT.start)));
+  $("botVal").textContent = "$" + v.toFixed(2);
+  $("botRet").textContent = (r >= 0 ? "▲ " : "▼ ") + Math.abs(r * 100).toFixed(1) + "%"; $("botRet").className = "chg " + (r >= 0 ? "win" : "loss");
+  $("botGoalFill").style.width = (prog * 100).toFixed(1) + "%";
+  $("botGoalTxt").textContent = `$${BOT.start.toFixed(0)} → $${BOT.goal.toFixed(0)} · ${(prog * 100).toFixed(0)}% of the way (counted in doublings)`;
+  const left = Math.max(0, BOT.endsAt - Date.now());
+  $("botClock").textContent = BOT.running ? `${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")}` : BOT.done ? "done" : "60:00";
+  $("botStartBtn").textContent = BOT.running ? "Stop the bot" : BOT.done ? "Run it again" : "Start the bot";
+  $("botStartBtn").classList.toggle("stop", BOT.running);
+  for(const id of ["botStyle", "botStartAmt", "botGoal"]) $(id).disabled = BOT.running;
+  $("botNote").textContent = `Runs while this page is open, with fake money. For any fair gamble, the chance of reaching ${(BOT.goal / BOT.start).toFixed(0)}× before $0 is about 1 in ${(BOT.goal / BOT.start).toFixed(0)}.` +
+    (STYLES[$("botStyle").value]?.noFee ? " At ×1000 a 0.1% move doubles or busts each trade. Fees are left out, since Trench doesn't publish its ×1000 fee; real fees would make this worse." : "");
+  const w = BOT.trades.filter(t => t.pnl > 0).length;
+  $("botStats").textContent = `${BOT.trades.length} trades · ${w} won · ${BOT.trades.filter(t => t.why === "bust").length} busted`;
+  const p = BOT.pos, el = $("botPos");
+  if(p){ const price = priceOf(p.coin), pnl = price ? pnlOf(p, price) : 0, toBust = price ? Math.abs(price - p.bust) / Math.abs(p.entry - p.bust) : 1;
+    const tpAt = p.stake * STYLES[BOT.style].tp;
+    el.innerHTML = `<div class="posTop"><span><b>${p.coin}</b> <span class="pill ${p.dir > 0 ? "up" : "down"}">${p.dir > 0 ? "▲ UP" : "▼ DOWN"}</span> <span class="pill" style="color:var(--muted)">$${p.stake.toFixed(2)} × ${p.mult}</span></span>
+      <span class="pnl ${pnl >= 0 ? "win" : "loss"}">${pnl >= 0 ? "+" : "−"}$${Math.abs(pnl).toFixed(2)}</span></div>
+      <div class="tpBar"><i class="lossSide" style="width:${(Math.max(0, -pnl) / p.stake * 50).toFixed(1)}%"></i><i class="winSide" style="width:${(Math.min(1, Math.max(0, pnl) / tpAt) * 50).toFixed(1)}%"></i><span>bust</span><span>entry</span><span>take profit</span></div>
+      <div class="posMeta"><span>in at ${fmtP(p.entry)}</span><span>now ${price ? fmtP(price) : "—"}</span><span>bust ${fmtP(p.bust)}</span><span>${toBust < .35 ? "⚠ close to busting" : "safe for now"}</span><span>${Math.max(0, Math.ceil((p.until - Date.now()) / 60000))} min max</span></div>`; }
+  else el.innerHTML = `<p class="pend">${BOT.running ? "Between trades, looking for the next one…" : "No trade open."}</p>`;
+  // money curve with the goal and start lines
+  const c = BOT.curve.length > 1 ? BOT.curve : [{t:0, v:BOT.start}, {t:1, v:v}];
+  const t0 = c[0].t, t1 = Math.max(c.at(-1).t, t0 + 1), lo = 0, hi = Math.max(BOT.goal, ...c.map(x => x.v));
+  const X = t => (t - t0) / (t1 - t0) * 400, Y = val => 96 - (val - lo) / (hi - lo) * 92;
+  $("botChart").innerHTML = `<line x1="0" x2="400" y1="${Y(BOT.goal)}" y2="${Y(BOT.goal)}" stroke="var(--warn)" stroke-dasharray="4 4" opacity=".7"/>
+    <line x1="0" x2="400" y1="${Y(BOT.start)}" y2="${Y(BOT.start)}" stroke="var(--faint)" stroke-dasharray="3 4"/>
+    <path d="${c.map((p, i) => `${i ? "L" : "M"}${X(p.t).toFixed(1)},${Y(p.v).toFixed(1)}`).join("")}" fill="none" stroke="${r >= 0 ? "var(--up)" : "var(--down)"}" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`;
+}
+// confetti burst for the goal
+function confetti(){
+  if(reduceMotion) return;
+  const cv = document.createElement("canvas"); cv.className = "confetti"; document.body.appendChild(cv);
+  const g = cv.getContext("2d"), W = cv.width = innerWidth, Hh = cv.height = innerHeight, cols = ["#3ee6a2", "#45d4ff", "#8b7bff", "#ffc24b", "#ff5d73"];
+  const bits = Array.from({length:160}, () => ({x:W / 2, y:Hh / 3, vx:(Math.random() - .5) * 14, vy:-Math.random() * 14 - 4, r:Math.random() * 6 + 3, c:cols[Math.floor(Math.random() * 5)], a:Math.random() * 6}));
+  const t0 = performance.now();
+  (function fr(t){ g.clearRect(0, 0, W, Hh);
+    for(const b of bits){ b.vy += .35; b.x += b.vx; b.y += b.vy; b.a += .2; g.save(); g.translate(b.x, b.y); g.rotate(b.a); g.fillStyle = b.c; g.fillRect(-b.r / 2, -b.r / 4, b.r, b.r / 2); g.restore(); }
+    if(t - t0 < 3500) requestAnimationFrame(fr); else cv.remove(); })(t0);
+}
+$("botStartBtn").addEventListener("click", () => BOT.running ? botStop("user") : botStart());
+$("botStyle").addEventListener("change", renderBot);
+$("botFollow").addEventListener("change", e => { BOT.follow = e.target.checked; saveBot(); });
+$("botStyle").value = BOT.style; $("botStartAmt").value = BOT.start; $("botGoal").value = BOT.goal; $("botFollow").checked = BOT.follow;
+setInterval(() => { if(BOT.running && BOT.pos && BOT.pos.coin !== S.coin) fetchPrice(BOT.pos.coin); }, 3000);
+setInterval(botTick, 1000);
+renderBot(); renderBotLog();
 
 loadPaper(); setInterval(loadPaper, 60000);
 window.addEventListener("resize", () => S.A && drawChart(S.candles, S.A, S.viewBars, S.disp));

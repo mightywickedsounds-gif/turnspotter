@@ -229,6 +229,17 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - **Visuals:** a drifting particle constellation tinted by the current call, section icons, and live
   mini charts plus 24h % on every coin in the top strip.
 
+### Round 7: the live AI bot
+- **AI bot · live run** (top of the page): press Start and the bot trades fake money on screen,
+  aiming for a goal ($50 → $500 by default) within 60 minutes. It narrates every decision: which coin,
+  which way and why (the AI's lean on every coin, plus live buying/selling and the order book for the
+  coin on screen). It can switch the screen to the coin it's trading.
+- **Styles:** Trench max ×1000 (default: all-in, a 0.1% move doubles or busts each trade, no fees
+  because Trench doesn't publish its ×1000 fee), All-in degen, Aggressive and Careful.
+- Goal bar, countdown, money curve, live trade card (bust ↔ take-profit bar), confetti on the goal
+  and a shake on a bust. For any fair gamble, the chance of 10× before $0 is about 1 in 10.
+- The practice ticket and the Trench lens now go up to ×1000.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
