@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Turn Spotter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one column instrument panel — verdict on top, chart, then the evidence (checklist, log, scorecard). */
+:root{
+  --bg:#f3f5f8; --panel:#ffffff; --ink:#14202e; --muted:#5d6b7c; --line:#dde3ea;
+  --accent:#2f5bd3; --on-accent:#ffffff; --up:#0f9d63; --down:#d6453d; --warn:#c98a06;
+  --up-soft:#e3f5ec; --down-soft:#fbe7e5; --warn-soft:#fbf1d9; --neutral-soft:#eef1f5;
+  --display:"Archivo",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0d131c; --panel:#151d29; --ink:#e6ecf3; --muted:#8c9aab; --line:#253142;
+  --accent:#7d9dff; --on-accent:#0d131c; --up:#34d08b; --down:#ff6b61; --warn:#f0b43c;
+  --up-soft:#11291f; --down-soft:#2e1617; --warn-soft:#2c2412; --neutral-soft:#1b2433;
+  color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:1040px;margin:0 auto;display:grid;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+h1{font:800 22px/1.1 var(--display);letter-spacing:-.01em;margin:0}
+h1 small{display:block;font:500 13px var(--body);color:var(--muted);letter-spacing:0;margin-top:4px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+select,button{font:500 14px var(--body);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.verdict{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;border-width:2px}
+.verdict.up{border-color:var(--up);background:var(--up-soft)}
+.verdict.down{border-color:var(--down);background:var(--down-soft)}
+.verdict.warn{border-color:var(--warn);background:var(--warn-soft)}
+.eyebrow{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.state{font:800 clamp(26px,5vw,40px)/1.05 var(--display);margin:6px 0;text-wrap:balance}
+.verdict.up .state{color:var(--up)} .verdict.down .state{color:var(--down)} .verdict.warn .state{color:var(--warn)}
+.why{color:var(--muted);max-width:60ch;margin:0}
+.price{text-align:right;font-variant-numeric:tabular-nums}
+.price b{display:block;font:600 28px var(--mono)}
+.price span{font:400 13px var(--mono);color:var(--muted)}
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.meter .bar{height:10px;border-radius:5px;background:var(--neutral-soft);overflow:hidden;margin-top:8px}
+.meter .fill{height:100%;width:0;border-radius:5px;transition:width .4s}
+.meter .num{font:600 26px var(--mono);font-variant-numeric:tabular-nums}
+.meter.b .fill{background:var(--up)} .meter.t .fill{background:var(--down)}
+.meter p{margin:4px 0 0;color:var(--muted);font-size:13px}
+canvas{width:100%;height:320px;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+h2{font:700 16px var(--display);margin:0 0 10px}
+ul.check{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+ul.check li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:baseline;font-size:14px}
+ul.check li .v{font:400 12px var(--mono);color:var(--muted)}
+.dot{font:600 13px var(--mono)} .dot.on{color:var(--up)} .dot.ont{color:var(--down)} .dot.off{color:var(--muted)}
+.sub{font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.pill{font:600 11px var(--mono);padding:2px 8px;border-radius:999px}
+.pill.up{background:var(--up-soft);color:var(--up)} .pill.down{background:var(--down-soft);color:var(--down)}
+.win{color:var(--up)} .loss{color:var(--down)} .pend{color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat b{display:block;font:600 24px var(--mono);font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.note{font-size:13px;color:var(--muted);margin:10px 0 0}
+.status{font:400 12px var(--mono);color:var(--muted)}
+.err{color:var(--down)}
+.model{margin:0;font-size:14px}
+.model b{font:600 14px var(--mono)}
+@media (max-width:720px){.cols,.meters{grid-template-columns:1fr}.verdict{grid-template-columns:1fr}.price{text-align:left}canvas{height:240px}}
+@media (prefers-reduced-motion:reduce){.meter .fill{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Turn Spotter<small>Watches the whole day, learns from it, and calls the next move</small></h1>
+    <div class="controls">
+      <select id="coin" aria-label="Coin">
+        <option value="BTC">Bitcoin (BTC)</option><option value="ETH">Ethereum (ETH)</option>
+        <option value="SOL">Solana (SOL)</option><option value="XRP">XRP</option><option value="DOGE">Dogecoin (DOGE)</option>
+      </select>
+      <select id="tf" aria-label="Candle size">
+        <option value="1m">1-minute candles</option><option value="5m">5-minute candles</option><option value="15m" selected>15-minute candles</option>
+      </select>
+      <select id="look" aria-label="How far ahead to predict">
+        <option value="5">Predict 5 min ahead</option><option value="15">Predict 15 min ahead</option><option value="30">Predict 30 min ahead</option>
+        <option value="60" selected>Predict 1 hour ahead</option><option value="240">Predict 4 hours ahead</option>
+      </select>
+      <button id="alerts" class="primary" type="button">Turn on alerts</button>
+    </div>
+  </header>
+
+  <section class="panel verdict" id="verdict">
+    <div>
+      <div class="eyebrow" id="vEyebrow">Loading today's market…</div>
+      <div class="state" id="vState">Watching</div>
+      <p class="why" id="vWhy">Pulling the last 24 hours of candles so the model has seen the whole day.</p>
+    </div>
+    <div class="price"><b id="pNow">—</b><span id="pDay">24h range —</span></div>
+  </section>
+
+  <section class="meters">
+    <div class="panel meter b">
+      <div class="eyebrow">Bottom score · turn up</div>
+      <div class="num" id="mB">0</div><div class="bar"><div class="fill" id="mBf"></div></div>
+      <p>How stretched to the downside price is, whether it is curling up, and how strongly the model leans UP.</p>
+    </div>
+    <div class="panel meter t">
+      <div class="eyebrow">Top score · turn down</div>
+      <div class="num" id="mT">0</div><div class="bar"><div class="fill" id="mTf"></div></div>
+      <p>How stretched to the upside price is, whether it is rolling over, and how strongly the model leans DOWN.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Last 24 hours</h2>
+    <canvas id="chart" aria-label="Price chart of the last 24 hours with UP and DOWN calls"></canvas>
+    <div class="legend">
+      <span><i style="background:var(--ink)"></i>Price</span>
+      <span><i style="background:var(--accent)"></i>Fair price (24h VWAP)</span>
+      <span><i style="background:var(--muted)"></i>24h high / low</span>
+      <span style="color:var(--up)">▲ UP call</span>
+      <span style="color:var(--down)">▼ DOWN call</span>
+    </div>
+  </section>
+
+  <section class="cols">
+    <div class="panel">
+      <h2>What it's seeing right now</h2>
+      <div class="sub">Learning model</div><p class="model" id="mdl">Warming up…</p>
+      <div class="sub">Stretched low?</div><ul class="check" id="ckB"></ul>
+      <div class="sub">Turning up?</div><ul class="check" id="ckBT"></ul>
+      <div class="sub">Stretched high?</div><ul class="check" id="ckT"></ul>
+      <div class="sub">Turning down?</div><ul class="check" id="ckTT"></ul>
+    </div>
+    <div class="panel">
+      <h2>How good have its calls been?</h2>
+      <div class="stats">
+        <div class="stat"><b id="sAll">—</b><span>right, all loaded history</span></div>
+        <div class="stat"><b id="sDay">—</b><span>right, last 24h</span></div>
+        <div class="stat"><b id="sN">—</b><span>calls checked</span></div>
+      </div>
+      <p class="note" id="sNote">A call counts as right if price is on the called side <b id="hLbl">1 hour</b> later. 50% is a coin flip.</p>
+      <div class="sub">Calls in the last 24h</div>
+      <div class="tablewrap"><table><thead><tr><th>Time</th><th>Call</th><th>Price</th><th>Result</th></tr></thead><tbody id="log"></tbody></table></div>
+    </div>
+  </section>
+
+  <p class="status" id="status">Starting…</p>
+  <p class="note">Tested on six years of hourly Bitcoin data, this model's confident calls were right about 56–60% of the time. Spotting "really low" on its own was no better than a coin flip, so it's shown as context and doesn't trigger calls. Past hit rates don't guarantee future ones. Not financial advice. Only stake what you can afford to lose.</p>
+</div>
+
+<script>
+"use strict";
+const TF = {
+  "1m":  {bin:"1m",  cb:60,  min:1,  need:3000},
+  "5m":  {bin:"5m",  cb:300, min:5,  need:3000},
+  "15m": {bin:"15m", cb:900, min:15, need:2000},
+};
+const SOURCES = [
+  {name:"Binance",    kind:"binance",  host:"https://api.binance.com",  sym:c=>c+"USDT"},
+  {name:"Binance US", kind:"binance",  host:"https://api.binance.us",   sym:c=>c+"USDT"},
+  {name:"Coinbase",   kind:"coinbase", host:"https://api.exchange.coinbase.com", sym:c=>c+"-USD"},
+];
+const CONF = 0.58;
+const S = {coin:"BTC", tf:"15m", look:60, candles:[], src:null, timer:null, gen:0, lastAlertT:0, alertsOn:false, A:null};
+const $ = id => document.getElementById(id);
+
+// ───────── data ─────────
+async function getJSON(url){
+  const r = await fetch(url, {cache:"no-store"});
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  return r.json();
+}
+async function fromBinance(src, coin, tf, need, recent){
+  let out = [], end = null;
+  while(out.length < need){
+    const lim = Math.min(1000, need - out.length);
+    const url = `${src.host}/api/v3/klines?symbol=${src.sym(coin)}&interval=${TF[tf].bin}&limit=${lim}` + (end ? `&endTime=${end}` : "");
+    const d = await getJSON(url);
+    if(!Array.isArray(d) || !d.length) break;
+    const c = d.map(k => ({t:k[0], o:+k[1], h:+k[2], l:+k[3], c:+k[4], v:+k[5]}));
+    out = c.concat(out); end = c[0].t - 1;
+    if(recent || d.length < lim) break;
+  }
+  return out;
+}
+async function fromCoinbase(src, coin, tf, need, recent){
+  const g = TF[tf].cb; let end = Math.floor(Date.now()/1000), out = [], tries = 0;
+  while(out.length < need && tries++ < 12){
+    const span = Math.min(300, need - out.length);
+    const start = end - span*g;
+    const url = `${src.host}/products/${src.sym(coin)}/candles?granularity=${g}&start=${new Date(start*1000).toISOString()}&end=${new Date(end*1000).toISOString()}`;
+    const d = await getJSON(url);
+    if(!Array.isArray(d) || !d.length) break;
+    const c = d.map(r => ({t:r[0]*1000, l:+r[1], h:+r[2], o:+r[3], c:+r[4], v:+r[5]})).sort((a,b)=>a.t-b.t);
+    out = c.concat(out); end = start;
+    if(recent) break;
+  }
+  const seen = new Set();
+  return out.filter(k => !seen.has(k.t) && seen.add(k.t)).sort((a,b)=>a.t-b.t);
+}
+function load(src, coin, tf, need, recent){
+  return src.kind === "binance" ? fromBinance(src, coin, tf, need, recent) : fromCoinbase(src, coin, tf, need, recent);
+}
+async function loadHistory(){
+  const gen = ++S.gen;
+  clearInterval(S.timer);
+  setStatus("Loading the last day of " + S.coin + "…");
+  const order = S.src ? [S.src, ...SOURCES.filter(s => s !== S.src)] : SOURCES;
+  let lastErr = null;
+  for(const src of order){
+    try{
+      const c = await load(src, S.coin, S.tf, TF[S.tf].need, false);
+      if(gen !== S.gen) return;
+      if(c.length < 120) throw new Error("not enough candles");
+      S.src = src; S.candles = c;
+      render();
+      S.timer = setInterval(poll, 10000);
+      return;
+    }catch(e){ lastErr = e; }
+  }
+  setStatus("Couldn't reach any price feed (" + (lastErr && lastErr.message) + "). Check your connection; retrying in 20s.", true);
+  S.timer = setTimeout(loadHistory, 20000);
+}
+async function poll(){
+  const gen = S.gen;
+  try{
+    const c = await load(S.src, S.coin, S.tf, 3, true);
+    if(gen !== S.gen) return;
+    for(const k of c){
+      const last = S.candles[S.candles.length-1];
+      if(k.t === last.t) S.candles[S.candles.length-1] = k;
+      else if(k.t > last.t) S.candles.push(k);
+      else { const i = S.candles.findIndex(x => x.t === k.t); if(i >= 0) S.candles[i] = k; }
+    }
+    if(S.candles.length > TF[S.tf].need + 200) S.candles.splice(0, S.candles.length - TF[S.tf].need);
+    render();
+  }catch(e){ setStatus("Live update failed (" + e.message + "), trying again shortly.", true); }
+}
+
+/*LOGIC-START*/
+// ───────── indicators ─────────
+function ema(a, n){ const k = 2/(n+1), o = new Array(a.length); let p = a[0]; for(let i=0;i<a.length;i++){ p = i ? a[i]*k + p*(1-k) : a[0]; o[i] = p; } return o; }
+function wilder(a, n){ const o = new Array(a.length).fill(NaN); let s = 0; for(let i=0;i<a.length;i++){ if(i < n){ s += a[i]; if(i === n-1) o[i] = s/n; } else o[i] = (o[i-1]*(n-1) + a[i])/n; } return o; }
+function rsi(c, n=14){
+  const g = [0], l = [0];
+  for(let i=1;i<c.length;i++){ const d = c[i]-c[i-1]; g.push(Math.max(d,0)); l.push(Math.max(-d,0)); }
+  const ag = wilder(g,n), al = wilder(l,n);
+  return ag.map((x,i) => isNaN(x) ? NaN : al[i] === 0 ? 100 : 100 - 100/(1 + x/al[i]));
+}
+function rolling(a, n, fn){ const o = new Array(a.length).fill(NaN); for(let i=n-1;i<a.length;i++) o[i] = fn(a.slice(i-n+1, i+1)); return o; }
+const mean = x => x.reduce((s,v)=>s+v,0)/x.length;
+const sdev = x => { const m = mean(x); return Math.sqrt(mean(x.map(v => (v-m)**2))); };
+const clamp01 = x => Math.max(0, Math.min(1, x));
+
+function analyze(C, dayBars, H, conf){
+  const n = C.length, c = C.map(k=>k.c), h = C.map(k=>k.h), l = C.map(k=>k.l), v = C.map(k=>k.v);
+  const R = rsi(c), e9 = ema(c, 9);
+  const m12 = ema(c,12), m26 = ema(c,26), macd = m12.map((x,i)=>x-m26[i]), sig = ema(macd,9), hist = macd.map((x,i)=>x-sig[i]);
+  const sma20 = rolling(c,20,mean), sd20 = rolling(c,20,sdev);
+  const tr = C.map((k,i) => i ? Math.max(k.h-k.l, Math.abs(k.h-c[i-1]), Math.abs(k.l-c[i-1])) : k.h-k.l), atr = wilder(tr,14);
+  const vAvg = rolling(v,20,mean);
+  const D = Math.min(dayBars, n);
+  const hiD = new Array(n).fill(NaN), loD = new Array(n).fill(NaN), vwap = new Array(n).fill(NaN);
+  let pv = 0, vs = 0;
+  for(let i=0;i<n;i++){
+    const tp = (h[i]+l[i]+c[i])/3; pv += tp*v[i]; vs += v[i];
+    if(i >= D){ const j = i-D, tpj = (h[j]+l[j]+c[j])/3; pv -= tpj*v[j]; vs -= v[j]; }
+    vwap[i] = vs > 0 ? pv/vs : c[i];
+    const a = Math.max(0, i-D+1); let hi = -Infinity, lo = Infinity;
+    for(let j=a;j<=i;j++){ if(h[j]>hi) hi=h[j]; if(l[j]<lo) lo=l[j]; }
+    hiD[i] = hi; loD[i] = lo;
+  }
+  const P = [];
+  for(let i=0;i<n;i++){
+    if(i < 40 || isNaN(R[i]) || isNaN(sd20[i]) || isNaN(atr[i])){ P.push(null); continue; }
+    const z = sd20[i] > 0 ? (c[i]-sma20[i])/sd20[i] : 0;
+    const rng = hiD[i]-loD[i], pos = rng > 0 ? (c[i]-loD[i])/rng : .5;
+    const vd = atr[i] > 0 ? (c[i]-vwap[i])/atr[i] : 0;
+    const win = (a,b,arr,fn) => fn(...arr.slice(Math.max(0,i-b), i-a+1));
+    const lowRecent = win(0,4,l,Math.min), lowPrior = win(5,24,l,Math.min);
+    const highRecent = win(0,4,h,Math.max), highPrior = win(5,24,h,Math.max);
+    const rMinRecent = win(0,4,R,Math.min), rMinPrior = win(5,24,R,Math.min);
+    const rMaxRecent = win(0,4,R,Math.max), rMaxPrior = win(5,24,R,Math.max);
+    const volSpike = win(0,4,v,Math.max) / (vAvg[i] || 1);
+    const B = [
+      {k:"RSI oversold", on:R[i] < 35, s:clamp01((35-R[i])/15), w:.3, val:"RSI "+R[i].toFixed(0)},
+      {k:"Below its normal band", on:z < -1, s:clamp01((-z-1)/1.5), w:.25, val:z.toFixed(1)+"σ"},
+      {k:"Near the 24h low", on:pos < .25, s:clamp01((.25-pos)/.25), w:.25, val:(pos*100).toFixed(0)+"% of range"},
+      {k:"Well under fair price", on:vd < -1, s:clamp01((-vd-1)/2), w:.2, val:vd.toFixed(1)+" ATR"},
+    ];
+    const T = [
+      {k:"RSI overbought", on:R[i] > 65, s:clamp01((R[i]-65)/15), w:.3, val:"RSI "+R[i].toFixed(0)},
+      {k:"Above its normal band", on:z > 1, s:clamp01((z-1)/1.5), w:.25, val:z.toFixed(1)+"σ"},
+      {k:"Near the 24h high", on:pos > .75, s:clamp01((pos-.75)/.25), w:.25, val:(pos*100).toFixed(0)+"% of range"},
+      {k:"Well over fair price", on:vd > 1, s:clamp01((vd-1)/2), w:.2, val:(vd > 0 ? "+" : "")+vd.toFixed(1)+" ATR"},
+    ];
+    const BT = [
+      {k:"Closed back above the 9-candle average", on:c[i] > e9[i], w:.3},
+      {k:"Selling pressure fading (MACD rising)", on:hist[i] > hist[i-1] && hist[i-1] > hist[i-2], w:.25},
+      {k:"RSI bouncing off its low", on:R[i] - rMinRecent > 3, w:.2},
+      {k:"Bullish divergence (lower low, stronger RSI)", on:lowRecent < lowPrior && rMinRecent > rMinPrior + 2, w:.15},
+      {k:"Capitulation volume spike", on:volSpike > 2, w:.1},
+    ];
+    const TT = [
+      {k:"Closed back below the 9-candle average", on:c[i] < e9[i], w:.3},
+      {k:"Buying pressure fading (MACD falling)", on:hist[i] < hist[i-1] && hist[i-1] < hist[i-2], w:.25},
+      {k:"RSI dropping off its high", on:rMaxRecent - R[i] > 3, w:.2},
+      {k:"Bearish divergence (higher high, weaker RSI)", on:highRecent > highPrior && rMaxRecent < rMaxPrior - 2, w:.15},
+      {k:"Blow-off volume spike", on:volSpike > 2, w:.1},
+    ];
+    const sum = (arr, f) => arr.reduce((s,x)=>s+f(x),0);
+    P.push({B, T, BT, TT, sB:sum(B,x=>x.s*x.w), sT:sum(T,x=>x.s*x.w), tB:sum(BT,x=>x.on?x.w:0), tT:sum(TT,x=>x.on?x.w:0)});
+  }
+  const prob = learn(C, H);
+  // recent stretch: was price stretched at any point in the last 6 candles?
+  for(let i=0;i<n;i++){ if(!P[i]) continue; let mb=0, mt=0; for(let j=Math.max(0,i-5);j<=i;j++){ if(P[j]){ mb=Math.max(mb,P[j].sB); mt=Math.max(mt,P[j].sT);} }
+    const pu = prob[i], p = P[i];
+    p.prob = pu; p.rB = mb; p.rT = mt;
+    p.modelUp = !isNaN(pu) && pu >= conf; p.modelDown = !isNaN(pu) && pu <= 1 - conf;
+    // a turn call needs the stretch + the turn + the learning model agreeing
+    p.up = mb >= .5 && p.tB >= .55 && p.modelUp;
+    p.down = mt >= .5 && p.tT >= .55 && p.modelDown;
+    const edge = isNaN(pu) ? 0 : (pu - .5) * 2;
+    p.scoreB = Math.round(100*clamp01(.4*mb + .25*p.tB + .35*clamp01(edge/((conf-.5)*2)) ));
+    p.scoreT = Math.round(100*clamp01(.4*mt + .25*p.tT + .35*clamp01(-edge/((conf-.5)*2)) ));
+  }
+  // signal events on closed candles only, with a cooldown.
+  // kind "turn" = stretched + turning + model agrees; kind "model" = model alone is confident
+  const sigs = []; let lastU = -99, lastD = -99;
+  for(let i=1;i<n-1;i++){
+    const p = P[i], q = P[i-1] || {}; if(!p) continue;
+    const u = p.up || p.modelUp, d = p.down || p.modelDown;
+    if(u && !(q.up || q.modelUp) && i-lastU >= 6){ lastU = i; sigs.push({i, dir:1, kind:p.up ? "turn" : "model"}); }
+    if(d && !(q.down || q.modelDown) && i-lastD >= 6){ lastD = i; sigs.push({i, dir:-1, kind:p.down ? "turn" : "model"}); }
+  }
+  for(const s of sigs){
+    s.t = C[s.i].t; s.price = c[s.i];
+    if(s.i + H <= n-2){ const mv = (c[s.i+H]-c[s.i])/c[s.i]; s.move = mv; s.win = s.dir > 0 ? mv > 0 : mv < 0; }
+  }
+  return {P, sigs, vwap, hiD, loD, n, prob};
+}
+
+// Online logistic regression: the same model as the TradingView indicator.
+// At candle i it is trained only on candles whose outcome H candles later is already known.
+function learn(C, H, lr = .02, l2 = 1e-4){
+  const n = C.length, c = C.map(k=>k.c), h = C.map(k=>k.h), l = C.map(k=>k.l);
+  const lv = C.map(k=>Math.log(k.v + 1));
+  const lret = c.map((x,i) => i ? Math.log(x/c[i-1]) : 0);
+  const sd = rolling(lret, 50, x => { const m = mean(x); return Math.sqrt(x.reduce((s,v)=>s+(v-m)**2,0)/(x.length-1)); });
+  const R = rsi(c), ef = ema(c,12), es = ema(c,48);
+  const hi = rolling(h,24,a=>Math.max(...a)), lo = rolling(l,24,a=>Math.min(...a));
+  const lvm = rolling(lv,50,mean), lvs = rolling(lv,50,sdev), s20 = rolling(lret,20,sdev), s100 = rolling(lret,100,sdev);
+  const cl = x => Math.max(-3, Math.min(3, x));
+  const X = new Array(n).fill(null);
+  for(let i=100;i<n;i++){
+    const s = sd[i]; if(!(s > 0) || isNaN(R[i])) continue;
+    X[i] = [cl(lret[i]/s), cl(Math.log(c[i]/c[i-3])/(s*Math.sqrt(3))), cl(Math.log(c[i]/c[i-12])/(s*Math.sqrt(12))),
+      cl(Math.log(c[i]/c[i-48])/(s*Math.sqrt(48))), cl((R[i]-50)/25), cl(Math.log(ef[i]/es[i])/(s*4)),
+      hi[i] > lo[i] ? cl(2*(c[i]-lo[i])/(hi[i]-lo[i])-1) : 0, lvs[i] > 0 ? cl((lv[i]-lvm[i])/lvs[i]) : 0,
+      s100[i] > 0 ? cl(s20[i]/s100[i]-1) : 0, 1];
+  }
+  const w = new Array(10).fill(0), out = new Array(n).fill(NaN), sig = z => 1/(1+Math.exp(-z));
+  const dot = x => x.reduce((s,v,k)=>s+v*w[k],0);
+  let seen = 0;
+  for(let i=0;i<n;i++){
+    const j = i - H;
+    if(j >= 0 && X[j]){ const y = c[i] > c[j] ? 1 : 0, p = sig(dot(X[j])); for(let k=0;k<10;k++) w[k] += lr*((y-p)*X[j][k] - l2*w[k]); seen++; }
+    if(X[i] && seen >= 150) out[i] = sig(dot(X[i]));
+  }
+  learn.weights = w;
+  return out;
+}
+
+/*LOGIC-END*/
+// ───────── render ─────────
+const fmtP = x => x >= 1000 ? x.toLocaleString(undefined,{maximumFractionDigits:0}) : x >= 1 ? x.toFixed(2) : x.toFixed(4);
+const fmtT = t => new Date(t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+function setStatus(msg, err){ const el = $("status"); el.textContent = msg; el.className = "status" + (err ? " err" : ""); }
+
+function render(){
+  const C = S.candles, dayBars = Math.round(1440 / TF[S.tf].min), H = horizon();
+  const A = analyze(C, dayBars, H, CONF); S.A = A;
+  const i = C.length-1, p = A.P[i], k = C[i];
+  if(!p) return;
+  const dayStart = C[Math.max(0, i-dayBars+1)].t;
+
+  // verdict
+  const v = $("verdict"); v.className = "panel verdict";
+  const look = lookLabel(), chance = isNaN(p.prob) ? null : Math.round(p.prob*100);
+  let state, why, eyebrow = S.coin + " · " + S.tf + " candles · next " + look + " · live";
+  if(p.up){ v.classList.add("up"); state = "UP · bouncing off a low";
+    why = `Price got stretched low, is curling back up, and the model gives a ${chance}% chance it's higher in ${look}.`; }
+  else if(p.down){ v.classList.add("down"); state = "DOWN · rolling off a high";
+    why = `Price got stretched high, is rolling over, and the model gives a ${100-chance}% chance it's lower in ${look}.`; }
+  else if(p.modelUp){ v.classList.add("up"); state = "Leaning UP";
+    why = `The model gives a ${chance}% chance price is higher in ${look}.`; }
+  else if(p.modelDown){ v.classList.add("down"); state = "Leaning DOWN";
+    why = `The model gives a ${100-chance}% chance price is lower in ${look}.`; }
+  else if(p.sB >= .5){ v.classList.add("warn"); state = "Really low · no turn confirmed";
+    why = "Price is stretched to the downside, but the model doesn't see an edge either way yet. Falling prices can keep falling. Wait for a call."; }
+  else if(p.sT >= .5){ v.classList.add("warn"); state = "Really high · no turn confirmed";
+    why = "Price is stretched to the upside, but the model doesn't see an edge either way yet. Wait for a call."; }
+  else { state = "No edge right now";
+    why = chance === null ? "The model is still learning from today's candles." : `The model's chance of UP is ${chance}%, too close to a coin flip. Sit this one out.`; }
+  $("vEyebrow").textContent = eyebrow; $("vState").textContent = state; $("vWhy").textContent = why;
+  $("pNow").textContent = fmtP(k.c);
+  $("pDay").textContent = "24h " + fmtP(A.loD[i]) + " – " + fmtP(A.hiD[i]);
+
+  // meters
+  $("mB").textContent = p.scoreB; $("mBf").style.width = p.scoreB + "%";
+  $("mT").textContent = p.scoreT; $("mTf").style.width = p.scoreT + "%";
+
+  // checklists
+  const ck = (id, arr, cls) => { $(id).innerHTML = arr.map(x =>
+    `<li><span class="dot ${x.on ? cls : "off"}">${x.on ? "●" : "○"}</span><span>${x.k}</span><span class="v">${x.val || ""}</span></li>`).join(""); };
+  $("mdl").innerHTML = chance === null ? "Still learning…" : `Chance price is higher in ${look}: <b>${chance}%</b>. Calls fire at ${Math.round(CONF*100)}% or more either way.`;
+  ck("ckB", p.B, "on"); ck("ckBT", p.BT, "on"); ck("ckT", p.T, "ont"); ck("ckTT", p.TT, "ont");
+
+  // scorecard
+  const done = A.sigs.filter(s => s.win !== undefined), today = done.filter(s => s.t >= dayStart);
+  const pct = a => a.length ? Math.round(100 * a.filter(s => s.win).length / a.length) + "%" : "—";
+  $("sAll").textContent = pct(done); $("sDay").textContent = pct(today); $("sN").textContent = done.length;
+  $("hLbl").textContent = look;
+  const recent = A.sigs.filter(s => s.t >= dayStart).reverse();
+  $("log").innerHTML = recent.length ? recent.map(s => `<tr><td>${fmtT(s.t)}</td>
+    <td><span class="pill ${s.dir > 0 ? "up" : "down"}">${s.dir > 0 ? "▲ UP" : "▼ DOWN"}</span>${s.kind === "turn" ? (s.dir > 0 ? " from a low" : " from a high") : ""}</td>
+    <td>${fmtP(s.price)}</td>
+    <td class="${s.win === undefined ? "pend" : s.win ? "win" : "loss"}">${s.win === undefined ? "waiting…" : (s.win ? "right " : "wrong ") + (s.move*100).toFixed(2) + "%"}</td></tr>`).join("")
+    : `<tr><td colspan="4" class="pend">No calls yet in the last 24h. The model only calls when it's confident.</td></tr>`;
+
+  drawChart(C, A, dayBars);
+  setStatus("Live from " + S.src.name + " · " + C.length + " candles studied · model trained on " + (C.length - H) + " known outcomes · updated " + new Date().toLocaleTimeString());
+  maybeAlert(A, C);
+}
+
+function horizon(){ return Math.max(1, Math.round(S.look / TF[S.tf].min)); }
+function lookLabel(){ const m = horizon() * TF[S.tf].min; return m >= 60 ? (m/60) + (m === 60 ? " hour" : " hours") : m + " min"; }
+function css(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function drawChart(C, A, dayBars){
+  const cv = $("chart"), dpr = window.devicePixelRatio || 1, W = cv.clientWidth, Hh = cv.clientHeight;
+  cv.width = W*dpr; cv.height = Hh*dpr;
+  const g = cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,Hh);
+  const n = C.length, a = Math.max(0, n-dayBars), view = C.slice(a);
+  const padL = 8, padR = 64, padT = 12, padB = 22;
+  let lo = Infinity, hi = -Infinity;
+  view.forEach((k,j) => { lo = Math.min(lo, k.l, A.vwap[a+j]); hi = Math.max(hi, k.h, A.vwap[a+j]); });
+  const pad = (hi-lo)*.06; lo -= pad; hi += pad;
+  const X = j => padL + (j + .5) * (W-padL-padR) / view.length, Y = p => padT + (hi-p)/(hi-lo) * (Hh-padT-padB);
+  const ink = css("--ink"), muted = css("--muted"), line = css("--line"), up = css("--up"), down = css("--down"), acc = css("--accent");
+  g.font = "11px JetBrains Mono, monospace"; g.textBaseline = "middle";
+  // grid + price labels
+  for(let s=0;s<=4;s++){ const p = lo + (hi-lo)*s/4, y = Y(p);
+    g.strokeStyle = line; g.lineWidth = 1; g.beginPath(); g.moveTo(padL,y); g.lineTo(W-padR,y); g.stroke();
+    g.fillStyle = muted; g.textAlign = "left"; g.fillText(fmtP(p), W-padR+6, y); }
+  // time labels
+  g.textAlign = "center"; g.textBaseline = "alphabetic";
+  const ticks = W < 600 ? 2 : 4;
+  for(let s=0;s<=ticks;s++){ const j = Math.min(view.length-1, Math.round((view.length-1)*s/ticks)); g.fillStyle = muted; g.fillText(fmtT(view[j].t), Math.min(Math.max(X(j),30), W-padR-30), Hh-6); }
+  // day hi/lo
+  g.setLineDash([4,4]); g.strokeStyle = muted;
+  [A.hiD[n-1], A.loD[n-1]].forEach(p => { g.beginPath(); g.moveTo(padL,Y(p)); g.lineTo(W-padR,Y(p)); g.stroke(); });
+  g.setLineDash([]);
+  // candles
+  const bw = Math.max(1, (W-padL-padR)/view.length*.7);
+  view.forEach((k,j) => { const col = k.c >= k.o ? up : down, x = X(j);
+    g.strokeStyle = col; g.globalAlpha = .55; g.beginPath(); g.moveTo(x,Y(k.h)); g.lineTo(x,Y(k.l)); g.stroke();
+    g.globalAlpha = .8; g.fillStyle = col; g.fillRect(x-bw/2, Y(Math.max(k.o,k.c)), bw, Math.max(1, Math.abs(Y(k.o)-Y(k.c)))); });
+  g.globalAlpha = 1;
+  // close line
+  g.strokeStyle = ink; g.lineWidth = 1.4; g.beginPath(); view.forEach((k,j) => j ? g.lineTo(X(j),Y(k.c)) : g.moveTo(X(j),Y(k.c))); g.stroke();
+  // vwap
+  g.strokeStyle = acc; g.lineWidth = 1.6; g.beginPath(); view.forEach((k,j) => j ? g.lineTo(X(j),Y(A.vwap[a+j])) : g.moveTo(X(j),Y(A.vwap[a+j]))); g.stroke();
+  // signals
+  A.sigs.filter(s => s.i >= a).forEach(s => { const j = s.i-a, x = X(j), k = C[s.i];
+    g.fillStyle = s.dir > 0 ? up : down; g.beginPath();
+    if(s.dir > 0){ const y = Y(k.l)+8; g.moveTo(x,y-6); g.lineTo(x-6,y+5); g.lineTo(x+6,y+5); }
+    else { const y = Y(k.h)-8; g.moveTo(x,y+6); g.lineTo(x-6,y-5); g.lineTo(x+6,y-5); }
+    g.closePath(); g.fill(); });
+  // last price tag
+  const last = C[n-1].c, y = Y(last); g.fillStyle = ink; g.fillRect(W-padR+2, y-9, padR-4, 18);
+  g.fillStyle = css("--panel"); g.textAlign = "left"; g.textBaseline = "middle"; g.font = "600 11px JetBrains Mono, monospace"; g.fillText(fmtP(last), W-padR+6, y);
+}
+
+// ───────── alerts ─────────
+let actx = null;
+function beep(dir){
+  try{ actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), gn = actx.createGain(); o.connect(gn); gn.connect(actx.destination);
+    const f = dir > 0 ? [660, 880] : [660, 440]; o.frequency.setValueAtTime(f[0], actx.currentTime); o.frequency.setValueAtTime(f[1], actx.currentTime+.18);
+    gn.gain.setValueAtTime(.15, actx.currentTime); gn.gain.exponentialRampToValueAtTime(.001, actx.currentTime+.5); o.start(); o.stop(actx.currentTime+.5);
+  }catch(e){}
+}
+function maybeAlert(A, C){
+  if(!S.alertsOn) return;
+  const s = A.sigs[A.sigs.length-1];
+  if(!s || s.t <= S.lastAlertT || s.i < C.length-3) return;
+  S.lastAlertT = s.t; beep(s.dir);
+  const msg = `${S.coin} ${s.dir > 0 ? "turning UP from a low" : "turning DOWN from a high"} at ${fmtP(s.price)}`;
+  try{ if("Notification" in window && Notification.permission === "granted") new Notification("Turn Spotter", {body: msg}); }catch(e){}
+  document.title = (s.dir > 0 ? "▲ " : "▼ ") + S.coin + " · Turn Spotter";
+}
+$("alerts").addEventListener("click", async () => {
+  S.alertsOn = !S.alertsOn;
+  $("alerts").textContent = S.alertsOn ? "Alerts on" : "Turn on alerts";
+  if(S.alertsOn){
+    beep(1);
+    try{ if("Notification" in window && Notification.permission === "default") await Notification.requestPermission(); }catch(e){}
+    const last = S.A && S.A.sigs[S.A.sigs.length-1]; S.lastAlertT = last ? last.t : 0;
+  }
+});
+
+// ───────── boot ─────────
+try{ const saved = JSON.parse(localStorage.getItem("turnspotter") || "{}"); if(saved.coin) $("coin").value = S.coin = saved.coin; if(saved.tf) $("tf").value = S.tf = saved.tf; if(saved.look) $("look").value = S.look = saved.look; }catch(e){}
+const save = () => { try{ localStorage.setItem("turnspotter", JSON.stringify({coin:S.coin, tf:S.tf, look:S.look})); }catch(e){} };
+$("coin").addEventListener("change", e => { S.coin = e.target.value; save(); loadHistory(); });
+$("tf").addEventListener("change", e => { S.tf = e.target.value; save(); loadHistory(); });
+$("look").addEventListener("change", e => { S.look = +e.target.value; save(); render(); });
+window.addEventListener("resize", () => S.A && drawChart(S.candles, S.A, Math.round(1440 / TF[S.tf].min)));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => S.A && render());
+loadHistory();
+</script>
+</body>
+</html>
