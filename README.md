@@ -214,6 +214,21 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - The shipped Experience brain is now trained on everything **except the last 30 days**, so the
   "What if?" replay and the scorecard run on days the brain has never seen.
 
+### Round 6: Trench-style percentages and a richer page
+- **Why the old % looked stuck:** it was the 24-hour change, refreshed every 10 seconds. Over a whole
+  day that barely moves. Trench shows your trade's P&L, which is roughly the price move since you
+  entered × your multiplier.
+- **Live change strip:** 1 min, 5 min, 15 min, 1 hour, 4 hours and 24 hours, updating 4 times a
+  second from live trades, each with its own mini chart. Tap one to show it next to the price.
+- **Trench lens:** a multiplier slider (×1–×100) that shows each move the way Trench would, e.g.
+  "▼0.22% → ×50 −11.1%", including "busted" when the move passes the bust distance.
+- **Interactive chart:** 6h / 12h / 24h / 3d ranges; hover for the price, time and what an UP bet
+  from that point would show now; click and drag to measure any move, raw and at your multiplier.
+- **Waiting orders:** a live order-book depth chart (buyers below the price, sellers above, within
+  ±0.5/1/2%), with the biggest "walls" marked, hover readouts and a buyer/seller balance bar.
+- **Visuals:** a drifting particle constellation tinted by the current call, section icons, and live
+  mini charts plus 24h % on every coin in the top strip.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

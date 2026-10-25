@@ -153,6 +153,39 @@ ul.check li .v{font:400 11.5px var(--mono);color:var(--muted)}
 @media (max-width:860px){.hero,.cols{grid-template-columns:1fr}}
 @media (max-width:640px){.facts{grid-template-columns:1fr}canvas{height:250px}.brain{grid-template-columns:96px 1fr 44px}.card{padding:15px;border-radius:16px}}
 
+/* round 6: richer visuals */
+.fx{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.55}
+h2{display:flex;align-items:center;gap:9px}
+h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px rgba(69,212,255,.5))}
+.moves{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:14px}
+.mv{position:relative;display:grid;gap:2px;text-align:left;padding:9px 10px 8px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.05);cursor:pointer;overflow:hidden;backdrop-filter:none;transition:border-color .2s,transform .2s,background .3s}
+.mv:hover{transform:translateY(-2px);border-color:var(--edge-hi)}
+.mv[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 0 22px -8px var(--accent)}
+.mv .k{font:600 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mv .raw{font:600 12px var(--mono)}
+.mv .lev{font:800 17px var(--display);letter-spacing:-.01em}
+.mv .lev.bust{font-size:13px;color:var(--down)}
+.mv svg{position:absolute;inset:auto 0 0 0;width:100%;height:46%;opacity:.5;pointer-events:none}
+.mv.u{background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--up) 10%,transparent))} .mv.d{background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--down) 10%,transparent))}
+.mv.u .raw,.mv.u .lev{color:var(--up)} .mv.d .raw,.mv.d .lev{color:var(--down)}
+.lens{display:grid;gap:4px;margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(0,0,0,.18);border:1px dashed var(--edge)}
+.lensTxt{margin:0;font:500 13px/1.45 var(--body);color:var(--muted)} .lensTxt b{color:var(--ink);font-family:var(--mono)}
+.seg{display:flex;gap:4px;background:rgba(140,155,255,.07);padding:3px;border-radius:10px}
+.seg button{border:0;background:none;padding:5px 10px;font:700 12px var(--mono);color:var(--muted);border-radius:8px;backdrop-filter:none}
+.seg button[aria-pressed="true"]{background:var(--panel-solid);color:var(--ink);box-shadow:0 0 0 1px var(--edge-hi)}
+#chart{cursor:crosshair;touch-action:pan-y}
+.hint{color:var(--faint)}
+.legend .record{margin-left:auto}
+.bookStats{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:14px;align-items:center;margin-bottom:10px}
+.bookStats b{display:block;font:800 22px var(--display)} .bookStats .r{text-align:right}
+.bkMid{display:grid;gap:6px;text-align:center}
+#bkFill{position:absolute;inset:0 auto 0 0;width:50%;background:linear-gradient(90deg,color-mix(in srgb,var(--up) 60%,transparent),var(--up));transition:width .6s}
+#bookChart{height:220px;cursor:crosshair}
+.chip .spk{width:54px;height:20px;flex:none}
+.chip .pct{font:600 11px var(--mono)}
+@media (max-width:860px){.moves{grid-template-columns:repeat(3,1fr)}.bookStats{grid-template-columns:1fr 1fr}.bkMid{grid-column:1/-1;order:3}}
+@media (max-width:420px){.chip .spk{display:none}}
+
 /* live buys & sells */
 .tug{display:grid;gap:6px;margin:4px 0 12px}
 .tugLbl{display:flex;justify-content:space-between;gap:8px;font:600 12px var(--mono);color:var(--muted)}
@@ -306,6 +339,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
 </head>
 <body>
 <div class="bgfx" aria-hidden="true"></div>
+<canvas class="fx" id="fx" aria-hidden="true"></canvas>
 <div class="wrap">
   <header class="top">
     <div class="brand">
@@ -322,20 +356,27 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
       <div><div class="coinName" id="coinName">Bitcoin</div><span class="price" id="pNow">—</span> <span class="chg" id="pChg"></span></div>
       <button id="alerts" class="alert" type="button">🔔 Alert me</button>
     </div>
+    <div class="moves" id="moves" role="group" aria-label="Price change over different time windows"></div>
+    <div class="lens">
+      <label class="sl" for="lens">Trench lens: what these moves look like at your multiplier <b id="lensV">×25</b></label>
+      <input type="range" id="lens" min="1" max="100" step="1" value="25" aria-label="Trench multiplier">
+      <p class="lensTxt" id="lensTxt"></p>
+    </div>
     <div class="call" id="bigCall">…</div>
     <p class="callSub" id="bigSub">Reading today's market…</p>
     <div id="countLine" hidden><p class="countLine">This call gets checked in <b id="fCount">—</b></p><div class="cbar"><i id="cbarFill"></i></div></div>
   </section>
 
   <section class="card">
-    <div class="rowHead"><h2>Today</h2><span class="record" id="recordLine"></span></div>
-    <div class="chartWrap"><canvas id="chart" aria-label="Price over the last 24 hours with the calls the AI made"></canvas><span class="pulse" id="pulse" hidden></span></div>
-    <div class="legend"><span style="color:var(--up)">● UP call</span><span style="color:var(--down)">● DOWN call</span><span>✓ right · ✕ wrong</span></div>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 4 8-9"/><path d="M3 21h18"/></svg>Chart</h2>
+      <div class="seg" id="range" role="group" aria-label="Chart range"><button type="button" data-bars="24">6h</button><button type="button" data-bars="48">12h</button><button type="button" data-bars="96" aria-pressed="true">24h</button><button type="button" data-bars="288">3d</button></div></div>
+    <div class="chartWrap"><canvas id="chart" aria-label="Price chart with the calls the AI made. Hover for details, drag to measure a move."></canvas><span class="pulse" id="pulse" hidden></span></div>
+    <div class="legend"><span style="color:var(--up)">● UP call</span><span style="color:var(--down)">● DOWN call</span><span>✓ right · ✕ wrong</span><span class="hint">Hover for details · drag across the chart to measure a move</span><span class="record" id="recordLine"></span></div>
     <div class="tablewrap"><table><tbody id="log"></tbody></table></div>
   </section>
 
   <section class="card" id="flowCard">
-    <div class="rowHead"><h2>Live buys &amp; sells</h2><span class="record" id="flowMeta">connecting…</span></div>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M7 4v16M3 8l4-4 4 4"/><path d="M17 20V4M13 16l4 4 4-4"/></svg>Live buys &amp; sells</h2><span class="record" id="flowMeta">connecting…</span></div>
     <div class="tug">
       <div class="tugLbl"><span class="win">Buyers <b id="tugBuyPct">50%</b></span><span id="tugWho">last minute</span><span class="loss"><b id="tugSellPct">50%</b> Sellers</span></div>
       <div class="tugBar"><i id="tugFill"></i><span class="tugMid"></span></div>
@@ -353,8 +394,20 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <p class="note">Every real trade on the exchange, live. Green = someone bought at the asking price (pushing up); red = someone sold into the bids (pushing down). 🐋 marks unusually big trades.</p>
   </section>
 
+  <section class="card" id="bookCard">
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M3 20V12h4v8M10 20V6h4v14M17 20v-9h4v9"/></svg>Waiting orders</h2>
+      <div class="seg" id="bookRange" role="group" aria-label="How far from the price"><button type="button" data-r="0.005">±0.5%</button><button type="button" data-r="0.01" aria-pressed="true">±1%</button><button type="button" data-r="0.02">±2%</button></div></div>
+    <div class="bookStats">
+      <div><span class="eyebrow">Buyers waiting</span><b class="win" id="bkBid">—</b><span class="acctSub" id="bkBidWall"></span></div>
+      <div class="bkMid"><div class="tugBar"><i id="bkFill"></i><span class="tugMid"></span></div><span class="acctSub" id="bkLean">—</span></div>
+      <div class="r"><span class="eyebrow">Sellers waiting</span><b class="loss" id="bkAsk">—</b><span class="acctSub" id="bkAskWall"></span></div>
+    </div>
+    <div class="chartWrap"><canvas id="bookChart" aria-label="Order book depth: buy orders left, sell orders right"></canvas></div>
+    <p class="note">The order book: buy orders (green, left) and sell orders (red, right) that people have placed but nobody has filled yet. A tall step is a "wall" that can slow price down. Walls can also vanish in a second. <span id="bookMeta"></span></p>
+  </section>
+
   <section class="card" id="practice">
-    <div class="rowHead"><h2>Practice trading</h2>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M16 12.5h2M3 9h18"/></svg>Practice trading</h2>
       <div class="tabs" role="tablist">
         <button type="button" role="tab" class="tab" data-tab="trade" aria-selected="true">Trade</button>
         <button type="button" role="tab" class="tab" data-tab="whatif" aria-selected="false">What if?</button>
@@ -522,7 +575,7 @@ const SOURCES = [
   {name:"Coinbase",   kind:"coinbase", host:"https://api.exchange.coinbase.com", sym:c=>c+"-USD"},
 ];
 const COINS = ["BTC","ETH","SOL","XRP","DOGE"];
-const S = {caches:{}, conf:0.55, watch:{}, watchTimer:null, coin:"BTC", tf:"15m", look:60, candles:[], src:null, timer:null, gen:0, lastAlertT:0, alertsOn:false, A:null};
+const S = {ticks:[], viewBars:96, lens:25, refMs:3600e3, caches:{}, conf:0.55, watch:{}, watchTimer:null, coin:"BTC", tf:"15m", look:60, candles:[], src:null, timer:null, gen:0, lastAlertT:0, alertsOn:false, A:null};
 const $ = id => document.getElementById(id);
 
 // ───────── data ─────────
@@ -576,7 +629,7 @@ async function loadHistory(){
       S.src = src; S.candles = c; S.revealAt = performance.now();
       clearInterval(S.watchTimer); S.watch = {};
       render();
-      startFlow();
+      startFlow(); fetchBook();
       if(!S.settled){ S.settled = true; settleStale(); }
       S.timer = setInterval(poll, 10000);
       scanWatch(); S.watchTimer = setInterval(scanWatch, 90000);
@@ -818,8 +871,7 @@ function render(){
 
   // price + day range
   setLivePrice(k.c);
-  const open24 = C[Math.max(0, i-dayBars+1)].o, chg = (k.c - open24) / open24;
-  $("pChg").textContent = (chg >= 0 ? "▲ " : "▼ ") + Math.abs(chg*100).toFixed(2) + "% 24h"; $("pChg").className = "chg " + (chg >= 0 ? "win" : "loss");
+  renderMoves();
   const lo = A.loD[i], hi = A.hiD[i], pos = hi > lo ? (k.c - lo) / (hi - lo) : .5;
   $("rangeDot").style.left = (pos * 100).toFixed(1) + "%";
   $("rLo").textContent = fmtP(lo); $("rHi").textContent = fmtP(hi);
@@ -877,7 +929,7 @@ function render(){
     <td class="${s.win === undefined ? "pend" : s.win ? "win" : "loss"}">${s.win === undefined ? "waiting…" : s.win ? "✓ right" : "✕ wrong"}</td></tr>`).join("")
     : `<tr><td colspan="4" class="pend">No calls yet today. The AI only calls when it's confident.</td></tr>`;
 
-  drawChart(C, A, dayBars, S.disp);
+  drawChart(C, A, S.viewBars, S.disp);
   setStatus(`${C.length} candles studied · updated ${new Date().toLocaleTimeString()}`);
   maybeAlert(A, C);
   practiceOnAnalysis(S.coin, A, C);
@@ -892,7 +944,12 @@ function watchEntry(p){
 }
 function renderWatch(){
   $("watch").innerHTML = COINS.map(c => { const w = S.watch[c] || {cls:"n", txt:"…"};
-    return `<button type="button" class="chip" data-coin="${c}" aria-current="${c === S.coin}">${c} <b class="${w.cls}">${w.txt}</b></button>`; }).join("");
+    const H = c === S.coin ? S.candles : S.hist[c], d = H && H.length > 100 ? H.slice(-96) : null;
+    let spark = "", pct = "";
+    if(d){ const lo = Math.min(...d.map(k => k.c)), hi = Math.max(...d.map(k => k.c)), ch = d[d.length-1].c / d[0].o - 1, col = ch >= 0 ? "var(--up)" : "var(--down)";
+      spark = `<svg class="spk" viewBox="0 0 54 20" preserveAspectRatio="none" aria-hidden="true"><path d="${d.map((k, i) => `${i ? "L" : "M"}${(i / 95 * 54).toFixed(1)},${(18 - (k.c - lo) / ((hi - lo) || 1) * 16).toFixed(1)}`).join("")}" fill="none" stroke="${col}" stroke-width="1.5"/></svg>`;
+      pct = `<span class="pct ${ch >= 0 ? "win" : "loss"}">${ch >= 0 ? "+" : ""}${(ch * 100).toFixed(1)}%</span>`; }
+    return `<button type="button" class="chip" data-coin="${c}" aria-current="${c === S.coin}">${c} ${spark}${pct}<b class="${w.cls}">${w.txt}</b></button>`; }).join("");
 }
 async function scanWatch(){
   const gen = S.gen, H = horizon(), dayBars = Math.round(1440 / TF[S.tf].min);
@@ -932,6 +989,8 @@ function setLivePrice(price){
   else if(price !== S.target){ pe.classList.remove("flash-up","flash-down"); void pe.offsetWidth;
     pe.classList.add(price > S.target ? "flash-up" : "flash-down"); clearTimeout(S.flashT); S.flashT = setTimeout(() => pe.classList.remove("flash-up","flash-down"), 900); }
   S.target = price;
+  S.ticks.push({t:Date.now(), p:price});
+  if(S.ticks.length > 20000 || (S.ticks.length && S.ticks[0].t < Date.now() - 2 * 3600e3)) S.ticks.splice(0, Math.max(1, S.ticks.length - 15000));
 }
 async function fetchTicker(){
   if(!S.src || !S.candles.length || document.hidden) return;
@@ -956,7 +1015,7 @@ function animate(ts){
   else S.disp += (S.target - S.disp) * 0.08;
   if(Math.abs(S.target - S.disp) < Math.abs(S.target) * 1e-7) S.disp = S.target;
   $("pNow").textContent = fmtP(S.disp);
-  drawChart(S.candles, S.A, Math.round(1440 / TF[S.tf].min), S.disp, reduceMotion ? 0 : ts);
+  drawChart(S.candles, S.A, S.viewBars, S.disp, reduceMotion ? 0 : ts);
 }
 let colors = null;
 function drawChart(C, A, dayBars, live, ts = 0){
@@ -984,7 +1043,7 @@ function drawChart(C, A, dayBars, live, ts = 0){
   for(let s=0;s<=ticks;s++){ const j = Math.min(view.length-1, Math.round((view.length-1)*s/ticks)); g.fillStyle = muted; g.fillText(fmtT(view[j].t), Math.min(Math.max(X(j),30), W-padR-30), Hh-6); }
   // day hi/lo
   g.setLineDash([3,5]); g.strokeStyle = faint;
-  [A.hiD[n-1], A.loD[n-1]].forEach(p => { g.beginPath(); g.moveTo(padL,Y(p)); g.lineTo(W-padR,Y(p)); g.stroke(); });
+  [A.hiD[n-1], A.loD[n-1]].forEach(p => { if(p >= lo && p <= hi){ g.beginPath(); g.moveTo(padL,Y(p)); g.lineTo(W-padR,Y(p)); g.stroke(); } });
   g.setLineDash([]);
   // wicks, faint
   view.forEach((k,j) => { g.strokeStyle = k.c >= k.o ? up : down; g.globalAlpha = .22; g.beginPath(); g.moveTo(X(j),Y(k.h)); g.lineTo(X(j),Y(k.l)); g.stroke(); });
@@ -1018,6 +1077,7 @@ function drawChart(C, A, dayBars, live, ts = 0){
   // a faint "now" line that glides with the price
   g.save(); g.globalAlpha = .35 + .15 * breathe; g.strokeStyle = cyan; g.setLineDash([2,4]); g.beginPath(); g.moveTo(padL, y); g.lineTo(W-padR, y); g.stroke(); g.restore();
   const pu = $("pulse"); pu.hidden = reveal < 1; pu.style.left = X(view.length-1) + "px"; pu.style.top = y + "px";
+  chartOverlay(g, {C, view, n, X, Y, W, Hh, padL, padR, padT, padB, up, down, muted, cyan});
 }
 
 // ───────── alerts ─────────
@@ -1438,8 +1498,220 @@ function runWhatIf(){
 `;
 }
 
+// ───────── live % changes + Trench lens ─────────
+// Trench shows your trade's P&L, which is (price move since you entered) × (your multiplier).
+// So the hero shows the move over several windows, raw and through the user's multiplier.
+const WINDOWS = [["1 min", 60e3], ["5 min", 300e3], ["15 min", 900e3], ["1 hour", 3600e3], ["4 hours", 14400e3], ["24 hours", 86400e3]];
+function priceAt(t){
+  const T = S.ticks;
+  if(T.length && T[0].t <= t){   // live ticks cover this moment
+    let lo = 0, hi = T.length - 1;
+    while(lo < hi){ const mid = (lo + hi + 1) >> 1; if(T[mid].t <= t) lo = mid; else hi = mid - 1; }
+    return T[lo].p;
+  }
+  const C = S.candles, tf = TF[S.tf].min * 60000;
+  for(let i = C.length - 1; i >= 0; i--) if(C[i].t <= t){
+    const f = Math.min(1, (t - C[i].t) / tf); return C[i].o + (C[i].c - C[i].o) * f; }
+  return NaN;
+}
+function pathFor(ms){
+  const now = Date.now(), pts = [];
+  for(let i = 0; i <= 24; i++){ const p = priceAt(now - ms + ms * i / 24); if(!isNaN(p)) pts.push(p); }
+  if(pts.length < 2) return "";
+  const lo = Math.min(...pts), hi = Math.max(...pts);
+  return pts.map((p, i) => `${i ? "L" : "M"}${(i / (pts.length - 1) * 100).toFixed(1)},${(38 - (p - lo) / ((hi - lo) || 1) * 34).toFixed(1)}`).join("");
+}
+function fmtLev(x){ return x <= -1 ? "busted" : (x >= 0 ? "+" : "−") + Math.abs(x * 100).toFixed(x > 9.99 ? 0 : 1) + "%"; }
+let movesBuilt = false;
+function renderMoves(){
+  if(!S.candles.length || S.disp === undefined) return;
+  const box = $("moves"), now = S.disp, lens = S.lens;
+  if(!movesBuilt){ movesBuilt = true;
+    box.innerHTML = WINDOWS.map(([k, ms]) => `<button type="button" class="mv" data-ms="${ms}" aria-pressed="${ms === S.refMs}">
+      <svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path fill="none" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+      <span class="k">${k}</span><span class="raw">—</span><span class="lev">—</span></button>`).join(""); }
+  let ref = null;
+  box.querySelectorAll(".mv").forEach(b => {
+    const ms = +b.dataset.ms, then = priceAt(Date.now() - ms), mv = now / then - 1;
+    if(isNaN(mv)) return;
+    const lev = mv * lens;
+    b.className = "mv " + (mv >= 0 ? "u" : "d");
+    b.querySelector(".raw").textContent = (mv >= 0 ? "▲ " : "▼ ") + Math.abs(mv * 100).toFixed(mv * 100 < 0.1 && mv * 100 > -0.1 ? 3 : 2) + "%";
+    const lv = b.querySelector(".lev"); lv.textContent = `×${lens} ${fmtLev(lev)}`; lv.classList.toggle("bust", lev <= -1);
+    const path = b.querySelector("path"); path.setAttribute("d", pathFor(ms)); path.setAttribute("stroke", mv >= 0 ? "var(--up)" : "var(--down)");
+    b.setAttribute("aria-pressed", String(ms === S.refMs));
+    if(ms === S.refMs) ref = {mv, k:b.querySelector(".k").textContent};
+  });
+  if(!ref) return;
+  $("pChg").textContent = `${ref.mv >= 0 ? "▲" : "▼"} ${Math.abs(ref.mv * 100).toFixed(2)}% · ${ref.k}`;
+  $("pChg").className = "chg " + (ref.mv >= 0 ? "win" : "loss");
+  const up = ref.mv * lens, bust = 100 / lens;
+  $("lensTxt").innerHTML = `A Trench <b>UP</b> bet at <b>×${lens}</b> placed ${ref.k} ago would show <b class="${up >= 0 ? "win" : "loss"}">${fmtLev(up)}</b> now; a <b>DOWN</b> bet <b class="${-up >= 0 ? "win" : "loss"}">${fmtLev(-up)}</b>.
+    At ×${lens} you bust on a <b>${bust.toFixed(2)}%</b> move against you. Tap a box to change the window.`;
+}
+$("moves").addEventListener("click", e => { const b = e.target.closest(".mv"); if(!b) return; S.refMs = +b.dataset.ms; renderMoves(); });
+$("lens").addEventListener("input", e => { S.lens = +e.target.value; $("lensV").textContent = "×" + S.lens; renderMoves();
+  try{ localStorage.setItem("turnspotter-lens", S.lens); }catch(err){} });
+try{ const l = +localStorage.getItem("turnspotter-lens"); if(l >= 1 && l <= 100){ S.lens = l; $("lens").value = l; $("lensV").textContent = "×" + l; } }catch(e){}
+setInterval(() => { if(!document.hidden) renderMoves(); }, 250);
+
+// ───────── chart: hover crosshair + drag to measure ─────────
+const dur = ms => { const m = Math.round(ms / 60000); return m < 60 ? m + "m" : Math.floor(m / 60) + "h" + (m % 60 ? " " + (m % 60) + "m" : ""); };
+function tag(g, x, y, lines, col, W, Hh){
+  g.font = "600 11px JetBrains Mono, monospace";
+  const w = Math.max(...lines.map(l => g.measureText(l).width)) + 18, h = lines.length * 16 + 10;
+  const bx = Math.max(4, Math.min(W - w - 70, x - w / 2)), by = Math.max(4, Math.min(Hh - h - 26, y - h));
+  g.fillStyle = "rgba(10,14,28,.92)"; g.strokeStyle = col; g.lineWidth = 1;
+  g.beginPath(); g.roundRect ? g.roundRect(bx, by, w, h, 8) : g.rect(bx, by, w, h); g.fill(); g.stroke();
+  g.textAlign = "left"; g.textBaseline = "top";
+  lines.forEach((l, i) => { g.fillStyle = i ? "#c9d2f2" : col; g.fillText(l, bx + 9, by + 6 + i * 16); });
+}
+function chartOverlay(g, o){
+  const {C, view, n, X, Y, W, Hh, padL, padR, padT, padB, up, down, muted, cyan} = o;
+  const step = (W - padL - padR) / view.length;
+  const idx = x => Math.max(0, Math.min(view.length - 1, Math.round((x - padL) / step - .5)));
+  const lens = S.lens, M = S.measure;
+  if(M && M.coin === S.coin && Math.abs(M.b - M.a) > 4){
+    const ja = idx(Math.min(M.a, M.b)), jb = idx(Math.max(M.a, M.b)), ka = view[ja], kb = view[jb];
+    const x1 = X(ja), x2 = X(jb), mv = kb.c / ka.c - 1, col = mv >= 0 ? up : down;
+    g.fillStyle = col; g.globalAlpha = .1; g.fillRect(x1, padT, x2 - x1, Hh - padT - padB); g.globalAlpha = 1;
+    g.strokeStyle = col; g.lineWidth = 1.5; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(x1, Y(ka.c)); g.lineTo(x2, Y(kb.c)); g.stroke(); g.setLineDash([]);
+    for(const [x, y] of [[x1, Y(ka.c)], [x2, Y(kb.c)]]){ g.fillStyle = col; g.beginPath(); g.arc(x, y, 4.5, 0, Math.PI * 2); g.fill(); }
+    tag(g, (x1 + x2) / 2, Math.min(Y(ka.c), Y(kb.c)) - 10, [`${mv >= 0 ? "▲ +" : "▼ "}${(mv * 100).toFixed(2)}% in ${dur(kb.t - ka.t)}`,
+      `UP at ×${lens}: ${fmtLev(mv * lens)}`, `DOWN at ×${lens}: ${fmtLev(-mv * lens)}`], col, W, Hh);
+  }
+  const hv = S.hover;
+  if(hv && !(M && M.dragging)){
+    const j = idx(hv.x), k = view[j], x = X(j), y = Y(k.c), now = C[n - 1].c, mv = now / k.c - 1;
+    g.strokeStyle = "rgba(234,240,255,.35)"; g.lineWidth = 1; g.setLineDash([2, 3]);
+    g.beginPath(); g.moveTo(x, padT); g.lineTo(x, Hh - padB); g.moveTo(padL, y); g.lineTo(W - padR, y); g.stroke(); g.setLineDash([]);
+    g.save(); g.shadowColor = cyan; g.shadowBlur = 12; g.fillStyle = cyan; g.beginPath(); g.arc(x, y, 5, 0, Math.PI * 2); g.fill(); g.restore();
+    tag(g, x, y - 14, [`${new Date(k.t).toLocaleString([], {weekday:"short", hour:"2-digit", minute:"2-digit"})}  ${fmtP(k.c)}`,
+      `since then: ${mv >= 0 ? "+" : ""}${(mv * 100).toFixed(2)}%`, `an UP bet at ×${lens}: ${fmtLev(mv * lens)}`], mv >= 0 ? up : down, W, Hh);
+  }
+}
+{
+  const cv = $("chart"), xOf = e => e.clientX - cv.getBoundingClientRect().left;
+  cv.addEventListener("pointermove", e => { S.hover = {x:xOf(e)}; if(S.measure && S.measure.dragging) S.measure.b = xOf(e); });
+  cv.addEventListener("pointerleave", () => { S.hover = null; });
+  cv.addEventListener("pointerdown", e => { S.measure = {a:xOf(e), b:xOf(e), dragging:true, coin:S.coin}; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener("pointerup", e => { if(!S.measure) return; S.measure.b = xOf(e); S.measure.dragging = false;
+    if(Math.abs(S.measure.b - S.measure.a) <= 4) S.measure = null; if(e.pointerType !== "mouse") S.hover = null; });
+}
+$("range").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return;
+  S.viewBars = +b.dataset.bars; S.measure = null; S.revealAt = performance.now();
+  $("range").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); });
+
+// ───────── order book: orders waiting to be filled ─────────
+const BOOK = {bids:[], asks:[], mid:0, range:0.01, shown:null, hover:null, at:0};
+async function fetchBook(){
+  if(!S.src || document.hidden) return;
+  const coin = S.coin;
+  try{
+    let bids, asks;
+    if(S.src.kind === "binance"){ const d = await getJSON(`${S.src.host}/api/v3/depth?symbol=${S.src.sym(coin)}&limit=500`); bids = d.bids; asks = d.asks; }
+    else { const d = await getJSON(`${S.src.host}/products/${S.src.sym(coin)}/book?level=2`); bids = d.bids; asks = d.asks; }
+    if(coin !== S.coin) return;
+    BOOK.bids = bids.map(x => [+x[0], +x[1]]); BOOK.asks = asks.map(x => [+x[0], +x[1]]);
+    BOOK.mid = (BOOK.bids[0][0] + BOOK.asks[0][0]) / 2; BOOK.at = Date.now(); BOOK.coin = coin;
+    $("bookMeta").textContent = `From ${S.src.name}, refreshed every 5 seconds.`;
+  }catch(e){ $("bookMeta").textContent = "The order book isn't reachable right now."; }
+}
+setInterval(fetchBook, 5000);
+const BINS = 80;
+function bookCurves(){
+  // cumulative dollars waiting, from the mid price outward, in BINS steps
+  const r = BOOK.range, mid = BOOK.mid, bid = new Array(BINS).fill(0), ask = new Array(BINS).fill(0);
+  let wallB = [0, 0], wallA = [0, 0];
+  for(const [p, q] of BOOK.bids){ const d = (mid - p) / mid; if(d > r) break; const i = Math.min(BINS - 1, Math.floor(d / r * BINS)); bid[i] += p * q; if(p * q > wallB[1]) wallB = [p, p * q]; }
+  for(const [p, q] of BOOK.asks){ const d = (p - mid) / mid; if(d > r) break; const i = Math.min(BINS - 1, Math.floor(d / r * BINS)); ask[i] += p * q; if(p * q > wallA[1]) wallA = [p, p * q]; }
+  for(let i = 1; i < BINS; i++){ bid[i] += bid[i - 1]; ask[i] += ask[i - 1]; }
+  return {bid, ask, wallB, wallA};
+}
+function drawBook(){
+  if(!BOOK.mid || BOOK.coin !== S.coin) return;
+  const cv = $("bookChart"), dpr = window.devicePixelRatio || 1, W = cv.clientWidth, Hh = cv.clientHeight;
+  if(!W) return;
+  if(cv.width !== Math.round(W * dpr) || cv.height !== Math.round(Hh * dpr)){ cv.width = W * dpr; cv.height = Hh * dpr; }
+  const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, Hh);
+  const target = bookCurves();
+  // glide toward the newest book so the walls swell and shrink smoothly
+  if(!BOOK.shown || BOOK.shown.range !== BOOK.range) BOOK.shown = {bid:[...target.bid], ask:[...target.ask], range:BOOK.range};
+  const k = reduceMotion ? 1 : .12;
+  for(let i = 0; i < BINS; i++){ BOOK.shown.bid[i] += (target.bid[i] - BOOK.shown.bid[i]) * k; BOOK.shown.ask[i] += (target.ask[i] - BOOK.shown.ask[i]) * k; }
+  const {bid, ask} = BOOK.shown, max = Math.max(bid[BINS - 1], ask[BINS - 1], 1);
+  const padB = 22, padT = 10, cx = W / 2, half = W / 2 - 6;
+  const xB = i => cx - (i + 1) / BINS * half, xA = i => cx + (i + 1) / BINS * half, y = v => Hh - padB - v / max * (Hh - padB - padT);
+  const {up, down, muted, faint} = colors || {up:"#3ee6a2", down:"#ff5d73", muted:"#8b95bd", faint:"#4a5378"};
+  for(const [arr, X, col] of [[bid, xB, up], [ask, xA, down]]){
+    const grad = g.createLinearGradient(0, padT, 0, Hh - padB); grad.addColorStop(0, col); grad.addColorStop(1, "transparent");
+    g.beginPath(); g.moveTo(cx, Hh - padB);
+    arr.forEach((v, i) => { const x0 = i ? X(i - 1) : cx; g.lineTo(x0, y(v)); g.lineTo(X(i), y(v)); });
+    g.lineTo(X(BINS - 1), Hh - padB); g.closePath(); g.globalAlpha = .35; g.fillStyle = grad; g.fill(); g.globalAlpha = 1;
+    g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); g.moveTo(cx, y(arr[0]));
+    arr.forEach((v, i) => { const x0 = i ? X(i - 1) : cx; g.lineTo(x0, y(v)); g.lineTo(X(i), y(v)); }); g.stroke();
+  }
+  g.strokeStyle = "rgba(234,240,255,.5)"; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(cx, padT); g.lineTo(cx, Hh - padB); g.stroke(); g.setLineDash([]);
+  g.font = "600 10.5px JetBrains Mono, monospace"; g.fillStyle = muted; g.textBaseline = "alphabetic";
+  g.textAlign = "left"; g.fillText(fmtP(BOOK.mid * (1 - BOOK.range)), 4, Hh - 6);
+  g.textAlign = "center"; g.fillText(fmtP(BOOK.mid), cx, Hh - 6);
+  g.textAlign = "right"; g.fillText(fmtP(BOOK.mid * (1 + BOOK.range)), W - 4, Hh - 6);
+  // the biggest single wall on each side
+  for(const [w, col, side] of [[target.wallB, up, -1], [target.wallA, down, 1]]){
+    if(!w[1]) continue;
+    const x = cx + side * (Math.abs(w[0] - BOOK.mid) / BOOK.mid) / BOOK.range * half;
+    g.strokeStyle = col; g.lineWidth = 1; g.setLineDash([2, 3]); g.beginPath(); g.moveTo(x, padT); g.lineTo(x, Hh - padB); g.stroke(); g.setLineDash([]);
+    g.fillStyle = col; g.textAlign = side < 0 ? "left" : "right"; g.fillText(`wall ${fmtUsd(w[1])} @ ${fmtP(w[0])}`, x + (side < 0 ? 4 : -4), padT + 10);
+  }
+  if(BOOK.hover !== null){
+    const hx = BOOK.hover, d = Math.abs(hx - cx) / half, i = Math.min(BINS - 1, Math.floor(d * BINS)), isAsk = hx > cx;
+    const price = BOOK.mid * (1 + (isAsk ? 1 : -1) * d * BOOK.range), cum = (isAsk ? ask : bid)[i];
+    g.strokeStyle = "rgba(234,240,255,.4)"; g.beginPath(); g.moveTo(hx, padT); g.lineTo(hx, Hh - padB); g.stroke();
+    tag(g, hx + 60, 60, [`${fmtP(price)} (${isAsk ? "+" : "−"}${(d * BOOK.range * 100).toFixed(2)}%)`,
+      `${fmtUsd(cum)} of ${isAsk ? "selling" : "buying"} in the way`], isAsk ? down : up, W + 70, Hh);
+  }
+  // headline numbers
+  const B = target.bid[BINS - 1], A2 = target.ask[BINS - 1], share = B / ((B + A2) || 1), r = (BOOK.range * 100).toFixed(1).replace(".0", "");
+  $("bkBid").textContent = fmtUsd(B); $("bkAsk").textContent = fmtUsd(A2);
+  $("bkBidWall").textContent = target.wallB[1] ? `biggest: ${fmtUsd(target.wallB[1])} at ${fmtP(target.wallB[0])}` : "";
+  $("bkAskWall").textContent = target.wallA[1] ? `biggest: ${fmtUsd(target.wallA[1])} at ${fmtP(target.wallA[0])}` : "";
+  $("bkFill").style.width = (share * 100).toFixed(1) + "%";
+  $("bkLean").textContent = `within ${r}%: ${share > .58 ? "more buyers waiting below (support)" : share < .42 ? "more sellers waiting above (resistance)" : "fairly balanced"}`;
+}
+{
+  const cv = $("bookChart");
+  cv.addEventListener("pointermove", e => { BOOK.hover = e.clientX - cv.getBoundingClientRect().left; });
+  cv.addEventListener("pointerleave", () => { BOOK.hover = null; });
+}
+$("bookRange").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return; BOOK.range = +b.dataset.r;
+  $("bookRange").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); });
+let bookFrame = 0;
+function bookLoop(ts){ requestAnimationFrame(bookLoop); if(document.hidden || ts - bookFrame < 40) return; bookFrame = ts; drawBook(); }
+requestAnimationFrame(bookLoop);
+
+// ───────── background particles: a slow constellation tinted by the current call ─────────
+if(!reduceMotion){
+  const cv = $("fx"), g = cv.getContext("2d"), P = [];
+  let W = 0, Hh = 0, tint = "139,123,255", last = 0;
+  const size = () => { const d = Math.min(2, window.devicePixelRatio || 1); W = innerWidth; Hh = innerHeight; cv.width = W * d; cv.height = Hh * d; g.setTransform(d, 0, 0, d, 0, 0); };
+  size(); addEventListener("resize", size);
+  for(let i = 0; i < Math.min(60, Math.round(innerWidth / 22)); i++) P.push({x:Math.random() * innerWidth, y:Math.random() * innerHeight, vx:(Math.random() - .5) * .25, vy:(Math.random() - .5) * .25, r:Math.random() * 1.6 + .6});
+  const tints = {up:"62,230,162", down:"255,93,115", warn:"255,194,75"};
+  (function loop(ts){
+    requestAnimationFrame(loop);
+    if(document.hidden || ts - last < 40) return; last = ts;
+    tint = tints[document.body.dataset.mood] || "139,123,255";
+    g.clearRect(0, 0, W, Hh);
+    for(const p of P){ p.x = (p.x + p.vx + W) % W; p.y = (p.y + p.vy + Hh) % Hh; }
+    for(let i = 0; i < P.length; i++){ const a = P[i];
+      g.fillStyle = `rgba(${tint},.7)`; g.beginPath(); g.arc(a.x, a.y, a.r, 0, Math.PI * 2); g.fill();
+      for(let j = i + 1; j < P.length; j++){ const b = P[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+        if(d < 130){ g.strokeStyle = `rgba(${tint},${(.18 * (1 - d / 130)).toFixed(3)})`; g.lineWidth = 1; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); } } }
+  })(0);
+}
+
 loadPaper(); setInterval(loadPaper, 60000);
-window.addEventListener("resize", () => S.A && drawChart(S.candles, S.A, Math.round(1440 / TF[S.tf].min)));
+window.addEventListener("resize", () => S.A && drawChart(S.candles, S.A, S.viewBars, S.disp));
 renderWatch();
 loadHistory();
 </script>
