@@ -152,7 +152,38 @@ ul.check li .v{font:400 11.5px var(--mono);color:var(--muted)}
 
 @media (max-width:860px){.hero,.cols{grid-template-columns:1fr}}
 @media (max-width:640px){.facts{grid-template-columns:1fr}canvas{height:250px}.brain{grid-template-columns:96px 1fr 44px}.card{padding:15px;border-radius:16px}}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* motion */
+.bgfx::before{content:"";position:absolute;inset:-20%;filter:blur(60px);opacity:.55;
+  background:radial-gradient(28rem 22rem at 30% 30%, color-mix(in srgb,var(--mood) 35%,transparent), transparent 70%),
+             radial-gradient(24rem 20rem at 70% 60%, rgba(69,212,255,.22), transparent 70%),
+             radial-gradient(20rem 18rem at 50% 90%, rgba(139,123,255,.20), transparent 70%);
+  animation:drift 22s ease-in-out infinite alternate}
+@keyframes drift{0%{transform:translate3d(-4%,-3%,0) rotate(0deg)}50%{transform:translate3d(5%,4%,0) rotate(8deg)}100%{transform:translate3d(-2%,6%,0) rotate(-6deg)}}
+.wrap > *{animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
+.wrap > :nth-child(2){animation-delay:.06s} .wrap > :nth-child(3){animation-delay:.12s} .wrap > :nth-child(4){animation-delay:.18s}
+.wrap > :nth-child(5){animation-delay:.24s} .wrap > :nth-child(6){animation-delay:.30s} .wrap > :nth-child(7){animation-delay:.36s}
+@keyframes rise{from{opacity:.001;transform:translateY(14px)}to{opacity:1;transform:none}}
+.card{transition:transform .25s,border-color .25s,box-shadow .25s}
+@media (hover:hover){.card:hover{transform:translateY(-2px);border-color:var(--edge-hi)}}
+.call.pop{animation:pop .6s cubic-bezier(.2,1.4,.3,1)}
+@keyframes pop{0%{transform:scale(.82);opacity:.2;filter:blur(6px)}100%{transform:none;opacity:1;filter:none}}
+body:not([data-mood]) .call, body[data-mood="warn"] .call{animation:breathe 3.6s ease-in-out infinite}
+@keyframes breathe{50%{opacity:.72}}
+.call .arrow{display:inline-block;animation:bob 1.6s ease-in-out infinite}
+body[data-mood="down"] .call .arrow{animation-name:bobDown}
+@keyframes bob{50%{transform:translateY(-8%)}} @keyframes bobDown{50%{transform:translateY(8%)}}
+.main::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(110deg,transparent 35%,color-mix(in srgb,var(--mood) 10%,transparent) 50%,transparent 65%);background-size:250% 100%;
+  animation:sheen 6s linear infinite}
+@keyframes sheen{from{background-position:150% 0}to{background-position:-100% 0}}
+.cbar{height:4px;border-radius:999px;background:rgba(140,155,255,.12);overflow:hidden;margin-top:8px;max-width:340px}
+.cbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mood),var(--cyan));transition:width 1s linear;box-shadow:0 0 10px var(--mood)}
+.chip[aria-current="true"]{background:linear-gradient(110deg,var(--panel) 30%,rgba(139,123,255,.25) 50%,var(--panel) 70%);background-size:250% 100%;animation:sheen 4s linear infinite}
+.chip .u,.chip .d{animation:blink 2s ease-in-out infinite}
+@keyframes blink{50%{opacity:.55}}
+.price.flash-up,.price.flash-down{animation:tickpop .5s}
+@keyframes tickpop{30%{transform:translateY(-2px);text-shadow:0 0 18px currentColor}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 
 /* simple mode */
 .top h1{font:800 16px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;margin:0}
@@ -205,7 +236,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </div>
     <div class="call" id="bigCall">…</div>
     <p class="callSub" id="bigSub">Reading today's market…</p>
-    <p class="countLine" id="countLine" hidden>This call gets checked in <b id="fCount">—</b></p>
+    <div id="countLine" hidden><p class="countLine">This call gets checked in <b id="fCount">—</b></p><div class="cbar"><i id="cbarFill"></i></div></div>
   </section>
 
   <section class="card">
@@ -376,7 +407,7 @@ async function loadHistory(){
       const c = await load(src, S.coin, S.tf, TF[S.tf].need, false);
       if(gen !== S.gen) return;
       if(c.length < 120) throw new Error("not enough candles");
-      S.src = src; S.candles = c;
+      S.src = src; S.candles = c; S.revealAt = performance.now();
       clearInterval(S.watchTimer); S.watch = {};
       render();
       S.timer = setInterval(poll, 10000);
@@ -638,7 +669,11 @@ function render(){
   else if(p.up || p.down) sub = "Price is turning around, but turnarounds haven't been reliable. Don't bet on this one.";
   else if(!p.agree) sub = "The two AIs disagree on the direction. No bet.";
   else sub = "Not confident either way right now. No bet.";
-  $("bigCall").textContent = big; $("bigSub").textContent = sub;
+  const bc = $("bigCall");
+  if(bc.dataset.v !== big){ bc.dataset.v = big; const [w, arrow] = big.split(" ");
+    bc.innerHTML = w + (arrow ? ` <span class="arrow">${arrow}</span>` : "");
+    bc.classList.remove("pop"); void bc.offsetWidth; bc.classList.add("pop"); }
+  $("bigSub").textContent = sub;
   document.title = (big === "WAIT" ? "" : big.split(" ")[0] + " · ") + S.coin + " · Turn Spotter";
   $("vEyebrow").textContent = `${S.coin} · ${S.tf} candles · next ${look}`;
   $("vState").textContent = state; $("vWhy").textContent = why;
@@ -742,6 +777,7 @@ function tick(){
   const left = open.t + (H + 1) * tfMs - Date.now();
   const mm = Math.max(0, Math.floor(left / 60000)), ss = Math.max(0, Math.floor(left / 1000) % 60);
   $("fCount").textContent = left > 0 ? `${mm}:${String(ss).padStart(2, "0")}` : "checking…";
+  $("cbarFill").style.width = (100 * Math.min(1, Math.max(0, 1 - left / ((H + 1) * tfMs)))).toFixed(1) + "%";
   $("fCountSub").textContent = `${open.dir > 0 ? "▲ UP" : "▼ DOWN"} at ${fmtP(open.price)}, made ${fmtT(open.t + tfMs)}`;
 }
 function horizon(){ return Math.max(1, Math.round(S.look / TF[S.tf].min)); }
@@ -813,20 +849,27 @@ function drawChart(C, A, dayBars, live, ts = 0){
   // wicks, faint
   view.forEach((k,j) => { g.strokeStyle = k.c >= k.o ? up : down; g.globalAlpha = .22; g.beginPath(); g.moveTo(X(j),Y(k.h)); g.lineTo(X(j),Y(k.l)); g.stroke(); });
   g.globalAlpha = 1;
+  // draw-in: on a fresh load the line sweeps in from the left and the call markers pop in after it
+  const since = performance.now() - (S.revealAt || 0), reveal = reduceMotion ? 1 : Math.min(1, since / 1100), ease = 1 - Math.pow(1 - reveal, 3);
+  const m = Math.max(2, Math.ceil(view.length * ease)), shown = view.slice(0, m);
   // price area + glowing line
   const grad = g.createLinearGradient(0, padT, 0, Hh-padB); grad.addColorStop(0, "rgba(69,212,255,.28)"); grad.addColorStop(1, "rgba(69,212,255,0)");
-  g.beginPath(); view.forEach((k,j) => j ? g.lineTo(X(j),Y(k.c)) : g.moveTo(X(j),Y(k.c)));
-  g.lineTo(X(view.length-1), Hh-padB); g.lineTo(X(0), Hh-padB); g.closePath(); g.fillStyle = grad; g.fill();
+  g.beginPath(); shown.forEach((k,j) => j ? g.lineTo(X(j),Y(k.c)) : g.moveTo(X(j),Y(k.c)));
+  g.lineTo(X(m-1), Hh-padB); g.lineTo(X(0), Hh-padB); g.closePath(); g.fillStyle = grad; g.fill();
   g.save(); g.shadowColor = cyan; g.shadowBlur = 12 + 5 * breathe; g.strokeStyle = cyan; g.lineWidth = 2; g.lineJoin = "round";
-  g.beginPath(); view.forEach((k,j) => j ? g.lineTo(X(j),Y(k.c)) : g.moveTo(X(j),Y(k.c))); g.stroke(); g.restore();
+  g.beginPath(); shown.forEach((k,j) => j ? g.lineTo(X(j),Y(k.c)) : g.moveTo(X(j),Y(k.c))); g.stroke(); g.restore();
   // vwap
   g.strokeStyle = acc; g.globalAlpha = .8; g.lineWidth = 1.5; g.setLineDash([6,4]);
   g.beginPath(); view.forEach((k,j) => j ? g.lineTo(X(j),Y(A.vwap[a+j])) : g.moveTo(X(j),Y(A.vwap[a+j]))); g.stroke();
   g.setLineDash([]); g.globalAlpha = 1;
   // calls
-  A.sigs.filter(s => s.i >= a).forEach(s => { const x = X(s.i-a), y = Y(C[s.i].c), col = s.dir > 0 ? up : down;
-    g.save(); g.shadowColor = col; g.shadowBlur = 14; g.fillStyle = col; g.beginPath(); g.arc(x, y, 5, 0, Math.PI*2); g.fill(); g.restore();
-    g.strokeStyle = col; g.lineWidth = 1.5; g.beginPath(); g.arc(x, y, 9, 0, Math.PI*2); g.globalAlpha = .45; g.stroke(); g.globalAlpha = 1;
+  A.sigs.filter(s => s.i >= a && s.i - a < m).forEach(s => { const x = X(s.i-a), y = Y(C[s.i].c), col = s.dir > 0 ? up : down;
+    // pop in as the line reaches the marker, then a slow ripple
+    const age = reduceMotion ? 1e9 : since - 1100 * ((s.i - a) / view.length) ** (1/3);
+    const pop = Math.min(1, Math.max(0, age / 350)), sc = pop < 1 ? 1 + .6 * Math.sin(pop * Math.PI) : 1;
+    const rip = reduceMotion ? 0 : ((performance.now() + (s.i * 137) % 2000) % 2400) / 2400;
+    g.save(); g.shadowColor = col; g.shadowBlur = 14; g.fillStyle = col; g.globalAlpha = pop; g.beginPath(); g.arc(x, y, 5 * sc, 0, Math.PI*2); g.fill(); g.restore();
+    g.strokeStyle = col; g.lineWidth = 1.5; g.beginPath(); g.arc(x, y, 9 + 8 * rip, 0, Math.PI*2); g.globalAlpha = .45 * (1 - rip) * pop; g.stroke(); g.globalAlpha = 1;
     if(s.win !== undefined){ g.fillStyle = s.win ? up : down; g.font = "700 10px JetBrains Mono, monospace"; g.fillText(s.win ? "✓" : "✕", x, s.dir > 0 ? y + 22 : y - 14); g.font = "11px JetBrains Mono, monospace"; } });
   // last price tag + pulse
   const last = C[n-1].c, y = Y(last);
@@ -834,7 +877,7 @@ function drawChart(C, A, dayBars, live, ts = 0){
   g.fillStyle = "#06080f"; g.textAlign = "left"; g.textBaseline = "middle"; g.font = "700 11px JetBrains Mono, monospace"; g.fillText(fmtP(last), W-padR+8, y);
   // a faint "now" line that glides with the price
   g.save(); g.globalAlpha = .35 + .15 * breathe; g.strokeStyle = cyan; g.setLineDash([2,4]); g.beginPath(); g.moveTo(padL, y); g.lineTo(W-padR, y); g.stroke(); g.restore();
-  const pu = $("pulse"); pu.hidden = false; pu.style.left = X(view.length-1) + "px"; pu.style.top = y + "px";
+  const pu = $("pulse"); pu.hidden = reveal < 1; pu.style.left = X(view.length-1) + "px"; pu.style.top = y + "px";
 }
 
 // ───────── alerts ─────────
@@ -880,6 +923,11 @@ setInterval(tick, 1000);
 setInterval(fetchTicker, 3000);
 requestAnimationFrame(animate);
 
+function countTo(el, to, fmt){
+  const from = +el.dataset.v || (reduceMotion ? to : 0), t0 = performance.now(); el.dataset.v = to;
+  const step = now => { const k = Math.min(1, (now - t0) / 900), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(from + (to - from) * e); if(k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
 // ───────── paper trading panel (ledger written by the paper/trader.mjs job) ─────────
 async function loadPaper(){
   try{
@@ -887,7 +935,7 @@ async function loadPaper(){
     const open = L.trades.filter(t => t.status === "open"), closed = L.trades.filter(t => t.status !== "open");
     const value = L.balance + open.reduce((s,t) => s + t.stake, 0), chg = value / L.start - 1;
     $("paper").hidden = false;
-    $("ppBal").textContent = "$" + value.toFixed(2);
+    countTo($("ppBal"), value, v => "$" + v.toFixed(2));
     $("ppChg").textContent = (chg >= 0 ? "▲ " : "▼ ") + Math.abs(chg*100).toFixed(1) + "%";
     $("ppChg").className = "chg " + (chg >= 0 ? "win" : "loss");
     const won = closed.filter(t => t.pnl > 0).length, mins = Math.round((Date.now() - L.lastRun) / 60000);
