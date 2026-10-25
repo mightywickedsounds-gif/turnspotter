@@ -56,6 +56,7 @@ async function candles(coin){
 const L = fs.existsSync(LEDGER) ? JSON.parse(fs.readFileSync(LEDGER, "utf8"))
   : {start: CFG.start, balance: CFG.start, startedAt: Date.now(), trades: [], equity: [], config: CFG};
 const now = Date.now();
+L.status = {};   // per-coin snapshot: why it is or isn't trading right now
 
 for(const coin of CFG.coins){
   let data;
@@ -82,6 +83,14 @@ for(const coin of CFG.coins){
   if(L.trades.some(t => t.coin === coin && t.status === "open")) continue;
   const A = analyze(C, Math.round(1440 / CFG.tfMin), H, CFG.conf, new Map());
   const n = C.length, fresh = A.sigs.filter(s => s.i >= n - 3).pop();
+  { const q = A.P[n-1], last = A.P.slice(n-400).filter(Boolean), share = f => +(last.filter(f).length / last.length).toFixed(3);
+    const done = A.sigs.filter(s => s.win !== undefined);
+    L.status[coin] = {src: data.src, candles: n, price: C[n-1].c, trend: +q.trend.toFixed(3), memory: +(q.mem || 0).toFixed(3), agree: q.agree,
+      paused: q.paused, record: isNaN(q.record) ? null : +q.record.toFixed(3), call: q.modelUp ? "UP" : q.modelDown ? "DOWN" : "WAIT",
+      // over the last 400 candles (~4 days): how often each gate blocked a call
+      last400: {trendConfident: share(p => Math.abs(p.trend - .5) >= CFG.conf - .5), agree: share(p => p.agree), paused: share(p => p.paused),
+        call: share(p => p.modelUp || p.modelDown), skippedTurn: share(p => p.up || p.down)},
+      backtest: {calls: done.length, right: done.length ? +(done.filter(s => s.win).length / done.length).toFixed(3) : null}}; }
   if(!fresh) continue;
   const p = A.P[n-1] || A.P[fresh.i];
   const stake = +Math.max(CFG.minStake, L.balance * CFG.stakePct).toFixed(2);
