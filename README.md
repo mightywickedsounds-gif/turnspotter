@@ -198,6 +198,22 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - **Paper trading:** `paper/trader.mjs` runs every 15 minutes on GitHub with $50 of fake money.
   It follows the site's calls, Trench-style (assumed rules in the file), and shows the P&L on the site.
 
+### Round 5: things to do, not just watch
+- **Live buys & sells:** the site connects straight to the exchange's live trade stream (Binance,
+  Binance US or Coinbase). It shows a buyers-vs-sellers tug-of-war for the last minute and 5 minutes,
+  a second-by-second buying/selling chart with floating bubbles for bigger trades, and a scrolling
+  trade tape with whale trades highlighted. Live trades also drive the main chart's price.
+- **Practice trading** (saved in your browser) has three tabs:
+  - **Trade:** a Trench-style ticket with UP/DOWN, stake, multiplier and 1h/4h. It shows the bust
+    price and how risky it is compared to a normal move. Open trades show live P&L, time left and
+    distance to bust, and you can close early. **Auto-follow** takes every new call on any coin, with
+    your own stake and bust-distance settings. Reset to any starting amount.
+  - **What if?:** replays ~20 days of real calls with your settings (start money, stake %, multiplier,
+    strictness, horizon, coins) and draws the money curve next to a no-multiplier version.
+  - **24/7 bot:** the GitHub paper trader.
+- The shipped Experience brain is now trained on everything **except the last 30 days**, so the
+  "What if?" replay and the scorecard run on days the brain has never seen.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

@@ -152,6 +152,94 @@ ul.check li .v{font:400 11.5px var(--mono);color:var(--muted)}
 
 @media (max-width:860px){.hero,.cols{grid-template-columns:1fr}}
 @media (max-width:640px){.facts{grid-template-columns:1fr}canvas{height:250px}.brain{grid-template-columns:96px 1fr 44px}.card{padding:15px;border-radius:16px}}
+
+/* live buys & sells */
+.tug{display:grid;gap:6px;margin:4px 0 12px}
+.tugLbl{display:flex;justify-content:space-between;gap:8px;font:600 12px var(--mono);color:var(--muted)}
+.tugLbl b{font-size:15px}
+.tugBar{position:relative;height:14px;border-radius:999px;background:linear-gradient(90deg,transparent,transparent),color-mix(in srgb,var(--down) 70%,transparent);overflow:hidden}
+.tugBar i{position:absolute;inset:0 auto 0 0;width:50%;background:linear-gradient(90deg,color-mix(in srgb,var(--up) 60%,transparent),var(--up));box-shadow:0 0 18px var(--up);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.tugMid{position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.5}
+.flowGrid{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;align-items:start}
+.flowViz{position:relative}
+#flowChart{height:230px}
+.flowAxis{display:flex;justify-content:space-between;font:500 10.5px var(--mono);color:var(--faint);margin-top:4px}
+.tapeWrap{min-width:0}
+.tapeHead{display:flex;justify-content:space-between;align-items:center;gap:8px;font:600 12px var(--body);color:var(--muted);margin-bottom:6px}
+.mini{display:flex;align-items:center;gap:6px;font:600 11px var(--body);color:var(--muted)}
+.mini select{padding:4px 24px 4px 8px;font-size:12px}
+.tape{list-style:none;margin:0;padding:0;height:240px;overflow:hidden;display:grid;align-content:start;gap:3px;
+  mask-image:linear-gradient(#000 70%,transparent)}
+.tape li{display:grid;grid-template-columns:62px 46px 1fr auto;gap:8px;align-items:center;font:500 12px var(--mono);padding:4px 8px;border-radius:8px;background:rgba(140,155,255,.04)}
+.tape li.pend{display:block;background:none;color:var(--muted)}
+.tape li.b{box-shadow:inset 3px 0 0 var(--up)} .tape li.s{box-shadow:inset 3px 0 0 var(--down)}
+.tape li .sd{font-weight:800} .tape li.b .sd{color:var(--up)} .tape li.s .sd{color:var(--down)}
+.tape li .usd{text-align:right;font-weight:700}
+.tape li.whale{background:color-mix(in srgb,var(--warn) 12%,transparent)}
+.tape li.new{animation:slideIn .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes slideIn{from{transform:translateX(-14px);opacity:0;background:rgba(255,255,255,.12)}}
+
+/* practice trading */
+.tabs{display:flex;gap:4px;background:rgba(140,155,255,.07);padding:4px;border-radius:12px}
+.tab{border:0;background:none;padding:7px 12px;border-radius:9px;font:700 12.5px var(--body);color:var(--muted);backdrop-filter:none}
+.tab[aria-selected="true"]{background:var(--panel-solid);color:var(--ink);box-shadow:0 0 0 1px var(--edge-hi)}
+.pane{animation:rise .35s both}
+.acct{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.acctSub{font:500 12.5px var(--body);color:var(--muted);margin-top:4px}
+.ghost{background:none}
+.ticketGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;align-items:start}
+.ticket{display:grid;gap:12px;padding:16px;border-radius:14px;background:rgba(140,155,255,.05);border:1px solid var(--edge)}
+.tkHead{font:500 13px var(--body);color:var(--muted)} .tkHead b{color:var(--ink);font-family:var(--mono)}
+.dirBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dirBtn{font:800 16px var(--display);padding:14px;border-radius:12px;transition:all .2s}
+.dirBtn.up[aria-pressed="true"]{background:color-mix(in srgb,var(--up) 22%,transparent);border-color:var(--up);color:var(--up);box-shadow:0 0 24px -6px var(--up)}
+.dirBtn.down[aria-pressed="true"]{background:color-mix(in srgb,var(--down) 22%,transparent);border-color:var(--down);color:var(--down);box-shadow:0 0 24px -6px var(--down)}
+.sl{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:baseline;font:600 12.5px var(--body);color:var(--muted)}
+.sl b{color:var(--ink);font-family:var(--mono)}
+.sl input{grid-column:1/-1}
+input[type=range]{width:100%;accent-color:var(--accent);height:24px}
+.quick{display:flex;gap:6px;flex-wrap:wrap}
+.quick button{padding:6px 10px;font-size:12px;border-radius:8px}
+.quick button[aria-pressed="true"]{border-color:var(--accent);color:var(--ink);box-shadow:0 0 0 1px var(--accent)}
+.risk{font:500 12.5px/1.45 var(--body);color:var(--muted);padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.18)}
+.risk b{color:var(--ink);font-family:var(--mono)} .risk .danger{color:var(--down)} .risk .ok{color:var(--up)}
+.place{font:800 15px var(--display);padding:14px;border:0;border-radius:12px;color:#07091a;background:linear-gradient(135deg,var(--up),var(--cyan));box-shadow:0 10px 30px -12px var(--up)}
+.place.down{background:linear-gradient(135deg,var(--down),#ff9a6b);box-shadow:0 10px 30px -12px var(--down)}
+.place:disabled{opacity:.4;cursor:not-allowed}
+.place:active{transform:scale(.98)}
+.auto{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted);cursor:pointer}
+.auto input{width:18px;height:18px;accent-color:var(--up);margin-top:1px}
+.autoCfg{display:grid;gap:10px}
+.positions{min-width:0}
+.pos{display:grid;gap:8px;padding:12px 14px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.04);margin-bottom:8px}
+.posTop{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.posTop .pnl{font:700 18px var(--mono)}
+.posMeta{font:500 11.5px var(--mono);color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.meter2{height:5px;border-radius:999px;background:rgba(140,155,255,.12);overflow:hidden}
+.meter2 i{display:block;height:100%;transition:width .6s}
+.posBtns{display:flex;justify-content:space-between;align-items:center;font:500 11.5px var(--body);color:var(--muted)}
+.posBtns button{padding:5px 10px;font-size:12px}
+.wiGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:10px 0}
+.wiGrid label{display:grid;gap:6px;font:600 12.5px var(--body);color:var(--muted)}
+.money{display:flex;align-items:center;gap:4px;border:1px solid var(--edge);border-radius:10px;padding:0 10px;background:var(--panel)}
+.money input{background:none;border:0;color:var(--ink);font:600 14px var(--mono);padding:8px 0;width:100%}
+.coinToggles{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.coinToggles button{padding:6px 12px;font-size:12.5px;border-radius:999px}
+.coinToggles button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);color:var(--ink)}
+.coinToggles button[aria-pressed="false"]{opacity:.45}
+.wiOut{display:grid;gap:10px}
+.wiChart{width:100%;height:170px}
+.wiStats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.wiStats div{padding:10px;border-radius:10px;background:rgba(140,155,255,.05);font:500 11.5px var(--body);color:var(--muted)}
+.wiStats b{display:block;font:700 17px var(--mono);color:var(--ink);margin-top:2px}
+.toasts{position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));display:grid;justify-items:end;gap:8px;z-index:20;pointer-events:none}
+.toast{max-width:100%}
+.toast{font:600 13px var(--body);padding:12px 16px;border-radius:12px;background:var(--panel-solid);border:1px solid var(--edge-hi);box-shadow:0 20px 40px -20px #000;animation:toastIn .4s cubic-bezier(.2,1.2,.3,1) both}
+.toast.win{border-color:var(--up)} .toast.loss{border-color:var(--down)}
+@keyframes toastIn{from{transform:translateY(20px) scale(.95);opacity:0}}
+@media (max-width:860px){.flowGrid,.ticketGrid{grid-template-columns:1fr}.wiGrid{grid-template-columns:1fr 1fr}.wiStats{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.wiGrid{grid-template-columns:1fr}.rowHead .tabs{width:100%}.tab{flex:1}}
+
 /* motion */
 .bgfx::before{content:"";position:absolute;inset:-20%;filter:blur(60px);opacity:.55;
   background:radial-gradient(28rem 22rem at 30% 30%, color-mix(in srgb,var(--mood) 35%,transparent), transparent 70%),
@@ -246,15 +334,95 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <div class="tablewrap"><table><tbody id="log"></tbody></table></div>
   </section>
 
-  <section class="card" id="paper" hidden>
-    <div class="rowHead"><h2>Paper trading</h2><span class="record" id="ppMeta"></span></div>
-    <div class="ppTop">
-      <div><div class="coinName">$50 of fake money, following every call</div><span class="price" id="ppBal">—</span> <span class="chg" id="ppChg"></span></div>
-      <svg class="spark" id="ppSpark" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true"></svg>
+  <section class="card" id="flowCard">
+    <div class="rowHead"><h2>Live buys &amp; sells</h2><span class="record" id="flowMeta">connecting…</span></div>
+    <div class="tug">
+      <div class="tugLbl"><span class="win">Buyers <b id="tugBuyPct">50%</b></span><span id="tugWho">last minute</span><span class="loss"><b id="tugSellPct">50%</b> Sellers</span></div>
+      <div class="tugBar"><i id="tugFill"></i><span class="tugMid"></span></div>
+      <div class="tugLbl"><span id="tugBuyAmt">$0 bought</span><span id="tug5">5 min: —</span><span id="tugSellAmt">$0 sold</span></div>
     </div>
-    <div class="tablewrap"><table><tbody id="ppLog"></tbody></table></div>
-    <p class="note">Simulated Trench-style trades: 10% of the balance per trade, multiplier set so the bust price is 3× the typical move away, 0.1% fee. Trench doesn't publish its exact formulas, so real results will differ.</p>
+    <div class="flowGrid">
+      <div class="flowViz"><canvas id="flowChart" aria-label="Buying and selling over the last 90 seconds"></canvas>
+        <div class="flowAxis"><span>90s ago</span><span>now</span></div></div>
+      <div class="tapeWrap">
+        <div class="tapeHead"><span>Trades as they happen</span>
+          <label class="mini">Hide under <select id="tapeMin"><option value="0">$0</option><option value="100">$100</option><option value="1000" selected>$1K</option><option value="10000">$10K</option></select></label></div>
+        <ul class="tape" id="tape"><li class="pend">Waiting for trades…</li></ul>
+      </div>
+    </div>
+    <p class="note">Every real trade on the exchange, live. Green = someone bought at the asking price (pushing up); red = someone sold into the bids (pushing down). 🐋 marks unusually big trades.</p>
   </section>
+
+  <section class="card" id="practice">
+    <div class="rowHead"><h2>Practice trading</h2>
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" class="tab" data-tab="trade" aria-selected="true">Trade</button>
+        <button type="button" role="tab" class="tab" data-tab="whatif" aria-selected="false">What if?</button>
+        <button type="button" role="tab" class="tab" data-tab="bot" aria-selected="false">24/7 bot</button>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-trade">
+      <div class="acct">
+        <div><div class="coinName">Your practice money (saved on this device)</div><span class="price" id="prEq">$50.00</span> <span class="chg" id="prChg"></span>
+          <div class="acctSub" id="prCash"></div></div>
+        <div class="acctBtns"><span id="resetBox"><button type="button" id="prReset" class="ghost">Reset</button></span></div>
+      </div>
+      <div class="ticketGrid">
+        <div class="ticket">
+          <div class="tkHead">New trade on <b id="tkCoin">BTC</b> at <b id="tkPrice">—</b></div>
+          <div class="dirBtns"><button type="button" class="dirBtn up" data-dir="1" aria-pressed="true">▲ UP</button><button type="button" class="dirBtn down" data-dir="-1" aria-pressed="false">▼ DOWN</button></div>
+          <label class="sl">Stake <b id="tkStakeV">$5.00</b><input type="range" id="tkStake" min="1" max="50" step="0.5" value="5"></label>
+          <div class="quick"><button type="button" data-pct="10">10%</button><button type="button" data-pct="25">25%</button><button type="button" data-pct="50">50%</button><button type="button" data-pct="100">All in</button></div>
+          <label class="sl">Multiplier <b id="tkMultV">×10</b><input type="range" id="tkMult" min="1" max="100" step="1" value="10"></label>
+          <div class="quick" id="tkDur"><button type="button" data-min="60" aria-pressed="true">1 hour</button><button type="button" data-min="240" aria-pressed="false">4 hours</button></div>
+          <div class="risk" id="tkRisk"></div>
+          <button type="button" class="place" id="tkPlace">Place trade</button>
+          <label class="auto"><input type="checkbox" id="autoOn"> <span><b>Auto-follow the AI's calls</b> on every coin while this page is open</span></label>
+          <div class="autoCfg" id="autoCfg">
+            <label class="sl">Stake per call <b id="autoStakeV">10%</b><input type="range" id="autoStake" min="1" max="50" step="1" value="10"></label>
+            <label class="sl">Bust distance <b id="autoBufV">3× a normal move</b><input type="range" id="autoBuf" min="1" max="6" step="0.5" value="3"></label>
+          </div>
+        </div>
+        <div class="positions">
+          <div class="sub">Open trades</div>
+          <div id="posList"><p class="pend">No open trades. Place one, or switch on auto-follow.</p></div>
+          <div class="sub">History</div>
+          <div class="tablewrap"><table><tbody id="prHist"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-whatif" hidden>
+      <p class="note">Replays every call the AI made over the loaded history (about 20 days), on days the AI was never trained on. Change anything and it re-runs instantly.</p>
+      <div class="wiGrid">
+        <label>Start with <span class="money"><span>$</span><input type="number" id="wiStart" min="5" max="100000" value="50"></span></label>
+        <label class="sl">Stake per call <b id="wiStakeV">10%</b><input type="range" id="wiStake" min="1" max="100" step="1" value="10"></label>
+        <label>Multiplier<select id="wiMode"><option value="auto3">Auto: bust 3× a normal move</option><option value="auto2">Auto: bust 2× a normal move</option><option value="auto5">Auto: bust 5× a normal move</option><option value="fixed">Fixed</option></select></label>
+        <label class="sl" id="wiFixedBox" hidden>Fixed multiplier <b id="wiFixedV">×10</b><input type="range" id="wiFixed" min="1" max="100" step="1" value="10"></label>
+        <label>How picky<select id="wiConf"><option value="0.55">Normal</option><option value="0.56">Picky</option><option value="0.58">Very picky</option></select></label>
+        <label>How far ahead<select id="wiLook"><option value="60">1 hour</option><option value="240">4 hours</option></select></label>
+      </div>
+      <div class="coinToggles" id="wiCoins"></div>
+      <div class="wiOut">
+        <div class="wiBig"><span class="price" id="wiFinal">—</span> <span class="chg" id="wiRet"></span><div class="acctSub" id="wiVs"></div></div>
+        <svg class="wiChart" id="wiChart" viewBox="0 0 600 170" preserveAspectRatio="none" aria-label="Money over time"></svg>
+        <div class="legend"><span><i style="background:var(--up)"></i>your settings</span><span><i style="background:var(--muted)"></i>same calls, no multiplier</span><span><i style="background:var(--faint)"></i>starting money</span></div>
+        <div class="wiStats" id="wiStats"></div>
+        <p class="note">Uses the price at the moment of each call. Entering a little later tested 2–3 points worse, and Trench's real fees and bust rules may differ.</p>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-bot" hidden>
+      <div class="ppTop">
+        <div><div class="coinName">$50 of fake money, following every call, running on GitHub 24/7</div><span class="price" id="ppBal">—</span> <span class="chg" id="ppChg"></span><div class="acctSub" id="ppMeta"></div></div>
+        <svg class="spark" id="ppSpark" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true"></svg>
+      </div>
+      <div class="tablewrap"><table><tbody id="ppLog"></tbody></table></div>
+      <p class="note">Simulated Trench-style trades: 10% of the balance per trade, multiplier set so the bust price is 3× the typical move away, 0.1% fee. Trench doesn't publish its exact formulas, so real results will differ.</p>
+    </div>
+  </section>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
 
   <details class="card fold" id="settings">
     <summary>Settings</summary>
@@ -408,6 +576,8 @@ async function loadHistory(){
       S.src = src; S.candles = c; S.revealAt = performance.now();
       clearInterval(S.watchTimer); S.watch = {};
       render();
+      startFlow();
+      if(!S.settled){ S.settled = true; settleStale(); }
       S.timer = setInterval(poll, 10000);
       scanWatch(); S.watchTimer = setInterval(scanWatch, 90000);
       return;
@@ -436,7 +606,7 @@ async function poll(){
 /*MODEL-START*/
 // Experience brain weights: logistic regression trained on all five coins' 15-minute candles since 2023.
 // Written by research/train.py on 2026-10-25. Out-of-sample check (last 16 months): {"1": {"0.55": {"share": 0.201, "now": 0.571, "delayed": 0.5301}, "0.56": {"share": 0.122, "now": 0.5778, "delayed": 0.5295}, "0.58": {"share": 0.037, "now": 0.5845, "delayed": 0.5302}}, "4": {"0.55": {"share": 0.253, "now": 0.557, "delayed": 0.5346}, "0.56": {"share": 0.168, "now": 0.561, "delayed": 0.537}, "0.58": {"share": 0.061, "now": 0.5681, "delayed": 0.536}}, "16": {"0.55": {"share": 0.161, "now": 0.5414, "delayed": 0.534}, "0.56": {"share": 0.095, "now": 0.5502, "delayed": 0.5423}, "0.58": {"share": 0.028, "now": 0.5677, "delayed": 0.558}}}
-const EXPERIENCE = {"trained": "2026-10-25", "feats": ["ret1", "ret3", "ret12", "ret48", "rsi", "trend", "range_pos", "vol_z", "vol_regime", "volmom"], "models": {"1": {"w": [-0.05577, -0.07231, 0.02893, -0.01966, -0.12558, 0.08399, -0.14496, 0.00869, 0.04349, 0.06373], "b": 0.02222}, "4": {"w": [-0.04361, -0.04669, 0.03276, 0.00024, -0.21678, 0.02933, -0.11777, -0.00271, 0.07936, 0.04756], "b": 0.0379}, "16": {"w": [-0.02663, -0.03735, 0.0163, 0.05307, -0.08846, -0.15788, -0.07464, 0.00314, 0.126, 0.02588], "b": 0.03282}}};
+const EXPERIENCE = {"trained": "2026-10-25", "unseenFrom": 1790374500000, "feats": ["ret1", "ret3", "ret12", "ret48", "rsi", "trend", "range_pos", "vol_z", "vol_regime", "volmom"], "models": {"1": {"w": [-0.05572, -0.07317, 0.02973, -0.01845, -0.13644, 0.08814, -0.14154, 0.00926, 0.04285, 0.06366], "b": 0.02272}, "4": {"w": [-0.04339, -0.04588, 0.03433, 0.00135, -0.23439, 0.03558, -0.11504, -0.00139, 0.0788, 0.04889], "b": 0.03874}, "16": {"w": [-0.02709, -0.03594, 0.0164, 0.05743, -0.09487, -0.15817, -0.07563, 0.00346, 0.12977, 0.02549], "b": 0.03555}}};
 /*MODEL-END*/
 // ───────── indicators ─────────
 function ema(a, n){ const k = 2/(n+1), o = new Array(a.length); let p = a[0]; for(let i=0;i<a.length;i++){ p = i ? a[i]*k + p*(1-k) : a[0]; o[i] = p; } return o; }
@@ -710,6 +880,8 @@ function render(){
   drawChart(C, A, dayBars, S.disp);
   setStatus(`${C.length} candles studied · updated ${new Date().toLocaleTimeString()}`);
   maybeAlert(A, C);
+  practiceOnAnalysis(S.coin, A, C);
+  renderTicket();
 }
 
 function watchEntry(p){
@@ -727,10 +899,11 @@ async function scanWatch(){
   for(const coin of COINS){
     if(coin === S.coin || gen !== S.gen) continue;
     try{
-      const c = await load(S.src, coin, S.tf, 1500, false);
+      const c = await load(S.src, coin, S.tf, 2000, false);
       if(gen !== S.gen) return;
       const A = analyze(c, dayBars, H, S.conf, cacheFor(coin));
       S.watch[coin] = watchEntry(A.P[c.length-1]);
+      practiceOnAnalysis(coin, A, c);
     }catch(e){ S.watch[coin] = {cls:"n", txt:"no data"}; }
     renderWatch();
   }
@@ -770,7 +943,7 @@ async function fetchTicker(){
     if(gen !== S.gen || !(price > 0)) return;
     const k = S.candles[S.candles.length-1];
     k.c = price; k.h = Math.max(k.h, price); k.l = Math.min(k.l, price);
-    setLivePrice(price);
+    setLivePrice(price); onPrice(S.coin, price);
   }catch(e){}
 }
 let lastFrame = 0;
@@ -901,7 +1074,6 @@ async function loadPaper(){
     const L = await (await fetch("paper/ledger.json?" + Date.now(), {cache:"no-store"})).json();
     const open = L.trades.filter(t => t.status === "open"), closed = L.trades.filter(t => t.status !== "open");
     const value = L.balance + open.reduce((s,t) => s + t.stake, 0), chg = value / L.start - 1;
-    $("paper").hidden = false;
     countTo($("ppBal"), value, v => "$" + v.toFixed(2));
     $("ppChg").textContent = (chg >= 0 ? "▲ " : "▼ ") + Math.abs(chg*100).toFixed(1) + "%";
     $("ppChg").className = "chg " + (chg >= 0 ? "win" : "loss");
@@ -916,8 +1088,356 @@ async function loadPaper(){
       <td><span class="pill ${t.dir > 0 ? "up" : "down"}">${t.dir > 0 ? "▲ UP" : "▼ DOWN"}</span></td><td>$${t.stake.toFixed(2)} × ${t.mult}</td>
       <td class="${t.status === "open" ? "pend" : t.pnl > 0 ? "win" : "loss"}">${t.status === "open" ? "open…" : t.status === "busted" ? "busted −$" + t.stake.toFixed(2) : (t.pnl > 0 ? "+$" : "−$") + Math.abs(t.pnl).toFixed(2)}</td></tr>`).join("")
       || `<tr><td colspan="5" class="pend">No trades yet. It trades whenever the site makes a call.</td></tr>`;
-  }catch(e){ $("paper").hidden = true; }
+  }catch(e){ $("ppMeta").textContent = "The bot's ledger isn't reachable from here."; }
 }
+// ───────── live buys & sells (exchange trade stream, straight into the browser) ─────────
+const FLOW = {ws:null, trades:[], secs:new Map(), bubbles:[], coin:null, tries:0, retry:null, lastPrice:0, rendered:0};
+const fmtUsd = v => v >= 1e6 ? "$" + (v/1e6).toFixed(2) + "M" : v >= 1e3 ? "$" + (v/1e3).toFixed(1) + "K" : "$" + v.toFixed(0);
+function flowSources(){
+  const all = [
+    {name:"Binance",    kind:"binance",  url:c => `wss://stream.binance.com:9443/ws/${c.toLowerCase()}usdt@trade`},
+    {name:"Binance US", kind:"binance",  url:c => `wss://stream.binance.us:9443/ws/${c.toLowerCase()}usdt@trade`},
+    {name:"Coinbase",   kind:"coinbase", url:() => "wss://ws-feed.exchange.coinbase.com"},
+  ];
+  const first = all.findIndex(s => S.src && s.name === S.src.name);
+  return first > 0 ? [all[first], ...all.filter((_, i) => i !== first)] : all;
+}
+function startFlow(i = 0){
+  clearTimeout(FLOW.retry);
+  if(FLOW.ws){ FLOW.ws.onclose = null; try{ FLOW.ws.close(); }catch(e){} FLOW.ws = null; }
+  if(FLOW.coin !== S.coin){ FLOW.trades = []; FLOW.secs.clear(); FLOW.bubbles = []; FLOW.coin = S.coin; FLOW.rendered = 0; }
+  const list = flowSources(), src = list[i % list.length], coin = S.coin;
+  $("flowMeta").textContent = i >= list.length ? "live feed unavailable, retrying…" : `connecting to ${src.name}…`;
+  let ws, got = false;
+  try{ ws = new WebSocket(src.url(coin)); }catch(e){ FLOW.retry = setTimeout(() => startFlow(i + 1), 3000); return; }
+  FLOW.ws = ws;
+  ws.onopen = () => { if(src.kind === "coinbase") ws.send(JSON.stringify({type:"subscribe", product_ids:[coin + "-USD"], channels:["matches"]})); };
+  ws.onmessage = ev => {
+    let d; try{ d = JSON.parse(ev.data); }catch(e){ return; }
+    let t = null;
+    // Binance: m = buyer was the maker, so the aggressive side was a SELL
+    if(src.kind === "binance" && d.e === "trade") t = {t:d.T, p:+d.p, q:+d.q, buy:!d.m};
+    // Coinbase: side is the maker's side, so the aggressive side is the opposite
+    else if(src.kind === "coinbase" && d.type === "match") t = {t:Date.parse(d.time), p:+d.price, q:+d.size, buy:d.side === "sell"};
+    if(!t || !(t.p > 0) || coin !== S.coin) return;
+    if(!got){ got = true; $("flowMeta").innerHTML = `<span class="live" style="padding:3px 9px"><i></i>live from ${src.name}</span>`; }
+    addTrade(t);
+  };
+  ws.onclose = () => { if(FLOW.ws !== ws) return; FLOW.retry = setTimeout(() => startFlow(got ? i : i + 1), got ? 1500 : 2500); };
+  setTimeout(() => { if(FLOW.ws === ws && !got){ ws.onclose = null; try{ ws.close(); }catch(e){} startFlow(i + 1); } }, 8000);
+}
+function addTrade(t){
+  t.v = t.p * t.q; t.id = ++FLOW.rendered;
+  FLOW.trades.push(t); if(FLOW.trades.length > 600) FLOW.trades.splice(0, 200);
+  const sec = Math.floor(t.t / 1000), b = FLOW.secs.get(sec) || {buy:0, sell:0};
+  if(t.buy) b.buy += t.v; else b.sell += t.v;
+  FLOW.secs.set(sec, b);
+  // bubbles for the bigger trades (top ~30% of recent sizes)
+  const recent = FLOW.trades.slice(-150).map(x => x.v).sort((a, b) => a - b);
+  if(t.v >= recent[Math.floor(recent.length * .7)] || FLOW.trades.length < 20){
+    FLOW.bubbles.push({born:performance.now(), buy:t.buy, v:t.v}); if(FLOW.bubbles.length > 70) FLOW.bubbles.shift(); }
+  // real trades are the freshest price there is: feed them to the chart (at most twice a second)
+  const now = performance.now();
+  if(now - FLOW.lastPrice > 500 && S.candles.length){ FLOW.lastPrice = now;
+    const k = S.candles[S.candles.length-1]; k.c = t.p; k.h = Math.max(k.h, t.p); k.l = Math.min(k.l, t.p);
+    S.prices[S.coin] = t.p; setLivePrice(t.p); onPrice(S.coin, t.p); }
+}
+function flowSums(ms){
+  const from = Date.now() - ms; let buy = 0, sell = 0;
+  for(const [sec, b] of FLOW.secs) if(sec * 1000 >= from){ buy += b.buy; sell += b.sell; }
+  return {buy, sell};
+}
+function renderFlowText(){
+  const now = Math.floor(Date.now() / 1000);
+  for(const sec of FLOW.secs.keys()) if(sec < now - 400) FLOW.secs.delete(sec);
+  const m = flowSums(60000), f = flowSums(300000), tot = m.buy + m.sell;
+  const pct = tot ? m.buy / tot : .5;
+  $("tugFill").style.width = (pct * 100).toFixed(1) + "%";
+  $("tugBuyPct").textContent = Math.round(pct * 100) + "%"; $("tugSellPct").textContent = Math.round((1 - pct) * 100) + "%";
+  $("tugBuyAmt").textContent = fmtUsd(m.buy) + " bought"; $("tugSellAmt").textContent = fmtUsd(m.sell) + " sold";
+  const f5 = f.buy + f.sell;
+  $("tug5").textContent = f5 ? `5 min: ${f.buy >= f.sell ? "buyers" : "sellers"} ahead by ${fmtUsd(Math.abs(f.buy - f.sell))}` : "5 min: —";
+  $("tugWho").textContent = !tot ? "last minute" : pct > .6 ? "buyers in control" : pct < .4 ? "sellers in control" : "evenly matched";
+  // tape
+  const min = +$("tapeMin").value, show = FLOW.trades.filter(t => t.v >= min).slice(-14).reverse();
+  if(!show.length){ if(FLOW.trades.length) $("tape").innerHTML = `<li class="pend">No trades over ${fmtUsd(min)} yet. Lower the filter to see more.</li>`; return; }
+  const sizes = FLOW.trades.slice(-300).map(x => x.v).sort((a, b) => a - b), whale = sizes[Math.floor(sizes.length * .97)] * 1.5;
+  const last = +($("tape").dataset.last || 0);
+  $("tape").innerHTML = show.map(t => `<li class="${t.buy ? "b" : "s"}${t.v >= whale && FLOW.trades.length > 50 ? " whale" : ""}${t.id > last ? " new" : ""}">
+    <span>${new Date(t.t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"}).replace(/ ?[AP]M/, "")}</span>
+    <span class="sd">${t.buy ? "BUY" : "SELL"}</span><span>${fmtP(t.p)}</span>
+    <span class="usd">${t.v >= whale && FLOW.trades.length > 50 ? "🐋 " : ""}${fmtUsd(t.v)}</span></li>`).join("");
+  $("tape").dataset.last = show[0].id;
+}
+function drawFlow(ts){
+  const cv = $("flowChart"), dpr = window.devicePixelRatio || 1, W = cv.clientWidth, Hh = cv.clientHeight;
+  if(!W) return;
+  if(cv.width !== Math.round(W*dpr) || cv.height !== Math.round(Hh*dpr)){ cv.width = W*dpr; cv.height = Hh*dpr; }
+  const g = cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,Hh);
+  const {up, down, faint, muted} = colors || {up:"#3ee6a2", down:"#ff5d73", faint:"#4a5378", muted:"#8b95bd"};
+  const mid = Hh / 2, N = 90, now = Date.now(), bw = W / N;
+  let max = 1;
+  for(let k=0;k<N;k++){ const b = FLOW.secs.get(Math.floor(now/1000) - k); if(b) max = Math.max(max, b.buy, b.sell); }
+  // per-second buy (up) and sell (down) bars; the current second grows smoothly as trades arrive
+  for(let k=0;k<N;k++){
+    const b = FLOW.secs.get(Math.floor(now/1000) - k); if(!b) continue;
+    const x = W - (k + 1) * bw - ((now % 1000) / 1000) * bw;
+    const hb = (b.buy / max) * (mid - 18), hs = (b.sell / max) * (mid - 18);
+    g.fillStyle = up; g.globalAlpha = .25 + .55 * (1 - k / N); g.fillRect(x + 1, mid - hb, bw - 2, hb);
+    g.fillStyle = down; g.fillRect(x + 1, mid, bw - 2, hs);
+  }
+  g.globalAlpha = 1;
+  g.strokeStyle = faint; g.beginPath(); g.moveTo(0, mid); g.lineTo(W, mid); g.stroke();
+  g.font = "600 10.5px JetBrains Mono, monospace"; g.textBaseline = "top"; g.fillStyle = up; g.fillText("BUYING ▲", 6, 4);
+  g.textBaseline = "bottom"; g.fillStyle = down; g.fillText("SELLING ▼", 6, Hh - 4);
+  // bubbles: each bigger trade floats up (buy) or sinks (sell) from the "now" edge
+  const vmax = Math.max(...FLOW.bubbles.map(b => b.v), 1), t = performance.now();
+  FLOW.bubbles = FLOW.bubbles.filter(b => t - b.born < 3200);
+  for(const b of FLOW.bubbles){
+    const age = (t - b.born) / 3200, r = 3 + 13 * Math.sqrt(b.v / vmax);
+    const x = W - 14 - age * W * .35 + Math.sin((b.born + t) / 300) * 3, y = b.buy ? mid - 8 - age * (mid - 10) : mid + 8 + age * (mid - 10);
+    g.globalAlpha = .85 * (1 - age); g.fillStyle = b.buy ? up : down;
+    g.save(); g.shadowColor = g.fillStyle; g.shadowBlur = 12; g.beginPath(); g.arc(x, y, r, 0, Math.PI*2); g.fill(); g.restore();
+  }
+  g.globalAlpha = 1;
+  if(!FLOW.trades.length){ g.fillStyle = muted; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("waiting for live trades…", W/2, mid - 14); g.textAlign = "left"; }
+}
+let flowFrame = 0;
+function flowLoop(ts){ requestAnimationFrame(flowLoop); if(document.hidden || ts - flowFrame < 33) return; flowFrame = ts; drawFlow(ts); }
+setInterval(renderFlowText, 400);
+requestAnimationFrame(flowLoop);
+
+// ───────── practice trading (your own fake account, saved in this browser) ─────────
+const FEE = 0.001;   // same assumed Trench fee as the bot: 0.1% of the position size
+const PR_KEY = "turnspotter-practice";
+S.prices = {}; S.hist = {};
+const PR = (() => { try{ const d = JSON.parse(localStorage.getItem(PR_KEY)); if(d && Array.isArray(d.positions)) return d; }catch(e){}
+  return {start:50, cash:50, positions:[], history:[], auto:{on:false, stakePct:10, buffer:3}, seen:{}}; })();
+const TK = {dir:1, mins:60, touched:false};
+function savePractice(){ try{ localStorage.setItem(PR_KEY, JSON.stringify(PR)); }catch(e){} }
+function priceOf(coin){ return S.prices[coin]; }
+function pnlOf(p, price){ return Math.max(-p.stake, p.stake * p.mult * p.dir * (price / p.entry - 1) - p.fee); }
+function equityNow(){ return PR.cash + PR.positions.reduce((s, p) => s + p.stake + (priceOf(p.coin) ? pnlOf(p, priceOf(p.coin)) : 0), 0); }
+function toast(msg, cls){ const el = document.createElement("div"); el.className = "toast " + (cls || ""); el.textContent = msg;
+  $("toasts").appendChild(el); setTimeout(() => el.remove(), 5000); }
+function openPosition(coin, dir, stake, mult, mins, auto){
+  const price = priceOf(coin);
+  stake = Math.round(stake * 100) / 100;
+  if(!(price > 0) || stake < 1 || stake > PR.cash + 1e-9) return false;
+  PR.cash -= stake;
+  PR.positions.push({id:Date.now() + coin, coin, dir, entry:price, stake, mult, fee:stake * mult * FEE,
+    bust:price * (1 - dir / mult), openedAt:Date.now(), expiresAt:Date.now() + mins * 60000, auto:!!auto});
+  savePractice(); renderPractice();
+  toast(`${auto ? "Auto: " : ""}${coin} ${dir > 0 ? "▲ UP" : "▼ DOWN"} · $${stake.toFixed(2)} × ${mult} at ${fmtP(price)}`);
+  return true;
+}
+function closePosition(p, price, status){
+  p.exit = price; p.closedAt = Date.now();
+  p.pnl = status === "busted" ? -p.stake : pnlOf(p, price);
+  p.status = status || (p.pnl > 0 ? "won" : "lost");
+  PR.cash += p.stake + p.pnl;
+  PR.positions = PR.positions.filter(x => x !== p);
+  PR.history.push(p); if(PR.history.length > 200) PR.history.shift();
+  savePractice(); renderPractice();
+  toast(`${p.coin} ${p.dir > 0 ? "UP" : "DOWN"} ${p.status === "busted" ? "busted" : "closed"}: ${p.pnl >= 0 ? "+" : "−"}$${Math.abs(p.pnl).toFixed(2)}`, p.pnl > 0 ? "win" : "loss");
+}
+// every new price: check busts and expiries
+function onPrice(coin, price){
+  S.prices[coin] = price;
+  for(const p of PR.positions.filter(x => x.coin === coin)){
+    if(p.dir > 0 ? price <= p.bust : price >= p.bust) closePosition(p, p.bust, "busted");
+    else if(Date.now() >= p.expiresAt) closePosition(p, price);
+  }
+}
+async function fetchPrice(coin){
+  if(!S.src) return;
+  try{
+    const d = S.src.kind === "binance" ? await getJSON(`${S.src.host}/api/v3/ticker/price?symbol=${S.src.sym(coin)}`)
+                                       : await getJSON(`${S.src.host}/products/${S.src.sym(coin)}/ticker`);
+    if(+d.price > 0) onPrice(coin, +d.price);
+  }catch(e){}
+}
+// trades that expired while the page was closed: settle them from the candles
+async function settleStale(){
+  for(const p of PR.positions.filter(x => Date.now() > x.expiresAt + 60000)){
+    try{
+      const C = await load(S.src, p.coin, "15m", 300, false);
+      const during = C.filter(k => k.t + 900000 > p.openedAt && k.t < p.expiresAt);
+      const hitBust = during.some(k => p.dir > 0 ? k.l <= p.bust : k.h >= p.bust);
+      const after = C.find(k => k.t >= p.expiresAt);
+      if(hitBust) closePosition(p, p.bust, "busted");
+      else closePosition(p, after ? after.o : C[C.length-1].c);
+    }catch(e){}
+  }
+}
+// auto-follow: take each fresh call on any coin, with the user's own stake and risk settings
+function practiceOnAnalysis(coin, A, C){
+  S.hist[coin] = C;
+  if(!S.prices[coin] || coin !== S.coin) S.prices[coin] = C[C.length-1].c;
+  if(!PR.auto.on || PR.positions.some(p => p.coin === coin)) return;
+  const s = A.sigs[A.sigs.length-1];
+  if(!s || s.i < C.length - 3 || s.t <= (PR.seen[coin] || 0)) return;
+  PR.seen[coin] = s.t;
+  const move = A.P[C.length-1]?.move || A.P[s.i]?.move || .01;
+  const mult = Math.max(1, Math.min(100, Math.floor(1 / (PR.auto.buffer * move))));
+  const stake = Math.max(1, PR.cash * PR.auto.stakePct / 100);
+  openPosition(coin, s.dir, Math.min(stake, PR.cash), mult, S.look, true);
+}
+
+function renderTicket(){
+  const coin = S.coin, price = priceOf(coin), p = S.A && S.A.P[S.A.P.length-1];
+  $("tkCoin").textContent = coin; $("tkPrice").textContent = price ? fmtP(price) : "—";
+  if(!TK.touched && p){ TK.dir = p.modelDown ? -1 : 1; }
+  document.querySelectorAll(".dirBtn").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.dir === TK.dir)));
+  const st = $("tkStake"); st.max = Math.max(1, Math.floor(PR.cash * 2) / 2);
+  if(+st.value > +st.max) st.value = st.max;
+  const stake = +st.value, mult = +$("tkMult").value;
+  $("tkStakeV").textContent = "$" + stake.toFixed(2); $("tkMultV").textContent = "×" + mult;
+  const bustPct = 100 / mult, move = p && !isNaN(p.move) ? p.move * Math.sqrt(TK.mins / S.look) * 100 : NaN;
+  const ratio = bustPct / move, win1 = stake * mult * .01 - stake * mult * FEE;
+  const call = p ? (p.modelUp ? "UP" : p.modelDown ? "DOWN" : "WAIT") : "…";
+  $("tkRisk").innerHTML = `Busts if price moves <b>${bustPct.toFixed(2)}%</b> against you (at ${price ? fmtP(price * (1 - TK.dir / mult)) : "—"}).
+    ${isNaN(move) ? "" : `A normal ${TK.mins === 60 ? "hour" : "4 hours"} moves about <b>±${move.toFixed(2)}%</b>, so this is <b class="${ratio < 1.5 ? "danger" : ratio < 3 ? "" : "ok"}">${ratio.toFixed(1)}×</b> a normal move${ratio < 1.5 ? ": likely to bust from noise alone" : ratio < 3 ? ": risky" : ": comfortable"}.`}
+    <br>A 1% move your way pays <b>+$${win1.toFixed(2)}</b>. Fee: $${(stake * mult * FEE).toFixed(2)}. The AI says <b>${call}</b> right now.`;
+  const btn = $("tkPlace");
+  btn.textContent = `Place ${TK.dir > 0 ? "▲ UP" : "▼ DOWN"} · $${stake.toFixed(2)} × ${mult}`;
+  btn.className = "place" + (TK.dir < 0 ? " down" : "");
+  btn.disabled = !price || PR.cash < 1;
+}
+function renderPractice(){
+  const eq = equityNow(), chg = eq / PR.start - 1;
+  $("prEq").textContent = "$" + eq.toFixed(2);
+  $("prChg").textContent = (chg >= 0 ? "▲ " : "▼ ") + Math.abs(chg * 100).toFixed(1) + "%"; $("prChg").className = "chg " + (chg >= 0 ? "win" : "loss");
+  const done = PR.history, won = done.filter(p => p.pnl > 0).length;
+  $("prCash").textContent = `$${PR.cash.toFixed(2)} free · ${PR.positions.length} open · ${done.length} closed${done.length ? `, ${won} won (${Math.round(100 * won / done.length)}%)` : ""} · started with $${PR.start}`;
+  $("posList").innerHTML = PR.positions.length ? PR.positions.map(p => {
+    const price = priceOf(p.coin), pnl = price ? pnlOf(p, price) : 0, left = Math.max(0, p.expiresAt - Date.now());
+    const prog = 1 - left / (p.expiresAt - p.openedAt), toBust = price ? Math.abs(price - p.bust) / Math.abs(p.entry - p.bust) : 1;
+    return `<div class="pos"><div class="posTop"><span><b>${p.coin}</b> <span class="pill ${p.dir > 0 ? "up" : "down"}">${p.dir > 0 ? "▲ UP" : "▼ DOWN"}</span>${p.auto ? ' <span class="pill" style="color:var(--muted)">auto</span>' : ""}</span>
+      <span class="pnl ${pnl >= 0 ? "win" : "loss"}">${pnl >= 0 ? "+" : "−"}$${Math.abs(pnl).toFixed(2)}</span></div>
+      <div class="posMeta"><span>$${p.stake.toFixed(2)} × ${p.mult}</span><span>in at ${fmtP(p.entry)}</span><span>now ${price ? fmtP(price) : "—"}</span><span>bust ${fmtP(p.bust)}</span></div>
+      <div class="meter2" title="Time left"><i style="width:${(prog * 100).toFixed(1)}%;background:linear-gradient(90deg,var(--accent),var(--cyan))"></i></div>
+      <div class="meter2" title="Distance to bust"><i style="width:${(Math.min(1, toBust) * 100).toFixed(1)}%;background:${toBust < .35 ? "var(--down)" : toBust < .7 ? "var(--warn)" : "var(--up)"}"></i></div>
+      <div class="posBtns"><span>${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")} left · ${toBust < .35 ? "close to busting" : "safe from bust"}</span>
+      <button type="button" data-close="${p.id}">Close now</button></div></div>`; }).join("")
+    : `<p class="pend">No open trades. Place one, or switch on auto-follow.</p>`;
+  $("prHist").innerHTML = done.slice(-10).reverse().map(p => `<tr><td>${fmtT(p.openedAt)}</td><td>${p.coin}</td>
+    <td><span class="pill ${p.dir > 0 ? "up" : "down"}">${p.dir > 0 ? "▲" : "▼"}</span></td><td>$${p.stake.toFixed(2)} × ${p.mult}</td>
+    <td class="${p.pnl > 0 ? "win" : "loss"}">${p.status === "busted" ? "busted " : ""}${p.pnl >= 0 ? "+" : "−"}$${Math.abs(p.pnl).toFixed(2)}</td></tr>`).join("")
+    || `<tr><td colspan="5" class="pend">Your closed trades show up here.</td></tr>`;
+  $("autoOn").checked = PR.auto.on; $("autoCfg").hidden = !PR.auto.on;
+  $("autoStake").value = PR.auto.stakePct; $("autoStakeV").textContent = PR.auto.stakePct + "%";
+  $("autoBuf").value = PR.auto.buffer; $("autoBufV").textContent = PR.auto.buffer + "× a normal move";
+  renderTicket();
+}
+
+// ticket controls
+document.querySelectorAll(".dirBtn").forEach(b => b.addEventListener("click", () => { TK.dir = +b.dataset.dir; TK.touched = true; renderTicket(); }));
+$("tkStake").addEventListener("input", renderTicket);
+$("tkMult").addEventListener("input", renderTicket);
+document.querySelectorAll("#pane-trade .quick [data-pct]").forEach(b => b.addEventListener("click", () => {
+  $("tkStake").value = Math.max(1, Math.floor(PR.cash * +b.dataset.pct / 100 * 2) / 2); renderTicket(); }));
+$("tkDur").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return; TK.mins = +b.dataset.min;
+  $("tkDur").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); renderTicket(); });
+$("tkPlace").addEventListener("click", () => { if(openPosition(S.coin, TK.dir, +$("tkStake").value, +$("tkMult").value, TK.mins, false)) TK.touched = false; });
+$("posList").addEventListener("click", e => { const b = e.target.closest("[data-close]"); if(!b) return;
+  const p = PR.positions.find(x => String(x.id) === b.dataset.close); if(p && priceOf(p.coin)) closePosition(p, priceOf(p.coin)); });
+$("autoOn").addEventListener("change", e => { PR.auto.on = e.target.checked;
+  if(PR.auto.on) for(const c of COINS) PR.seen[c] = Date.now() - 30 * 60000;   // only calls from now on
+  savePractice(); renderPractice(); toast(PR.auto.on ? "Auto-follow on: the next call on any coin opens a trade" : "Auto-follow off"); });
+$("autoStake").addEventListener("input", e => { PR.auto.stakePct = +e.target.value; savePractice(); renderPractice(); });
+$("autoBuf").addEventListener("input", e => { PR.auto.buffer = +e.target.value; savePractice(); renderPractice(); });
+// reset with an inline confirmation (the viewer can't show confirm dialogs)
+$("resetBox").addEventListener("click", e => {
+  const box = $("resetBox");
+  if(e.target.id === "prReset") box.innerHTML = `<span class="money" style="display:inline-flex;width:110px"><span>$</span><input type="number" id="resetAmt" value="${PR.start}" min="5"></span>
+    <button type="button" id="resetYes" class="ghost">Reset all</button> <button type="button" id="resetNo" class="ghost">Cancel</button>`;
+  else if(e.target.id === "resetYes"){ const amt = Math.max(5, +$("resetAmt").value || 50);
+    Object.assign(PR, {start:amt, cash:amt, positions:[], history:[], seen:{}}); savePractice(); renderPractice(); toast(`Practice account reset to $${amt}`);
+    box.innerHTML = `<button type="button" id="prReset" class="ghost">Reset</button>`; }
+  else if(e.target.id === "resetNo") box.innerHTML = `<button type="button" id="prReset" class="ghost">Reset</button>`;
+});
+// tabs
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", String(x === t)));
+  for(const name of ["trade", "whatif", "bot"]) $("pane-" + name).hidden = name !== t.dataset.tab;
+  if(t.dataset.tab === "whatif") runWhatIf();
+}));
+setInterval(() => {
+  for(const c of new Set(PR.positions.map(p => p.coin))) if(c !== S.coin) fetchPrice(c);
+  for(const p of PR.positions) if(Date.now() >= p.expiresAt && priceOf(p.coin)) onPrice(p.coin, priceOf(p.coin));
+  if(!$("pane-trade").hidden) renderPractice();
+}, 3000);
+renderPractice();
+
+// ───────── "What if?" replay of real past calls ─────────
+const WI = {coins:new Set(COINS), cache:new Map(), timer:null};
+$("wiCoins").innerHTML = COINS.map(c => `<button type="button" data-coin="${c}" aria-pressed="true">${c}</button>`).join("");
+$("wiCoins").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return;
+  const c = b.dataset.coin; WI.coins.has(c) ? WI.coins.delete(c) : WI.coins.add(c);
+  b.setAttribute("aria-pressed", String(WI.coins.has(c))); runWhatIf(); });
+for(const id of ["wiStart", "wiStake", "wiMode", "wiFixed", "wiConf", "wiLook"]) $(id).addEventListener("input", () => { clearTimeout(WI.timer); WI.timer = setTimeout(runWhatIf, 150); });
+function analyzeCached(coin, C, H, conf){
+  const key = `${coin}|${H}|${conf}|${C.length}|${C[C.length-1].t}`;
+  if(!WI.cache.has(key)){ if(WI.cache.size > 30) WI.cache.clear(); WI.cache.set(key, analyze(C, 96, H, conf, new Map())); }
+  return WI.cache.get(key);
+}
+function simulate(cfg){
+  const events = [];
+  for(const coin of cfg.coins){
+    const C = S.hist[coin]; if(!C) continue;
+    const A = analyzeCached(coin, C, cfg.H, cfg.conf);
+    let busyUntil = 0;
+    for(const s of A.sigs){
+      if(s.i + cfg.H >= C.length - 1 || s.i <= busyUntil || C[s.i].t < EXPERIENCE.unseenFrom) continue;
+      busyUntil = s.i + cfg.H;   // one trade per coin at a time
+      const move = A.P[s.i]?.move || .01;
+      const mult = cfg.fixed ? cfg.fixed : Math.max(1, Math.min(100, Math.floor(1 / (cfg.buffer * move))));
+      const entry = C[s.i].c, bust = entry * (1 - s.dir / mult);
+      const path = C.slice(s.i + 1, s.i + cfg.H + 1), hit = path.some(k => s.dir > 0 ? k.l <= bust : k.h >= bust);
+      events.push({coin, t:C[s.i].t, end:C[s.i + cfg.H].t, dir:s.dir, mult, entry, exit:C[s.i + cfg.H].c, busted:hit});
+    }
+  }
+  events.sort((a, b) => a.t - b.t);
+  let cash = cfg.start; const open = [], curve = [{t:events[0]?.t || Date.now(), v:cfg.start}], done = [];
+  const settle = upto => { open.sort((a, b) => a.end - b.end);
+    while(open.length && open[0].end <= upto){ const e = open.shift();
+      const pnl = e.busted ? -e.stake : Math.max(-e.stake, e.stake * e.mult * e.dir * (e.exit / e.entry - 1) - e.stake * e.mult * FEE);
+      cash += e.stake + pnl; done.push({...e, pnl}); curve.push({t:e.end, v:cash + open.reduce((s, x) => s + x.stake, 0)}); } };
+  for(const e of events){ settle(e.t); const stake = Math.min(cash, Math.max(1, cash * cfg.stakePct / 100)); if(stake < 1) continue;
+    cash -= stake; open.push({...e, stake}); }
+  settle(Infinity);
+  let peak = cfg.start, dd = 0; for(const p of curve){ peak = Math.max(peak, p.v); dd = Math.max(dd, 1 - p.v / peak); }
+  return {final:cash, curve, done, dd};
+}
+function runWhatIf(){
+  if($("pane-whatif").hidden) return;
+  const look = +$("wiLook").value, H = look / 15, mode = $("wiMode").value;
+  $("wiFixedBox").hidden = mode !== "fixed"; $("wiStakeV").textContent = $("wiStake").value + "%"; $("wiFixedV").textContent = "×" + $("wiFixed").value;
+  const missing = [...WI.coins].filter(c => !S.hist[c]);
+  if(missing.length){ $("wiVs").textContent = `Still loading ${missing.join(", ")}…`; setTimeout(runWhatIf, 2000); }
+  const cfg = {start:Math.max(5, +$("wiStart").value || 50), stakePct:+$("wiStake").value, conf:+$("wiConf").value, H,
+    fixed:mode === "fixed" ? +$("wiFixed").value : 0, buffer:{auto3:3, auto2:2, auto5:5}[mode] || 3, coins:[...WI.coins].filter(c => S.hist[c])};
+  const r = simulate(cfg), flat = simulate({...cfg, fixed:1});
+  const ret = r.final / cfg.start - 1, won = r.done.filter(d => d.pnl > 0).length, busts = r.done.filter(d => d.busted).length;
+  countTo($("wiFinal"), r.final, v => "$" + v.toFixed(2));
+  $("wiRet").textContent = (ret >= 0 ? "▲ " : "▼ ") + Math.abs(ret * 100).toFixed(1) + "%"; $("wiRet").className = "chg " + (ret >= 0 ? "win" : "loss");
+  if(!missing.length){ const days = r.curve.length > 1 ? (r.curve[r.curve.length-1].t - r.curve[0].t) / 864e5 : 0;
+    $("wiVs").textContent = `Over ${days.toFixed(1)} days. Same calls with no multiplier (×1): $${flat.final.toFixed(2)}.`; }
+  $("wiStats").innerHTML = `<div>Trades<b>${r.done.length}</b></div><div>Right<b class="${won / (r.done.length || 1) >= .5 ? "win" : "loss"}">${r.done.length ? Math.round(100 * won / r.done.length) + "%" : "—"}</b></div>
+    <div>Busted<b class="${busts ? "loss" : ""}">${busts}</b></div><div>Worst drop<b class="${r.dd > .3 ? "loss" : ""}">${(r.dd * 100).toFixed(0)}%</b></div>`;
+  // money curve, plus the no-multiplier version for comparison
+  const all = [...r.curve, ...flat.curve], t0 = Math.min(...all.map(p => p.t)), t1 = Math.max(...all.map(p => p.t)) || t0 + 1;
+  const lo = Math.min(...all.map(p => p.v), cfg.start), hi = Math.max(...all.map(p => p.v), cfg.start);
+  const X = t => 4 + (t - t0) / ((t1 - t0) || 1) * 592, Y = v => 160 - (v - lo) / ((hi - lo) || 1) * 150;
+  const line = c => c.map((p, i) => `${i ? "L" : "M"}${X(p.t).toFixed(1)},${Y(p.v).toFixed(1)}`).join("");
+  const col = ret >= 0 ? "var(--up)" : "var(--down)";
+  $("wiChart").innerHTML = `<line x1="0" x2="600" y1="${Y(cfg.start)}" y2="${Y(cfg.start)}" stroke="var(--faint)" stroke-dasharray="4 5"/>
+    <path d="${line(flat.curve)}" fill="none" stroke="var(--muted)" stroke-width="1.5" opacity=".6" vector-effect="non-scaling-stroke"/>
+    <path d="${line(r.curve)}" fill="none" stroke="${col}" stroke-width="2.5" vector-effect="non-scaling-stroke" style="filter:drop-shadow(0 0 6px ${col})"/>
+`;
+}
+
 loadPaper(); setInterval(loadPaper, 60000);
 window.addEventListener("resize", () => S.A && drawChart(S.candles, S.A, Math.round(1440 / TF[S.tf].min)));
 renderWatch();

@@ -2,7 +2,8 @@
 
 For each prediction distance (1, 4 and 16 fifteen-minute candles = 15 min, 1 hour, 4 hours):
   1. honest check: train on everything before the last 16 months, test on those 16 months
-  2. ship: retrain on all data and write the weights between /*MODEL-START*/ and /*MODEL-END*/
+  2. ship: retrain on all data except the most recent 30 days (so the site's replay of recent calls
+     is a fair test of data the brain has never seen) and write the weights between the MODEL markers
 Run from the research folder after fetch_data.py. The weekly GitHub job does both.
 """
 import json, os, re
@@ -32,14 +33,15 @@ for h in (1, 4, 16):
         rep[str(cf)] = {"share": round(float(sel.mean()), 3), "now": acc["y_now"], "delayed": acc["y_del"]}
     report[h] = rep
     print(f"h={h:>2} tested on {te.index.min():%Y-%m-%d}..{te.index.max():%Y-%m-%d}:", rep, flush=True)
-    full = data.dropna(subset=["y_now"])
+    holdout = data.index.max() - pd.Timedelta(days=30)
+    full = data[data.index < holdout].dropna(subset=["y_now"])
     mf = LogisticRegression(C=0.1, max_iter=500).fit(full[FEATS], full["y_now"])
     models[h] = {"w": [round(float(x), 5) for x in mf.coef_[0]], "b": round(float(mf.intercept_[0]), 5)}
 
 stamp = pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%d")
 block = ("/*MODEL-START*/\n// Experience brain weights: logistic regression trained on all five coins' 15-minute candles since 2023.\n"
          f"// Written by research/train.py on {stamp}. Out-of-sample check (last 16 months): {json.dumps(report)}\n"
-         f"const EXPERIENCE = {json.dumps({'trained': stamp, 'feats': FEATS, 'models': models})};\n/*MODEL-END*/")
+         f"const EXPERIENCE = {json.dumps({'trained': stamp, 'unseenFrom': int(holdout.timestamp() * 1000), 'feats': FEATS, 'models': models})};\n/*MODEL-END*/")
 html = open(HTML).read()
 if "/*MODEL-START*/" in html:
     html = re.sub(r"/\*MODEL-START\*/.*?/\*MODEL-END\*/", lambda _: block, html, flags=re.S)
