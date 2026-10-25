@@ -85,11 +85,10 @@ for(const coin of CFG.coins){
   const n = C.length, fresh = A.sigs.filter(s => s.i >= n - 3).pop();
   { const q = A.P[n-1], last = A.P.slice(n-400).filter(Boolean), share = f => +(last.filter(f).length / last.length).toFixed(3);
     const done = A.sigs.filter(s => s.win !== undefined);
-    L.status[coin] = {src: data.src, candles: n, price: C[n-1].c, trend: +q.trend.toFixed(3), memory: +(q.mem || 0).toFixed(3), agree: q.agree,
-      paused: q.paused, record: isNaN(q.record) ? null : +q.record.toFixed(3), call: q.modelUp ? "UP" : q.modelDown ? "DOWN" : "WAIT",
-      // over the last 400 candles (~4 days): how often each gate blocked a call
-      last400: {trendConfident: share(p => Math.abs(p.trend - .5) >= CFG.conf - .5), agree: share(p => p.agree), paused: share(p => p.paused),
-        call: share(p => p.modelUp || p.modelDown), skippedTurn: share(p => p.up || p.down)},
+    L.status[coin] = {src: data.src, candles: n, price: C[n-1].c, experience: +q.exp.toFixed(3), liveLearner: +q.trend.toFixed(3),
+      record: isNaN(q.record) ? null : +q.record.toFixed(3), call: q.modelUp ? "UP" : q.modelDown ? "DOWN" : "WAIT",
+      // over the last 400 candles (~4 days): how often a call was on
+      last400: {call: share(p => p.modelUp || p.modelDown), bounceOrRollover: share(p => p.up || p.down)},
       backtest: {calls: done.length, right: done.length ? +(done.filter(s => s.win).length / done.length).toFixed(3) : null}}; }
   if(!fresh) continue;
   const p = A.P[n-1] || A.P[fresh.i];
@@ -102,7 +101,7 @@ for(const coin of CFG.coins){
   L.balance = +(L.balance - stake).toFixed(4);
   L.trades.push({id: `${coin}-${now}`, coin, dir: fresh.dir, entry, stake, mult, fee,
     bustPrice: +(entry * (1 - fresh.dir / mult)).toPrecision(8), openedAt: now, expiresAt: now + CFG.lookMin*60000,
-    trend: +p.trend.toFixed(3), memory: +p.mem.toFixed(3), source: data.src, status: "open"});
+    experience: +p.exp.toFixed(3), source: data.src, status: "open"});
   console.log("opened", coin, fresh.dir > 0 ? "UP" : "DOWN", `$${stake} x${mult} @ ${entry}`);
 }
 
