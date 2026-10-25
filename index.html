@@ -140,7 +140,7 @@ td{padding:9px 8px;border-bottom:1px solid var(--edge);white-space:nowrap;font-f
 .pill.up{background:color-mix(in srgb,var(--up) 14%,transparent);color:var(--up)} .pill.down{background:color-mix(in srgb,var(--down) 14%,transparent);color:var(--down)}
 details{border-top:1px solid var(--edge);margin-top:4px;padding-top:12px}
 summary{cursor:pointer;font:700 13px var(--body);color:var(--ink);list-style:none}
-summary::after{content:" +";color:var(--muted)} details[open] summary::after{content:" −"}
+summary::after{content:" +";color:var(--muted)} details[open] > summary::after{content:" −"}
 .sub{font:600 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
 ul.check{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 ul.check li{display:grid;grid-template-columns:18px 1fr auto;gap:8px;align-items:baseline;font-size:13.5px}
@@ -153,6 +153,34 @@ ul.check li .v{font:400 11.5px var(--mono);color:var(--muted)}
 @media (max-width:860px){.hero,.cols{grid-template-columns:1fr}}
 @media (max-width:640px){.facts{grid-template-columns:1fr}canvas{height:250px}.brain{grid-template-columns:96px 1fr 44px}.card{padding:15px;border-radius:16px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* simple mode */
+.top h1{font:800 16px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;margin:0}
+.main{display:flex;flex-direction:column;gap:6px;padding:22px;border-color:color-mix(in srgb,var(--mood) 45%,transparent);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--mood) 18%,transparent),0 30px 90px -40px var(--mood);transition:box-shadow 1s,border-color 1s}
+.mainTop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.coinName{font:600 13px var(--body);color:var(--muted)}
+.mainTop .price{font-size:clamp(24px,4vw,32px)}
+.call{font:800 clamp(72px,18vw,128px)/1 var(--display);letter-spacing:-.02em;margin-top:14px;color:var(--ink)}
+body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,var(--mood) 50%,transparent)}
+.callSub{font:600 clamp(16px,2.4vw,20px)/1.35 var(--body);margin:0;max-width:40ch}
+.countLine{margin:6px 0 0;color:var(--muted);font-size:14px}
+.countLine b{font:700 15px var(--mono);color:var(--ink)}
+.rowHead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.rowHead h2{margin:0}
+.record{font:600 13px var(--body);color:var(--muted)} .record b{font:700 14px var(--mono)}
+.fold>summary{font:700 13px var(--display);letter-spacing:.06em;text-transform:uppercase}
+.fold[open]>summary{margin-bottom:14px}
+.fold .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.fold label{display:grid;gap:6px;font:600 12px var(--body);color:var(--muted)}
+.moreGrid{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;align-items:start}
+.moreGrid .state{font-size:clamp(22px,3vw,30px)}
+.moreGrid .facts{grid-template-columns:1fr 1fr;margin-top:12px}
+.moreGrid .range{margin-top:12px}
+.score{margin-top:16px}
+.foot{margin-top:4px}
+#log td{border-bottom:1px solid var(--edge)}
+@media (max-width:760px){.moreGrid,.fold .controls{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -161,118 +189,115 @@ ul.check li .v{font:400 11.5px var(--mono);color:var(--muted)}
   <header class="top">
     <div class="brand">
       <svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#0d131c"/><path d="M88 176 L204 336 L300 252 L424 140" fill="none" stroke="#3ee6a2" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/><circle cx="204" cy="336" r="34" fill="#8b7bff"/></svg>
-      <h1>Turn Spotter<small>Two AI brains watching the market all day</small></h1>
+      <h1>Turn Spotter</h1>
     </div>
     <span class="live off" id="live"><i></i><span id="liveTxt">Connecting</span></span>
   </header>
 
-  <nav class="watch" id="watch" aria-label="All coins"></nav>
+  <nav class="watch" id="watch" aria-label="Pick a coin"></nav>
 
-  <div class="controls">
-    <select id="coin" aria-label="Coin">
-      <option value="BTC">Bitcoin</option><option value="ETH">Ethereum</option><option value="SOL">Solana</option><option value="XRP">XRP</option><option value="DOGE">Dogecoin</option>
-    </select>
-    <select id="tf" aria-label="Candle size">
-      <option value="1m">1-min candles</option><option value="5m">5-min candles</option><option value="15m" selected>15-min candles</option>
-    </select>
-    <select id="look" aria-label="How far ahead to predict">
-      <option value="5">Next 5 min</option><option value="15">Next 15 min</option><option value="30">Next 30 min</option><option value="60" selected>Next 1 hour</option><option value="240">Next 4 hours</option>
-    </select>
-    <select id="strict" aria-label="How picky the model is">
-      <option value="0.58" selected>Normal: more calls</option><option value="0.62">Strict: fewer, better</option><option value="0.66">Very strict: fewest, best</option>
-    </select>
-    <button id="alerts" class="alert" type="button">Turn on alerts</button>
-  </div>
-
-  <section class="hero">
-    <div class="card verdict">
-      <div class="eyebrow" id="vEyebrow">Loading today's market…</div>
-      <p class="state" id="vState">Warming up</p>
-      <p class="why" id="vWhy">Pulling the last day of candles so both brains have seen the whole day.</p>
-      <div class="priceRow"><span class="price" id="pNow">—</span><span class="chg" id="pChg"></span></div>
-      <div class="range">
-        <div class="rangeBar"><i id="rangeDot" style="left:50%"></i></div>
-        <div class="rangeLbl"><span id="rLo">24h low</span><span id="rPos">where price sits in today's range</span><span id="rHi">24h high</span></div>
-      </div>
+  <section class="card main">
+    <div class="mainTop">
+      <div><div class="coinName" id="coinName">Bitcoin</div><span class="price" id="pNow">—</span> <span class="chg" id="pChg"></span></div>
+      <button id="alerts" class="alert" type="button">🔔 Alert me</button>
     </div>
-    <div class="card dialCard">
-      <div class="eyebrow">Chance price is higher in <span id="dLook">1 hour</span></div>
-      <svg class="dial" viewBox="0 0 300 175" role="img" aria-label="Dial showing the chance of UP">
-        <defs>
-          <linearGradient id="arc" x1="0" x2="1"><stop offset="0" stop-color="#ff5d73"/><stop offset=".42" stop-color="#4a5378"/><stop offset=".58" stop-color="#4a5378"/><stop offset="1" stop-color="#3ee6a2"/></linearGradient>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        </defs>
-        <path d="M30 150 A120 120 0 0 1 270 150" fill="none" stroke="rgba(140,155,255,.10)" stroke-width="22" stroke-linecap="round"/>
-        <path d="M30 150 A120 120 0 0 1 270 150" fill="none" stroke="url(#arc)" stroke-width="10" stroke-linecap="round" filter="url(#glow)"/>
-        <g id="ticks" stroke="#eaf0ff" stroke-width="2" opacity=".5"></g>
-        <text x="30" y="172" fill="#8b95bd" font-size="11" font-family="JetBrains Mono" text-anchor="middle">DOWN</text>
-        <text x="270" y="172" fill="#8b95bd" font-size="11" font-family="JetBrains Mono" text-anchor="middle">UP</text>
-        <g class="needle" id="needle"><path d="M145 150 L150 42 L155 150 Z" fill="#eaf0ff" style="filter:drop-shadow(0 0 6px rgba(234,240,255,.6))"/><circle cx="150" cy="150" r="10" fill="#eaf0ff"/><circle cx="150" cy="150" r="4" fill="#06080f"/></g>
-      </svg>
-      <div class="dialNum" id="dNum">—</div>
-      <div class="dialSub" id="dSub">calls fire past the white marks</div>
-      <div class="brains">
-        <div class="brain"><span>Trend brain</span><div class="b"><i id="bT"></i></div><b id="bTn">—</b></div>
-        <div class="brain"><span>Memory brain</span><div class="b"><i id="bM"></i></div><b id="bMn">—</b></div>
-      </div>
-      <span class="agree no" id="agree">Waiting for both brains</span>
-    </div>
-  </section>
-
-  <section class="facts">
-    <div class="card fact"><div class="eyebrow">Typical move · <span id="fLook">1 hour</span></div><b id="fMove">—</b>
-      <p>If your Trench bust price is closer than this, ordinary wiggles can wipe you out even when the call is right.</p></div>
-    <div class="card fact"><div class="eyebrow">Latest call resolves in</div><b id="fCount">—</b><p id="fCountSub">No open call.</p></div>
-    <div class="card fact"><div class="eyebrow">Recent record</div><b id="fRec">—</b><p id="fRecSub">Every confident moment in the last 100, not just the calls in the scorecard.</p></div>
+    <div class="call" id="bigCall">…</div>
+    <p class="callSub" id="bigSub">Reading today's market…</p>
+    <p class="countLine" id="countLine" hidden>This call gets checked in <b id="fCount">—</b></p>
   </section>
 
   <section class="card">
-    <h2>Last 24 hours</h2>
-    <div class="chartWrap"><canvas id="chart" aria-label="Price chart of the last 24 hours with UP and DOWN calls"></canvas><span class="pulse" id="pulse" hidden></span></div>
-    <div class="legend">
-      <span><i style="background:var(--cyan)"></i>Price</span>
-      <span><i style="background:var(--accent)"></i>Fair price (24h VWAP)</span>
-      <span><i style="background:var(--faint)"></i>24h high / low</span>
-      <span style="color:var(--up)">● UP call</span><span style="color:var(--down)">● DOWN call</span>
-    </div>
+    <div class="rowHead"><h2>Today</h2><span class="record" id="recordLine"></span></div>
+    <div class="chartWrap"><canvas id="chart" aria-label="Price over the last 24 hours with the calls the AI made"></canvas><span class="pulse" id="pulse" hidden></span></div>
+    <div class="legend"><span style="color:var(--up)">● UP call</span><span style="color:var(--down)">● DOWN call</span><span>✓ right · ✕ wrong</span></div>
+    <div class="tablewrap"><table><tbody id="log"></tbody></table></div>
   </section>
 
-  <section class="cols">
-    <div class="card">
-      <h2>Scorecard</h2>
-      <div class="score">
-        <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(140,155,255,.12)" stroke-width="9"/>
-          <circle id="ringArc" cx="50" cy="50" r="42" fill="none" stroke="var(--up)" stroke-width="9" stroke-linecap="round" stroke-dasharray="0 264" transform="rotate(-90 50 50)"/>
-          <text id="ringTxt" x="50" y="57" text-anchor="middle">—</text></svg>
-        <div class="stats">
-          <span>Right, all loaded history: <b id="sAll">—</b></span>
-          <span>Right, last 24h: <b id="sDay">—</b></span>
-          <span>Calls checked: <b id="sN">—</b></span>
-          <span>A call is right if price is on the called side <b id="hLbl">1 hour</b> later. 50% is a coin flip.</span>
+  <details class="card fold" id="settings">
+    <summary>Settings</summary>
+    <div class="controls">
+      <label>How far ahead<select id="look">
+        <option value="5">5 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60" selected>1 hour</option><option value="240">4 hours</option>
+      </select></label>
+      <label>How picky<select id="strict">
+        <option value="0.58" selected>Normal: more calls</option><option value="0.62">Picky: fewer, better calls</option><option value="0.66">Very picky: fewest, best calls</option>
+      </select></label>
+      <label>Candle size<select id="tf">
+        <option value="1m">1 minute</option><option value="5m">5 minutes</option><option value="15m" selected>15 minutes</option>
+      </select></label>
+      <select id="coin" hidden><option value="BTC">BTC</option><option value="ETH">ETH</option><option value="SOL">SOL</option><option value="XRP">XRP</option><option value="DOGE">DOGE</option></select>
+    </div>
+    <p class="note">Set "How far ahead" to how long your Trench trade stays open.</p>
+  </details>
+
+  <details class="card fold" id="more">
+    <summary>Details</summary>
+    <div class="moreGrid">
+      <div>
+        <div class="eyebrow" id="vEyebrow"></div>
+        <p class="state" id="vState"></p>
+        <p class="why" id="vWhy"></p>
+        <div class="range">
+          <div class="rangeBar"><i id="rangeDot" style="left:50%"></i></div>
+          <div class="rangeLbl"><span id="rLo">24h low</span><span id="rPos"></span><span id="rHi">24h high</span></div>
         </div>
+        <div class="facts">
+          <div class="fact"><div class="eyebrow">Typical move · <span id="fLook">1 hour</span></div><b id="fMove">—</b>
+            <p>If your Trench bust price is closer than this, normal wiggles can wipe you out even when the call is right.</p></div>
+          <div class="fact"><div class="eyebrow">Recent record</div><b id="fRec">—</b><p id="fRecSub"></p></div>
+        </div>
+        <p class="note" id="fCountSub" hidden></p>
       </div>
-      <div class="tablewrap"><table><thead><tr><th>Time</th><th>Call</th><th>Price</th><th>Result</th></tr></thead><tbody id="log"></tbody></table></div>
+      <div class="dialCard">
+        <div class="eyebrow">Chance price is higher in <span id="dLook">1 hour</span></div>
+        <svg class="dial" viewBox="0 0 300 175" role="img" aria-label="Dial showing the chance of UP">
+          <defs>
+            <linearGradient id="arc" x1="0" x2="1"><stop offset="0" stop-color="#ff5d73"/><stop offset=".42" stop-color="#4a5378"/><stop offset=".58" stop-color="#4a5378"/><stop offset="1" stop-color="#3ee6a2"/></linearGradient>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <path d="M30 150 A120 120 0 0 1 270 150" fill="none" stroke="rgba(140,155,255,.10)" stroke-width="22" stroke-linecap="round"/>
+          <path d="M30 150 A120 120 0 0 1 270 150" fill="none" stroke="url(#arc)" stroke-width="10" stroke-linecap="round" filter="url(#glow)"/>
+          <g id="ticks" stroke="#eaf0ff" stroke-width="2" opacity=".5"></g>
+          <text x="30" y="172" fill="#8b95bd" font-size="11" font-family="JetBrains Mono" text-anchor="middle">DOWN</text>
+          <text x="270" y="172" fill="#8b95bd" font-size="11" font-family="JetBrains Mono" text-anchor="middle">UP</text>
+          <g class="needle" id="needle"><path d="M145 150 L150 42 L155 150 Z" fill="#eaf0ff" style="filter:drop-shadow(0 0 6px rgba(234,240,255,.6))"/><circle cx="150" cy="150" r="10" fill="#eaf0ff"/><circle cx="150" cy="150" r="4" fill="#06080f"/></g>
+        </svg>
+        <div class="dialNum" id="dNum">—</div>
+        <div class="brains">
+          <div class="brain"><span>Trend brain</span><div class="b"><i id="bT"></i></div><b id="bTn">—</b></div>
+          <div class="brain"><span>Memory brain</span><div class="b"><i id="bM"></i></div><b id="bMn">—</b></div>
+        </div>
+        <span class="agree no" id="agree">Waiting for both brains</span>
+      </div>
     </div>
-    <div class="card">
-      <h2>Under the hood</h2>
-      <p class="note" id="mdl">Both brains are learning from today's candles.</p>
-      <details>
-        <summary>Stretch checklist</summary>
-        <div class="sub">Stretched low?</div><ul class="check" id="ckB"></ul>
-        <div class="sub">Curling up?</div><ul class="check" id="ckBT"></ul>
-        <div class="sub">Stretched high?</div><ul class="check" id="ckT"></ul>
-        <div class="sub">Rolling over?</div><ul class="check" id="ckTT"></ul>
-      </details>
-      <details>
-        <summary>How it works</summary>
-        <p class="note" style="margin-top:10px">The <b>Trend brain</b> is a learning model that updates on every candle, looking at momentum, RSI, trend, volume and volatility. The <b>Memory brain</b> searches the loaded history for the 60 moments that looked most like right now and checks what happened next. A call only fires when the Trend brain is confident <b>and</b> the Memory brain agrees. If their recent calls drop under 52% right, calls pause until they recover.</p>
-        <p class="note" style="margin-top:10px">Backtested on 2013–2017 hourly Bitcoin data, calls were right about 59–61% of the time against a 52–53% baseline. Calls made right after price got stretched (bounce or roll-over setups) were right only 33–40% of the time, so the site skips them. Past results don't guarantee future ones.</p>
-      </details>
+    <div class="score">
+      <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(140,155,255,.12)" stroke-width="9"/>
+        <circle id="ringArc" cx="50" cy="50" r="42" fill="none" stroke="var(--up)" stroke-width="9" stroke-linecap="round" stroke-dasharray="0 264" transform="rotate(-90 50 50)"/>
+        <text id="ringTxt" x="50" y="57" text-anchor="middle">—</text></svg>
+      <div class="stats">
+        <span>Right, all loaded history: <b id="sAll">—</b></span>
+        <span>Right, last 24h: <b id="sDay">—</b></span>
+        <span>Calls checked: <b id="sN">—</b></span>
+        <span>A call is right if price is on the called side <b id="hLbl">1 hour</b> later. 50% is a coin flip.</span>
+      </div>
     </div>
-  </section>
+    <p class="note" id="mdl"></p>
+    <details>
+      <summary>Stretch checklist</summary>
+      <div class="sub">Stretched low?</div><ul class="check" id="ckB"></ul>
+      <div class="sub">Curling up?</div><ul class="check" id="ckBT"></ul>
+      <div class="sub">Stretched high?</div><ul class="check" id="ckT"></ul>
+      <div class="sub">Rolling over?</div><ul class="check" id="ckTT"></ul>
+    </details>
+    <details>
+      <summary>How it works</summary>
+      <p class="note" style="margin-top:10px">Two AIs watch the market. The <b>Trend brain</b> learns from every candle, looking at momentum, RSI, trend, volume and volatility. The <b>Memory brain</b> finds the 60 past moments that looked most like right now and checks what happened next. A call only fires when the Trend brain is confident <b>and</b> the Memory brain agrees. If their recent calls drop under 52% right, calls pause until they recover.</p>
+      <p class="note" style="margin-top:10px">Backtested on 2013–2017 hourly Bitcoin data, calls were right about 59–61% of the time against a 52–53% baseline. Bounce and roll-over setups were right only 33–40% of the time, so the site skips them. Past results don't guarantee future ones.</p>
+    </details>
+    <p class="status" id="status">Starting…</p>
+  </details>
 
-  <p class="status" id="status">Starting…</p>
-  <p class="note">Not financial advice. Trench multipliers can wipe out a stake on a small move against you. Only stake what you can afford to lose.</p>
+  <p class="note foot">Not financial advice. A Trench multiplier can wipe out your stake on a small move against you. Only bet what you can afford to lose.</p>
 </div>
 
 <script>
@@ -587,6 +612,22 @@ function render(){
       : !p.agree ? "The two brains disagree on direction, so there's no call. Sit this one out."
       : `The brains agree but aren't confident enough (calls fire at ${pctTxt(S.conf)}). Sit this one out.`; }
   if(mood) document.body.dataset.mood = mood; else delete document.body.dataset.mood;
+  // the simple answer
+  const NAMES = {BTC:"Bitcoin", ETH:"Ethereum", SOL:"Solana", XRP:"XRP", DOGE:"Dogecoin"};
+  $("coinName").textContent = NAMES[S.coin] || S.coin;
+  let big = "WAIT", sub;
+  // quote the real track record, not the model's raw confidence (which runs hotter than reality)
+  const doneAll = A.sigs.filter(s => s.win !== undefined), hit = doneAll.length >= 10 ? doneAll.filter(s => s.win).length / doneAll.length : NaN;
+  const record = !isNaN(hit) ? `Calls like this were right ${pctTxt(hit)} of the time recently.` : "Calls like this were right about 60% of the time in testing.";
+  if(p.modelUp){ big = "UP ▲"; sub = `Likely higher in ${look}. ${record}`; }
+  else if(p.modelDown){ big = "DOWN ▼"; sub = `Likely lower in ${look}. ${record}`; }
+  else if(!hasT || !hasM) sub = "Still learning today's market…";
+  else if(p.paused) sub = "The AI has been wrong a lot lately, so it's sitting out until it gets back on track.";
+  else if(p.up || p.down) sub = "Price is turning around, but turnarounds haven't been reliable. Don't bet on this one.";
+  else if(!p.agree) sub = "The two AIs disagree on the direction. No bet.";
+  else sub = "Not confident either way right now. No bet.";
+  $("bigCall").textContent = big; $("bigSub").textContent = sub;
+  document.title = (big === "WAIT" ? "" : big.split(" ")[0] + " · ") + S.coin + " · Turn Spotter";
   $("vEyebrow").textContent = `${S.coin} · ${S.tf} candles · next ${look}`;
   $("vState").textContent = state; $("vWhy").textContent = why;
 
@@ -647,11 +688,14 @@ function render(){
   $("ringTxt").textContent = isNaN(all) ? "—" : pctTxt(all);
   $("hLbl").textContent = look;
   const recent = A.sigs.filter(s => s.t >= dayStart).reverse();
-  $("log").innerHTML = recent.length ? recent.map(s => `<tr><td>${fmtT(s.t)}</td>
+  const td = rate(today);
+  $("recordLine").innerHTML = today.length ? `Right <b class="${td >= .5 ? "win" : "loss"}">${today.filter(s => s.win).length} of ${today.length}</b> calls today`
+    : done.length ? `Right <b class="${all >= .5 ? "win" : "loss"}">${pctTxt(all)}</b> of ${done.length} recent calls` : "";
+  $("log").innerHTML = recent.length ? recent.slice(0, 8).map(s => `<tr><td>${fmtT(s.t)}</td>
     <td><span class="pill ${s.dir > 0 ? "up" : "down"}">${s.dir > 0 ? "▲ UP" : "▼ DOWN"}</span></td>
     <td>${fmtP(s.price)}</td>
-    <td class="${s.win === undefined ? "pend" : s.win ? "win" : "loss"}">${s.win === undefined ? "open…" : (s.win ? "✓ " : "✕ ") + (s.move*100).toFixed(2) + "%"}</td></tr>`).join("")
-    : `<tr><td colspan="4" class="pend">No calls in the last 24h. The brains only call when they agree and are confident.</td></tr>`;
+    <td class="${s.win === undefined ? "pend" : s.win ? "win" : "loss"}">${s.win === undefined ? "waiting…" : s.win ? "✓ right" : "✕ wrong"}</td></tr>`).join("")
+    : `<tr><td colspan="4" class="pend">No calls yet today. The AI only calls when it's confident.</td></tr>`;
 
   drawChart(C, A, dayBars);
   setStatus(`${C.length} candles studied · updated ${new Date().toLocaleTimeString()}`);
@@ -662,8 +706,7 @@ function watchEntry(p){
   if(!p) return {cls:"n", txt:"…"};
   if(p.modelUp) return {cls:"u", txt:"▲ UP"};
   if(p.modelDown) return {cls:"d", txt:"▼ DOWN"};
-  if(p.paused) return {cls:"n", txt:"paused"};
-  return {cls:"n", txt:"no edge"};
+  return {cls:"n", txt:"wait"};
 }
 function renderWatch(){
   $("watch").innerHTML = COINS.map(c => { const w = S.watch[c] || {cls:"n", txt:"…"};
@@ -686,7 +729,8 @@ function tick(){
   if(!S.A) return;
   const tfMs = TF[S.tf].min * 60000, H = horizon();
   const open = S.A.sigs.filter(s => s.win === undefined).pop();
-  if(!open){ $("fCount").textContent = "—"; $("fCountSub").textContent = "No open call."; return; }
+  $("countLine").hidden = !open;
+  if(!open){ $("fCount").textContent = "—"; return; }
   const left = open.t + (H + 1) * tfMs - Date.now();
   const mm = Math.max(0, Math.floor(left / 60000)), ss = Math.max(0, Math.floor(left / 1000) % 60);
   $("fCount").textContent = left > 0 ? `${mm}:${String(ss).padStart(2, "0")}` : "checking…";
@@ -761,11 +805,10 @@ function maybeAlert(A, C){
   S.lastAlertT = s.t; beep(s.dir);
   const msg = `${S.coin} ${s.dir > 0 ? "UP" : "DOWN"} call at ${fmtP(s.price)} for the next ${lookLabel()}`;
   try{ if("Notification" in window && Notification.permission === "granted") new Notification("Turn Spotter", {body: msg, icon: "icon-192.png"}); }catch(e){}
-  document.title = (s.dir > 0 ? "▲ " : "▼ ") + S.coin + " · Turn Spotter";
 }
 $("alerts").addEventListener("click", async () => {
   S.alertsOn = !S.alertsOn;
-  $("alerts").textContent = S.alertsOn ? "🔔 Alerts on" : "Turn on alerts";
+  $("alerts").textContent = S.alertsOn ? "🔔 Alerts on" : "🔔 Alert me";
   $("alerts").classList.toggle("on", S.alertsOn);
   if(S.alertsOn){
     beep(1);

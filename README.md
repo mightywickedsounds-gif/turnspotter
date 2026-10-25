@@ -154,6 +154,15 @@ the fourth test in a row where they failed, so the site now skips them.
 - The TradingView indicator still runs only the Trend brain. The Memory brain is too heavy for
   TradingView's script limits.
 
+### Round 3: simpler screen
+- The main screen now answers one question: **UP, DOWN or WAIT**, with one plain sentence and a
+  countdown to when the call gets checked.
+- The coin strip at the top is the coin picker.
+- Settings (how far ahead, how picky, candle size) and Details (the dial, both brains, the checklist,
+  the full scorecard) are folded away until you open them.
+- The main line quotes the real track record ("calls like this were right 62% of the time") instead
+  of the model's raw confidence, which runs hotter than reality.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
