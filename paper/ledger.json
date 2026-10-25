@@ -11,6 +11,10 @@
   {
    "t": 1792965745028,
    "value": 50
+  },
+  {
+   "t": 1792966579789,
+   "value": 50
   }
  ],
  "config": {
@@ -33,116 +37,111 @@
   "conf": 0.58,
   "need": 2000
  },
- "lastRun": 1792965745028,
+ "lastRun": 1792966579789,
  "status": {
   "BTC": {
    "src": "Binance US",
    "candles": 2000,
-   "price": 80529.93,
-   "trend": 0.465,
-   "memory": 0.484,
-   "agree": false,
-   "paused": true,
-   "record": 0.49,
+   "price": 80481.32,
+   "trend": 0.437,
+   "memory": 0,
+   "paused": false,
+   "record": 0.52,
    "call": "WAIT",
    "last400": {
-    "trendConfident": 0.295,
-    "agree": 0.355,
-    "paused": 0.708,
-    "call": 0.068,
-    "skippedTurn": 0
+    "trendConfident": 0.522,
+    "agree": 0,
+    "paused": 0,
+    "call": 0.26,
+    "skippedTurn": 0.007
    },
    "backtest": {
-    "calls": 56,
-    "right": 0.446
+    "calls": 169,
+    "right": 0.544
    }
   },
   "ETH": {
    "src": "Binance US",
    "candles": 2000,
-   "price": 2340.95,
-   "trend": 0.378,
-   "memory": 0.387,
-   "agree": true,
-   "paused": true,
-   "record": 0.4,
+   "price": 2342.12,
+   "trend": 0.471,
+   "memory": 0,
+   "paused": false,
+   "record": 0.49,
    "call": "WAIT",
    "last400": {
-    "trendConfident": 0.258,
-    "agree": 0.23,
-    "paused": 1,
-    "call": 0,
-    "skippedTurn": 0
+    "trendConfident": 0.427,
+    "agree": 0,
+    "paused": 0,
+    "call": 0.258,
+    "skippedTurn": 0.007
    },
    "backtest": {
-    "calls": 26,
-    "right": 0.5
+    "calls": 157,
+    "right": 0.51
    }
   },
   "SOL": {
    "src": "Binance US",
    "candles": 2000,
-   "price": 101.66,
-   "trend": 0.315,
-   "memory": 0.419,
-   "agree": true,
+   "price": 101.56,
+   "trend": 0.372,
+   "memory": 0,
    "paused": false,
-   "record": 0.56,
-   "call": "DOWN",
+   "record": 0.46,
+   "call": "WAIT",
    "last400": {
-    "trendConfident": 0.323,
-    "agree": 0.235,
+    "trendConfident": 0.51,
+    "agree": 0,
     "paused": 0,
-    "call": 0.095,
-    "skippedTurn": 0.005
+    "call": 0.265,
+    "skippedTurn": 0.007
    },
    "backtest": {
-    "calls": 51,
-    "right": 0.471
+    "calls": 160,
+    "right": 0.537
    }
   },
   "XRP": {
    "src": "Binance US",
    "candles": 2000,
-   "price": 1.2986,
-   "trend": 0.316,
-   "memory": 0.468,
-   "agree": false,
-   "paused": true,
-   "record": 0.44,
+   "price": 1.2975,
+   "trend": 0.505,
+   "memory": 0,
+   "paused": false,
+   "record": 0.6,
    "call": "WAIT",
    "last400": {
-    "trendConfident": 0.365,
-    "agree": 0.3,
-    "paused": 1,
-    "call": 0,
-    "skippedTurn": 0
+    "trendConfident": 0.625,
+    "agree": 0,
+    "paused": 0,
+    "call": 0.307,
+    "skippedTurn": 0.005
    },
    "backtest": {
-    "calls": 23,
-    "right": 0.304
+    "calls": 161,
+    "right": 0.435
    }
   },
   "DOGE": {
    "src": "Binance US",
    "candles": 2000,
-   "price": 0.07679,
-   "trend": 0.449,
-   "memory": 0.565,
-   "agree": false,
-   "paused": true,
-   "record": 0.5,
+   "price": 0.07701,
+   "trend": 0.498,
+   "memory": 0,
+   "paused": false,
+   "record": 0.45,
    "call": "WAIT",
    "last400": {
-    "trendConfident": 0.24,
-    "agree": 0.29,
-    "paused": 0.848,
-    "call": 0.043,
-    "skippedTurn": 0
+    "trendConfident": 0.415,
+    "agree": 0,
+    "paused": 0,
+    "call": 0.355,
+    "skippedTurn": 0.02
    },
    "backtest": {
-    "calls": 42,
-    "right": 0.357
+    "calls": 164,
+    "right": 0.512
    }
   }
  }
