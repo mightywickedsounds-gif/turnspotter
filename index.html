@@ -632,11 +632,7 @@ function render(){
   $("vState").textContent = state; $("vWhy").textContent = why;
 
   // price + day range
-  const pe = $("pNow"), prev = S.lastPrice;
-  pe.textContent = fmtP(k.c);
-  if(prev !== undefined && prev !== k.c && S.lastCoin === S.coin){ pe.classList.remove("flash-up","flash-down"); void pe.offsetWidth;
-    pe.classList.add(k.c > prev ? "flash-up" : "flash-down"); clearTimeout(S.flashT); S.flashT = setTimeout(() => pe.classList.remove("flash-up","flash-down"), 900); }
-  S.lastPrice = k.c; S.lastCoin = S.coin;
+  setLivePrice(k.c);
   const open24 = C[Math.max(0, i-dayBars+1)].o, chg = (k.c - open24) / open24;
   $("pChg").textContent = (chg >= 0 ? "▲ " : "▼ ") + Math.abs(chg*100).toFixed(2) + "% 24h"; $("pChg").className = "chg " + (chg >= 0 ? "win" : "loss");
   const lo = A.loD[i], hi = A.hiD[i], pos = hi > lo ? (k.c - lo) / (hi - lo) : .5;
@@ -697,7 +693,7 @@ function render(){
     <td class="${s.win === undefined ? "pend" : s.win ? "win" : "loss"}">${s.win === undefined ? "waiting…" : s.win ? "✓ right" : "✕ wrong"}</td></tr>`).join("")
     : `<tr><td colspan="4" class="pend">No calls yet today. The AI only calls when it's confident.</td></tr>`;
 
-  drawChart(C, A, dayBars);
+  drawChart(C, A, dayBars, S.disp);
   setStatus(`${C.length} candles studied · updated ${new Date().toLocaleTimeString()}`);
   maybeAlert(A, C);
 }
@@ -740,10 +736,46 @@ function horizon(){ return Math.max(1, Math.round(S.look / TF[S.tf].min)); }
 function lookLabel(){ const m = horizon() * TF[S.tf].min; return m >= 60 ? (m/60) + (m === 60 ? " hour" : " hours") : m + " min"; }
 function css(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 
-function drawChart(C, A, dayBars){
+// ───────── live motion ─────────
+// New prices arrive every few seconds; the chart and the price glide toward them so the page feels alive.
+function setLivePrice(price){
+  const pe = $("pNow");
+  if(S.lastCoin !== S.coin || S.disp === undefined){ S.disp = price; S.lastCoin = S.coin; }
+  else if(price !== S.target){ pe.classList.remove("flash-up","flash-down"); void pe.offsetWidth;
+    pe.classList.add(price > S.target ? "flash-up" : "flash-down"); clearTimeout(S.flashT); S.flashT = setTimeout(() => pe.classList.remove("flash-up","flash-down"), 900); }
+  S.target = price;
+}
+async function fetchTicker(){
+  if(!S.src || !S.candles.length || document.hidden) return;
+  const gen = S.gen;
+  try{
+    const d = S.src.kind === "binance" ? await getJSON(`${S.src.host}/api/v3/ticker/price?symbol=${S.src.sym(S.coin)}`)
+                                       : await getJSON(`${S.src.host}/products/${S.src.sym(S.coin)}/ticker`);
+    const price = +d.price;
+    if(gen !== S.gen || !(price > 0)) return;
+    const k = S.candles[S.candles.length-1];
+    k.c = price; k.h = Math.max(k.h, price); k.l = Math.min(k.l, price);
+    setLivePrice(price);
+  }catch(e){}
+}
+let lastFrame = 0;
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function animate(ts){
+  requestAnimationFrame(animate);
+  if(!S.A || document.hidden || ts - lastFrame < 33) return;
+  lastFrame = ts;
+  if(reduceMotion) S.disp = S.target;
+  else S.disp += (S.target - S.disp) * 0.08;
+  if(Math.abs(S.target - S.disp) < Math.abs(S.target) * 1e-7) S.disp = S.target;
+  $("pNow").textContent = fmtP(S.disp);
+  drawChart(S.candles, S.A, Math.round(1440 / TF[S.tf].min), S.disp, reduceMotion ? 0 : ts);
+}
+let colors = null;
+function drawChart(C, A, dayBars, live, ts = 0){
   const cv = $("chart"), dpr = window.devicePixelRatio || 1, W = cv.clientWidth, Hh = cv.clientHeight;
   if(!W) return;
-  cv.width = W*dpr; cv.height = Hh*dpr;
+  if(live !== undefined && C.length){ const k = C[C.length-1]; C = C.slice(0, -1).concat({...k, c:live, h:Math.max(k.h, live), l:Math.min(k.l, live)}); }
+  if(cv.width !== Math.round(W*dpr) || cv.height !== Math.round(Hh*dpr)){ cv.width = W*dpr; cv.height = Hh*dpr; }
   const g = cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,Hh);
   const n = C.length, a = Math.max(0, n-dayBars), view = C.slice(a);
   const padL = 4, padR = 66, padT = 14, padB = 24;
@@ -751,7 +783,9 @@ function drawChart(C, A, dayBars){
   view.forEach((k,j) => { lo = Math.min(lo, k.l, A.vwap[a+j]); hi = Math.max(hi, k.h, A.vwap[a+j]); });
   const pad = (hi-lo)*.08; lo -= pad; hi += pad;
   const X = j => padL + (j + .5) * (W-padL-padR) / view.length, Y = p => padT + (hi-p)/(hi-lo) * (Hh-padT-padB);
-  const muted = css("--muted"), faint = css("--faint"), up = css("--up"), down = css("--down"), acc = css("--accent"), cyan = css("--cyan");
+  colors = colors || {muted:css("--muted"), faint:css("--faint"), up:css("--up"), down:css("--down"), acc:css("--accent"), cyan:css("--cyan")};
+  const {muted, faint, up, down, acc, cyan} = colors;
+  const breathe = ts ? Math.sin(ts / 700) : 0;   // slow pulse for the glow
   g.font = "11px JetBrains Mono, monospace";
   // grid + price labels
   for(let s=0;s<=4;s++){ const p = lo + (hi-lo)*s/4, y = Y(p);
@@ -771,7 +805,7 @@ function drawChart(C, A, dayBars){
   const grad = g.createLinearGradient(0, padT, 0, Hh-padB); grad.addColorStop(0, "rgba(69,212,255,.28)"); grad.addColorStop(1, "rgba(69,212,255,0)");
   g.beginPath(); view.forEach((k,j) => j ? g.lineTo(X(j),Y(k.c)) : g.moveTo(X(j),Y(k.c)));
   g.lineTo(X(view.length-1), Hh-padB); g.lineTo(X(0), Hh-padB); g.closePath(); g.fillStyle = grad; g.fill();
-  g.save(); g.shadowColor = cyan; g.shadowBlur = 12; g.strokeStyle = cyan; g.lineWidth = 2; g.lineJoin = "round";
+  g.save(); g.shadowColor = cyan; g.shadowBlur = 12 + 5 * breathe; g.strokeStyle = cyan; g.lineWidth = 2; g.lineJoin = "round";
   g.beginPath(); view.forEach((k,j) => j ? g.lineTo(X(j),Y(k.c)) : g.moveTo(X(j),Y(k.c))); g.stroke(); g.restore();
   // vwap
   g.strokeStyle = acc; g.globalAlpha = .8; g.lineWidth = 1.5; g.setLineDash([6,4]);
@@ -786,6 +820,8 @@ function drawChart(C, A, dayBars){
   const last = C[n-1].c, y = Y(last);
   g.fillStyle = cyan; g.beginPath(); g.roundRect ? g.roundRect(W-padR+3, y-10, padR-5, 20, 6) : g.rect(W-padR+3, y-10, padR-5, 20); g.fill();
   g.fillStyle = "#06080f"; g.textAlign = "left"; g.textBaseline = "middle"; g.font = "700 11px JetBrains Mono, monospace"; g.fillText(fmtP(last), W-padR+8, y);
+  // a faint "now" line that glides with the price
+  g.save(); g.globalAlpha = .35 + .15 * breathe; g.strokeStyle = cyan; g.setLineDash([2,4]); g.beginPath(); g.moveTo(padL, y); g.lineTo(W-padR, y); g.stroke(); g.restore();
   const pu = $("pulse"); pu.hidden = false; pu.style.left = X(view.length-1) + "px"; pu.style.top = y + "px";
 }
 
@@ -829,6 +865,8 @@ $("strict").addEventListener("change", e => { S.conf = +e.target.value; save(); 
 $("watch").addEventListener("click", e => { const b = e.target.closest(".chip"); if(!b || b.dataset.coin === S.coin) return;
   S.coin = $("coin").value = b.dataset.coin; save(); loadHistory(); });
 setInterval(tick, 1000);
+setInterval(fetchTicker, 3000);
+requestAnimationFrame(animate);
 window.addEventListener("resize", () => S.A && drawChart(S.candles, S.A, Math.round(1440 / TF[S.tf].min)));
 renderWatch();
 loadHistory();

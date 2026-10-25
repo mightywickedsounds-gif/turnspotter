@@ -1,0 +1,29 @@
+name: Paper trade
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [paper/trader.mjs, .github/workflows/paper-trade.yml]
+permissions:
+  contents: write
+concurrency:
+  group: paper-trade
+  cancel-in-progress: false
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "20"}
+      - run: node paper/trader.mjs
+      - name: Save the ledger
+        run: |
+          git config user.name "turnspotter-bot"
+          git config user.email "turnspotter-bot@users.noreply.github.com"
+          git add paper/ledger.json
+          git commit -m "Paper trading update" || exit 0
+          for i in 1 2 3; do git pull --rebase origin main && git push && break; sleep 5; done
