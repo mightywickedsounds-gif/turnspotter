@@ -38,8 +38,9 @@ lvSd = ta.stdev(lv, 50)
 f8 = lvSd > 0 ? clip((lv - ta.sma(lv, 50)) / lvSd) : 0.0             // volume surprise
 sd100 = ta.stdev(lret, 100)
 f9 = sd100 > 0 ? clip(ta.stdev(lret, 20) / sd100 - 1) : 0.0          // volatility regime
+f10 = clip(f2 * math.max(0.0, f8))                                   // momentum counts more on high volume
 
-feat(int off) => array.from(f1[off], f2[off], f3[off], f4[off], f5[off], f6[off], f7[off], f8[off], f9[off], 1.0)
+feat(int off) => array.from(f1[off], f2[off], f3[off], f4[off], f5[off], f6[off], f7[off], f8[off], f9[off], f10[off], 1.0)
 
 hasNa(array<float> a) =>
     bool bad = false
@@ -50,7 +51,7 @@ hasNa(array<float> a) =>
 
 sigmoid(float z) => 1.0 / (1.0 + math.exp(-z))
 
-var array<float> w = array.new_float(10, 0.0)
+var array<float> w = array.new_float(11, 0.0)
 
 dotW(array<float> x) =>
     float s = 0.0
@@ -69,16 +70,28 @@ if bar_index > horizon and not hasNa(xPast) and not na(close[horizon])
         w.set(i, wi + lrate * ((y - p) * xPast.get(i) - l2 * wi))
     learned += 1
 
+// ───────── Honest scorecard of past predictions ─────────
+var array<int> hits     = array.new_int()
+var array<int> confHits = array.new_int()
+
+// Self-check: pause signals while the last 100 signals with known outcomes are under 52% right
+recentRate() =>
+    int sz = confHits.size()
+    int k = math.min(100, sz)
+    float s = 0.0
+    if k > 0
+        for i = sz - k to sz - 1
+            s += confHits.get(i)
+    k >= 50 ? s / k : na
+rec    = recentRate()
+paused = not na(rec) and rec < 0.52
+
 // ───────── Predict ─────────
 xNow  = feat(0)
 probUp = hasNa(xNow) ? na : sigmoid(dotW(xNow))
 conf   = na(probUp) ? na : math.max(probUp, 1 - probUp)
-isUp   = not na(probUp) and probUp >= confTh
-isDown = not na(probUp) and probUp <= 1 - confTh
-
-// ───────── Honest scorecard of past predictions ─────────
-var array<int> hits     = array.new_int()
-var array<int> confHits = array.new_int()
+isUp   = not paused and not na(probUp) and probUp >= confTh
+isDown = not paused and not na(probUp) and probUp <= 1 - confTh
 pPrev = probUp[horizon]
 if learned > warmup and not na(pPrev) and close != close[horizon]
     int ok = (pPrev > 0.5) == (close > close[horizon]) ? 1 : 0
@@ -106,9 +119,9 @@ plotshape(showArr and isUp and not isUp[1], "Up signal", shape.triangleup, locat
 plotshape(showArr and isDown and not isDown[1], "Down signal", shape.triangledown, location.abovebar, downCol,
           size = size.small, force_overlay = true)
 
-var table tb = table.new(position.top_right, 2, 7, bgcolor = color.new(#0f172a, 10), border_width = 1)
+var table tb = table.new(position.top_right, 2, 8, bgcolor = color.new(#0f172a, 10), border_width = 1)
 if barstate.islast
-    sig = isUp ? "▲ UP" : isDown ? "▼ DOWN" : "— NO TRADE"
+    sig = isUp ? "▲ UP" : isDown ? "▼ DOWN" : paused ? "⏸ PAUSED" : "— NO TRADE"
     sigCol = isUp ? upCol : isDown ? downCol : color.gray
     tb.cell(0, 0, "Trench AI", text_color = color.white, text_size = size.normal)
     tb.cell(1, 0, sig, text_color = sigCol, text_size = size.large)
@@ -122,8 +135,10 @@ if barstate.islast
     tb.cell(1, 4, str.tostring(pct(confHits), "#.0") + "%  (" + str.tostring(confHits.size()) + ")", text_color = color.white)
     tb.cell(0, 5, "Candles learned from", text_color = color.silver)
     tb.cell(1, 5, str.tostring(learned), text_color = color.white)
-    tb.cell(0, 6, "Not financial advice. 50% = coin flip.", text_color = color.gray, text_size = size.tiny)
-    tb.merge_cells(0, 6, 1, 6)
+    tb.cell(0, 6, "Recent record (last 100)", text_color = color.silver)
+    tb.cell(1, 6, na(rec) ? "building…" : str.tostring(rec * 100, "#.0") + "%" + (paused ? "  (paused)" : ""), text_color = paused ? downCol : color.white)
+    tb.cell(0, 7, "Not financial advice. 50% = coin flip.", text_color = color.gray, text_size = size.tiny)
+    tb.merge_cells(0, 7, 1, 7)
 
 alertcondition(isUp and not isUp[1], "Trench AI: UP signal", "Trench AI predicts UP on {{ticker}} {{interval}} (price {{close}})")
 alertcondition(isDown and not isDown[1], "Trench AI: DOWN signal", "Trench AI predicts DOWN on {{ticker}} {{interval}} (price {{close}})")

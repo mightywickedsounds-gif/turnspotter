@@ -93,9 +93,47 @@ six years of Bitcoin data it was **no better than a coin flip** (DOWN calls into
 were right only about 35% of the time). So the page shows "really low/high" as context, and only the
 learning model triggers calls. A call marked "from a low" means both agreed.
 
+## Improvement log
+
+### Round 1: what was tested (`research/experiments.py`)
+
+Each idea was tested the way the website runs, with a fresh model on about 3,000 candles, scored on
+2013–2017 hourly Bitcoin data. "Confident calls" means calls at 58% or more.
+
+| Idea | Result | Kept? |
+|---|---|---|
+| Time-of-day and weekend effects | No gain (studies disagree on whether these exist) | No |
+| Momentum that counts more on high volume | Small gain (supported by research on Bitcoin intraday momentum) | **Yes** |
+| 1-week trend | Slightly worse | No |
+| Blend of 3 learning speeds | Slightly worse | No |
+| Pre-training on older history | Within noise | No |
+| **Self-check pause** (stop calling while the last 100 calls are under 52% right) | Best single gain, mostly at longer horizons | **Yes** |
+
+Combined upgrade vs. the old model, at each strictness level:
+
+| Ahead | Strictness | Old | New |
+|---|---|---|---|
+| 1 candle | Normal (58%) | 57.96% | 58.47% |
+| 1 candle | Very strict (66%) | 60.34% | 61.70% |
+| 4 candles | Normal (58%) | 55.96% | 56.33% |
+| 4 candles | Very strict (66%) | 56.81% | 58.63% |
+
+Calls made while price was "stretched" (bouncing off a low or rolling off a high) did worse than
+ordinary calls in testing, so the site now warns you about them.
+
+### Round 1: new on the website
+- **Strictness setting:** Normal, Strict or Very strict. Stricter means fewer calls with a higher hit rate.
+- **Self-check pause:** the model stops calling when it's on a cold streak, and tells you why.
+- **Typical move:** the normal size of a price swing over your prediction window. Keep your Trench
+  bust price well beyond it.
+- **Countdown:** time until the latest call is checked.
+- **Watchlist:** a strip of all five coins showing which ones have a call right now. Tap one to switch.
+- **App icon:** add the site to your phone's home screen and it opens like an app.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
 - `tradingview/TrenchAI_Direction.pine`: the indicator (paste into TradingView)
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)
+- `research/experiments.py`: tests of candidate upgrades (`python3 experiments.py`)
 - `research/btc_1h_2011_2017.csv`: the hourly BTC data used for testing
