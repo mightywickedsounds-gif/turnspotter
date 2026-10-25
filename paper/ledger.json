@@ -15,6 +15,10 @@
   {
    "t": 1792966579789,
    "value": 50
+  },
+  {
+   "t": 1792966621008,
+   "value": 50
   }
  ],
  "config": {
@@ -37,23 +41,19 @@
   "conf": 0.58,
   "need": 2000
  },
- "lastRun": 1792966579789,
+ "lastRun": 1792966621008,
  "status": {
   "BTC": {
    "src": "Binance US",
    "candles": 2000,
    "price": 80481.32,
-   "trend": 0.437,
-   "memory": 0,
-   "paused": false,
+   "experience": 0.505,
+   "liveLearner": 0.437,
    "record": 0.52,
    "call": "WAIT",
    "last400": {
-    "trendConfident": 0.522,
-    "agree": 0,
-    "paused": 0,
     "call": 0.26,
-    "skippedTurn": 0.007
+    "bounceOrRollover": 0.007
    },
    "backtest": {
     "calls": 169,
@@ -63,18 +63,14 @@
   "ETH": {
    "src": "Binance US",
    "candles": 2000,
-   "price": 2342.12,
-   "trend": 0.471,
-   "memory": 0,
-   "paused": false,
+   "price": 2344.16,
+   "experience": 0.493,
+   "liveLearner": 0.452,
    "record": 0.49,
    "call": "WAIT",
    "last400": {
-    "trendConfident": 0.427,
-    "agree": 0,
-    "paused": 0,
     "call": 0.258,
-    "skippedTurn": 0.007
+    "bounceOrRollover": 0.007
    },
    "backtest": {
     "calls": 157,
@@ -84,18 +80,14 @@
   "SOL": {
    "src": "Binance US",
    "candles": 2000,
-   "price": 101.56,
-   "trend": 0.372,
-   "memory": 0,
-   "paused": false,
+   "price": 101.7,
+   "experience": 0.482,
+   "liveLearner": 0.353,
    "record": 0.46,
    "call": "WAIT",
    "last400": {
-    "trendConfident": 0.51,
-    "agree": 0,
-    "paused": 0,
     "call": 0.265,
-    "skippedTurn": 0.007
+    "bounceOrRollover": 0.007
    },
    "backtest": {
     "calls": 160,
@@ -105,18 +97,14 @@
   "XRP": {
    "src": "Binance US",
    "candles": 2000,
-   "price": 1.2975,
-   "trend": 0.505,
-   "memory": 0,
-   "paused": false,
+   "price": 1.3,
+   "experience": 0.498,
+   "liveLearner": 0.425,
    "record": 0.6,
    "call": "WAIT",
    "last400": {
-    "trendConfident": 0.625,
-    "agree": 0,
-    "paused": 0,
     "call": 0.307,
-    "skippedTurn": 0.005
+    "bounceOrRollover": 0.005
    },
    "backtest": {
     "calls": 161,
@@ -127,17 +115,13 @@
    "src": "Binance US",
    "candles": 2000,
    "price": 0.07701,
-   "trend": 0.498,
-   "memory": 0,
-   "paused": false,
+   "experience": 0.542,
+   "liveLearner": 0.498,
    "record": 0.45,
    "call": "WAIT",
    "last400": {
-    "trendConfident": 0.415,
-    "agree": 0,
-    "paused": 0,
     "call": 0.355,
-    "skippedTurn": 0.02
+    "bounceOrRollover": 0.02
    },
    "backtest": {
     "calls": 164,
