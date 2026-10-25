@@ -240,6 +240,19 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   and a shake on a bust. For any fair gamble, the chance of 10× before $0 is about 1 in 10.
 - The practice ticket and the Trench lens now go up to ×1000.
 
+### Round 8: a bot you can set up, a more realistic fill, and a history
+- **Coin tiles** inside the bot card: each coin shows a big ▲ / ▼ / – for the AI's current lean, its
+  %, price, mini chart and whether there's a call. Tap to let the bot trade it or not.
+- **Settings:** direction (follow the AI / always UP / always DOWN), multiplier (auto or ×1–×1000),
+  stake %, take profit, stop loss, max hold, wait between trades, minimum AI confidence, fee, start,
+  goal and time limit, plus presets (Trench ×1000 gamble, Degen, Steady). A risk line shows the bust
+  distance and what the fee costs, and blocks trades where the fee would eat the whole stake.
+- **More realistic trading:** orders fill 1 second after the decision, at the ask when buying and the
+  bid when selling (from the live order book), with a fee on the position size. Bust, stop and take
+  profit are checked on every live trade.
+- **History:** every bot trade and run is saved on the device: all-time P&L, win rate, busts, best
+  and worst trade, fees paid, a cumulative P&L line, and run and trade tables.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
