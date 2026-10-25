@@ -23,7 +23,7 @@ I can't log into your accounts, so this one part needs you:
 
 1. Go to tradingview.com (a free account works) and open a chart, for example `BTCUSDT`.
 2. At the bottom, open **Pine Editor**, delete what's there, and paste in all of
-   `TrenchAI_Direction.pine`.
+   `tradingview/TrenchAI_Direction.pine`.
 3. Click **Save**, then **Add to chart**.
 4. Optional: right-click the indicator → **Add alert** → pick "Trench AI: UP signal" / "DOWN signal" to
    get phone notifications.
@@ -50,7 +50,7 @@ market changes. It never sees future data, and it doesn't repaint.
 
 ## Honest test results
 
-`research/backtest.py` runs the exact same model over **52,000 hourly Bitcoin candles (2011–2017)**,
+`research/backtest.py` runs the exact same model over **46,000 hourly Bitcoin candles (2011–2017)**,
 always predicting only from the past:
 
 | Setup | Hit rate | "Always guess up" baseline |
@@ -73,9 +73,9 @@ a money printer. Also:
   clearly above 50% over hundreds of calls, it isn't working there.
 - Nothing can reliably predict crypto. Only stake what you're fine losing. This is not financial advice.
 
-## Live web page: Turn Spotter (`live/turn-spotter.html`)
+## Live web page: Turn Spotter (`index.html`)
 
-Open this file in any browser (Chrome, Safari, on a phone or computer). No install and no account.
+Open the website: https://mightywickedsounds-gif.github.io/turnspotter/ (bookmark it or add it to your home screen). No install and no account.
 When it loads, it pulls the last 1–3 days of candles from Binance (falling back to Binance US, then
 Coinbase), so it has seen the whole day. It trains the same learning model on that data and then
 updates every 10 seconds.
@@ -95,7 +95,7 @@ learning model triggers calls. A call marked "from a low" means both agreed.
 
 ## Files
 
-- `live/turn-spotter.html`: the live web page (open in a browser)
-- `TrenchAI_Direction.pine`: the indicator (paste into TradingView)
+- `index.html`: the live web page (the website itself)
+- `tradingview/TrenchAI_Direction.pine`: the indicator (paste into TradingView)
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)
 - `research/btc_1h_2011_2017.csv`: the hourly BTC data used for testing
