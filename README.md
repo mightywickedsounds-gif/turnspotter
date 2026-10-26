@@ -286,6 +286,12 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   5 seconds. Bot results from before this fix are not trustworthy: reset the bankroll and clear the
   history.
 
+### Round 12: fees you set yourself
+- The bot's fee is now any number you type, as a % of the stake (default 1% = $0.50 on a $50 trade)
+  or a % of the position. Copy it from a real Trench ticket. Presets no longer change the fee.
+- The same fee applies to the practice ticket, the "What if?" replay and the 100-run check. The 24/7
+  GitHub bot now pays 1% of the stake instead of 0.1% of the position.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

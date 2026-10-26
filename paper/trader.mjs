@@ -11,7 +11,7 @@ const CFG = {
   start: 50,            // fake dollars
   stakePct: 0.10,       // risk 10% of the balance per trade
   minStake: 1,
-  feePct: 0.001,        // 0.1% of the position size on entry (assumed)
+  feeStakePct: 1,       // 1% of the stake per trade (assumed; Trench shows its real fee on the ticket)
   bustBuffer: 3,        // bust price sits 3x the typical move away
   maxMult: 50,
   coins: ["BTC", "ETH", "SOL", "XRP", "DOGE"],
@@ -97,7 +97,7 @@ for(const coin of CFG.coins){
   const move = isNaN(p.move) ? 0.01 : p.move;
   const mult = Math.max(1, Math.min(CFG.maxMult, Math.floor(1 / (CFG.bustBuffer * move))));
   const entry = C[n-1].c;   // price right now, not the old candle's close
-  const fee = +(stake * mult * CFG.feePct).toFixed(4);
+  const fee = +(stake * CFG.feeStakePct / 100).toFixed(4);
   L.balance = +(L.balance - stake).toFixed(4);
   L.trades.push({id: `${coin}-${now}`, coin, dir: fresh.dir, entry, stake, mult, fee,
     bustPrice: +(entry * (1 - fresh.dir / mult)).toPrecision(8), openedAt: now, expiresAt: now + CFG.lookMin*60000,

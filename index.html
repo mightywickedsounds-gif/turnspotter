@@ -245,6 +245,8 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .botCfg{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
 .botCfg label{display:grid;gap:6px;font:600 12px var(--body);color:var(--muted)}
 .botCfg .sl{grid-template-columns:1fr auto}
+.feeRow{display:grid;grid-template-columns:1fr 1.3fr;gap:6px}
+.feeRow input{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:8px 10px;color:var(--ink);font:600 14px var(--mono);width:100%}
 .riskLine{margin:0;font:500 12.5px/1.45 var(--body);color:var(--muted);padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.18)}
 .riskLine b{color:var(--ink);font-family:var(--mono)} .riskLine b.loss{color:var(--down);font-family:var(--body)}
 .botHist{margin-top:18px;padding-top:14px;border-top:1px solid var(--edge)}
@@ -467,7 +469,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
           <label class="sl">Close after <b id="cfgHoldV">5 min</b><input type="range" id="cfgHold" min="1" max="60" step="1" value="5"></label>
           <label class="sl">Wait between trades <b id="cfgGapV">10 s</b><input type="range" id="cfgGap" min="3" max="180" step="1" value="10"></label>
           <label class="sl">Only trade when the AI is at least <b id="cfgConfV">50%</b><input type="range" id="cfgConf" min="50" max="62" step="1" value="50"></label>
-          <label>Fee per trade<select id="cfgFee"><option value="0">None</option><option value="0.01">0.01% of position</option><option value="0.02">0.02% of position</option><option value="0.05">0.05% of position</option><option value="0.1">0.1% of position</option></select></label>
+          <label>Fee per trade (copy it from a Trench ticket)<span class="feeRow"><input type="number" id="cfgFee" min="0" max="50" step="0.01" value="1" aria-label="Fee amount"><select id="cfgFeeMode" aria-label="Fee is a percent of"><option value="stake">% of stake</option><option value="position">% of position</option></select></span></label>
           <label>Goal for each run<select id="cfgGoalX"><option value="2">2× the bankroll</option><option value="5">5× the bankroll</option><option value="10" selected>10× the bankroll</option><option value="100">100× the bankroll</option><option value="0">No goal (until time or broke)</option></select></label>
           <label>Time limit<select id="cfgMins"><option value="15">15 min</option><option value="30">30 min</option><option value="60" selected>60 min</option><option value="240">4 hours</option></select></label>
         </div>
@@ -606,7 +608,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
         <svg class="spark" id="ppSpark" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true"></svg>
       </div>
       <div class="tablewrap"><table><tbody id="ppLog"></tbody></table></div>
-      <p class="note">Simulated Trench-style trades: 10% of the balance per trade, multiplier set so the bust price is 3× the typical move away, 0.1% fee. Trench doesn't publish its exact formulas, so real results will differ.</p>
+      <p class="note">Simulated Trench-style trades: 10% of the balance per trade, multiplier set so the bust price is 3× the typical move away, 1% of the stake as a fee. Trench doesn't publish its exact formulas, so real results will differ.</p>
     </div>
   </section>
   <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -1409,7 +1411,6 @@ setInterval(renderFlowText, 400);
 requestAnimationFrame(flowLoop);
 
 // ───────── practice trading (your own fake account, saved in this browser) ─────────
-const FEE = 0.001;   // same assumed Trench fee as the bot: 0.1% of the position size
 const PR_KEY = "turnspotter-practice";
 S.prices = {}; S.priceT = {}; S.hist = {};
 const PR = (() => { try{ const d = JSON.parse(localStorage.getItem(PR_KEY)); if(d && Array.isArray(d.positions)) return d; }catch(e){}
@@ -1426,7 +1427,7 @@ function openPosition(coin, dir, stake, mult, mins, auto){
   stake = Math.round(stake * 100) / 100;
   if(!(price > 0) || stake < 1 || stake > PR.cash + 1e-9) return false;
   PR.cash -= stake;
-  PR.positions.push({id:Date.now() + coin, coin, dir, entry:price, stake, mult, fee:stake * mult * FEE,
+  PR.positions.push({id:Date.now() + coin, coin, dir, entry:price, stake, mult, fee:feeOf(stake, mult),
     bust:price * (1 - dir / mult), openedAt:Date.now(), expiresAt:Date.now() + mins * 60000, auto:!!auto});
   savePractice(); renderPractice();
   toast(`${auto ? "Auto: " : ""}${coin} ${dir > 0 ? "▲ UP" : "▼ DOWN"} · $${stake.toFixed(2)} × ${mult} at ${fmtP(price)}`);
@@ -1496,11 +1497,11 @@ function renderTicket(){
   const stake = +st.value, mult = +$("tkMult").value;
   $("tkStakeV").textContent = "$" + stake.toFixed(2); $("tkMultV").textContent = "×" + mult;
   const bustPct = 100 / mult, move = p && !isNaN(p.move) ? p.move * Math.sqrt(TK.mins / S.look) * 100 : NaN;
-  const ratio = bustPct / move, win1 = stake * mult * .01 - stake * mult * FEE;
+  const ratio = bustPct / move, fee = feeOf(stake, mult), win1 = stake * mult * .01 - fee;
   const call = p ? (p.modelUp ? "UP" : p.modelDown ? "DOWN" : "WAIT") : "…";
   $("tkRisk").innerHTML = `Busts if price moves <b>${bustPct.toFixed(2)}%</b> against you (at ${price ? fmtP(price * (1 - TK.dir / mult)) : "—"}).
     ${isNaN(move) ? "" : `A normal ${TK.mins === 60 ? "hour" : "4 hours"} moves about <b>±${move.toFixed(2)}%</b>, so this is <b class="${ratio < 1.5 ? "danger" : ratio < 3 ? "" : "ok"}">${ratio.toFixed(1)}×</b> a normal move${ratio < 1.5 ? ": likely to bust from noise alone" : ratio < 3 ? ": risky" : ": comfortable"}.`}
-    <br>A 1% move your way pays <b>+$${win1.toFixed(2)}</b>. Fee: $${(stake * mult * FEE).toFixed(2)}. The AI says <b>${call}</b> right now.`;
+    <br>A 1% move your way pays <b>+$${win1.toFixed(2)}</b>. Fee: $${fee.toFixed(2)} (${feeLabel()}, set in the bot's fee box). The AI says <b>${call}</b> right now.`;
   const btn = $("tkPlace");
   btn.textContent = `Place ${TK.dir > 0 ? "▲ UP" : "▼ DOWN"} · $${stake.toFixed(2)} × ${mult}`;
   btn.className = "place" + (TK.dir < 0 ? " down" : "");
@@ -1604,7 +1605,7 @@ function simulate(cfg){
   let cash = cfg.start; const open = [], curve = [{t:events[0]?.t || Date.now(), v:cfg.start}], done = [];
   const settle = upto => { open.sort((a, b) => a.end - b.end);
     while(open.length && open[0].end <= upto){ const e = open.shift();
-      const pnl = e.busted ? -e.stake : Math.max(-e.stake, e.stake * e.mult * e.dir * (e.exit / e.entry - 1) - e.stake * e.mult * FEE);
+      const pnl = e.busted ? -e.stake : Math.max(-e.stake, e.stake * e.mult * e.dir * (e.exit / e.entry - 1) - feeOf(e.stake, e.mult));
       cash += e.stake + pnl; done.push({...e, pnl}); curve.push({t:e.end, v:cash + open.reduce((s, x) => s + x.stake, 0)}); } };
   for(const e of events){ settle(e.t); const stake = Math.min(cash, Math.max(1, cash * cfg.stakePct / 100)); if(stake < 1) continue;
     cash -= stake; open.push({...e, stake}); }
@@ -1858,13 +1859,19 @@ if(!reduceMotion){
 // charged on the position size, and bust / stop / take-profit are checked on every live trade.
 const BOT_KEY = "turnspotter-livebot2";
 const PRESETS = {
-  x1000:  {dir:"ai", mult:1000, stake:100, tp:100, sl:100, hold:5,  gap:10, conf:50, fee:0.01},
-  degen:  {dir:"ai", mult:0,    stake:100, tp:60,  sl:100, hold:10, gap:15, conf:52, fee:0.05},
-  steady: {dir:"ai", mult:0,    stake:20,  tp:25,  sl:50,  hold:30, gap:60, conf:55, fee:0.05},
+  x1000:  {dir:"ai", mult:1000, stake:100, tp:100, sl:100, hold:5,  gap:10, conf:50},
+  degen:  {dir:"ai", mult:0,    stake:100, tp:60,  sl:100, hold:10, gap:15, conf:52},
+  steady: {dir:"ai", mult:0,    stake:20,  tp:25,  sl:50,  hold:30, gap:60, conf:55},
 };
 const BOT = (() => { try{ const d = JSON.parse(localStorage.getItem(BOT_KEY)); if(d && d.cfg) return d; }catch(e){} return null; })()
   || {running:false, start:50, goal:500, cash:50, pos:null, pending:null, log:[], curve:[], endsAt:0, startedAt:0, follow:true, nextAt:0, done:null,
-      cfg:{...PRESETS.x1000, coins:[...COINS], mins:60, goalX:10}, history:[], runs:[], runId:0};
+      cfg:{...PRESETS.x1000, coins:[...COINS], mins:60, goalX:10, fee:1, feeMode:"stake"}, history:[], runs:[], runId:0};
+// fees are Trench's, not a strategy's: one setting, as a % of the stake (or of the position), used everywhere
+if(BOT.cfg.feeMode === undefined){ BOT.cfg.fee = 1; BOT.cfg.feeMode = "stake"; }
+// (the practice panel loads before this block, so fall back to the default until BOT exists)
+function feeCfg(c){ if(c) return c; try{ return BOT.cfg; }catch(e){ return {fee:1, feeMode:"stake"}; } }
+function feeOf(stake, mult, c){ c = feeCfg(c); return c.feeMode === "position" ? stake * mult * c.fee / 100 : stake * c.fee / 100; }
+function feeLabel(c){ c = feeCfg(c); return `${c.fee}% of the ${c.feeMode === "position" ? "position" : "stake"}`; }
 // the bankroll carries over between runs, so each run continues from where the last one finished
 if(BOT.bank === undefined){ const last = BOT.runs.at(-1); BOT.bank = last ? +last.end.toFixed(2) : 50; BOT.bankStart = 50; BOT.bankSince = Date.now(); BOT.peak = Math.max(50, BOT.bank); }
 if(BOT.cfg.goalX === undefined) BOT.cfg.goalX = 10;
@@ -1886,14 +1893,14 @@ function botValue(){ const p = BOT.pos; return BOT.cash + (BOT.pending ? BOT.pen
 function readCfg(){
   const c = BOT.cfg;
   Object.assign(c, {dir:$("cfgDir").value, mult:+$("cfgMult").value, stake:+$("cfgStake").value, tp:+$("cfgTp").value, sl:+$("cfgSl").value,
-    hold:+$("cfgHold").value, gap:+$("cfgGap").value, conf:+$("cfgConf").value, fee:+$("cfgFee").value, mins:+$("cfgMins").value});
+    hold:+$("cfgHold").value, gap:+$("cfgGap").value, conf:+$("cfgConf").value, fee:Math.max(0, +$("cfgFee").value || 0), feeMode:$("cfgFeeMode").value, mins:+$("cfgMins").value});
   c.goalX = +$("cfgGoalX").value;
   saveBot(); renderBotCfg();
 }
 function writeCfg(){
   const c = BOT.cfg;
   $("cfgDir").value = c.dir; $("cfgMult").value = c.mult; $("cfgStake").value = c.stake; $("cfgTp").value = c.tp; $("cfgSl").value = c.sl;
-  $("cfgHold").value = c.hold; $("cfgGap").value = c.gap; $("cfgConf").value = c.conf; $("cfgFee").value = String(c.fee); $("cfgMins").value = String(c.mins);
+  $("cfgHold").value = c.hold; $("cfgGap").value = c.gap; $("cfgConf").value = c.conf; $("cfgFee").value = String(c.fee); $("cfgFeeMode").value = c.feeMode; $("cfgMins").value = String(c.mins);
   $("cfgGoalX").value = String(c.goalX); $("botFollow").checked = BOT.follow;
   renderBotCfg();
 }
@@ -1902,13 +1909,13 @@ function writeCfg(){
 // hitting the take profit first is (distance to loss) / (distance to win + distance to loss).
 function winChance(c, stake, mult){
   if(!c.tp || !mult) return null;
-  const size = stake * mult, fee = size * c.fee / 100, winD = (stake * c.tp / 100 + fee) / size + 2 * halfSpread;
+  const size = stake * mult, fee = feeOf(stake, mult, c), winD = (stake * c.tp / 100 + fee) / size + 2 * halfSpread;
   const lossD = Math.max(1e-6, (c.sl < 100 ? (stake * c.sl / 100 - fee) / size : 1 / mult) - halfSpread);
   return lossD / (winD + lossD);
 }
 function odds(c, stake){
   if(!c.mult || !c.tp || stake <= 0) return "";
-  const size = stake * c.mult, fee = size * c.fee / 100;
+  const size = stake * c.mult, fee = feeOf(stake, c.mult, c);
   const winD = (stake * c.tp / 100 + fee) / size + 2 * halfSpread;
   const lossAmt = c.sl < 100 ? stake * c.sl / 100 : stake;
   const lossD = Math.max(1e-6, (c.sl < 100 ? (stake * c.sl / 100 - fee) / size : 1 / c.mult) - halfSpread);
@@ -1926,12 +1933,12 @@ function renderBotCfg(){
   $("cfgStakeV").textContent = c.stake + "%"; $("cfgTpV").textContent = c.tp ? `+${c.tp}% of stake` : "off";
   $("cfgSlV").textContent = c.sl >= 100 ? "bust only" : `−${c.sl}% of stake`; $("cfgHoldV").textContent = c.hold + " min";
   $("cfgGapV").textContent = c.gap + " s"; $("cfgConfV").textContent = c.conf <= 50 ? "any lean" : c.conf + "%";
-  const m = c.mult || 50, stake = BOT.bank * c.stake / 100, fee = stake * m * c.fee / 100;
+  const m = c.mult || 50, stake = BOT.bank * c.stake / 100, fee = feeOf(stake, m, c);
   $("botRisk").innerHTML = `${c.mult ? `At ×${c.mult} a <b>${(100 / c.mult).toFixed(2)}%</b> move against you busts the trade.` : "Auto picks the multiplier per coin so the bust is 3× a normal move away."}
-    Fee: <b>${c.fee}%</b> of the position${c.mult ? ` = <b>$${fee.toFixed(2)}</b> on a $${stake.toFixed(2)} stake (${(fee / stake * 100).toFixed(0)}% of it)` : ""}.
+    Fee: <b>${feeLabel(c)}</b> = <b>$${fee.toFixed(2)}</b> on a $${stake.toFixed(2)} stake${c.feeMode === "position" ? ` (${(fee / stake * 100).toFixed(0)}% of it${c.mult ? "" : " at ×50"})` : ""}.
     ${c.mult && fee >= stake ? '<b class="loss">The fee alone eats the whole stake: lower the multiplier or the fee.</b>' : ""}
     ${odds(c, stake)}`;
-  $("botNote").textContent = `Runs while this page is open, with fake money. For any fair gamble, ${c.goalX ? `the chance of reaching ${c.goalX}× before $0 is about 1 in ${c.goalX}` : "the longer you play, the more fees and spread eat into the bankroll"}; fees and spread make it lower. Use "Run 100 times" below to see the odds for your exact settings. Trench doesn't publish its fees, so pick the one you think is right.`;
+  $("botNote").textContent = `Runs while this page is open, with fake money. For any fair gamble, ${c.goalX ? `the chance of reaching ${c.goalX}× before $0 is about 1 in ${c.goalX}` : "the longer you play, the more fees and spread eat into the bankroll"}; fees and spread make it lower. Use "Run 100 times" below to see the odds for your exact settings. Trench shows the fee on its trade ticket: enter it as a % of your stake.`;
 }
 
 function botStart(){
@@ -1940,11 +1947,11 @@ function botStart(){
   const c = BOT.cfg;
   if(BOT.bank < 1){ say("The bankroll is empty. Reset it to start again.", "loss"); return; }
   BOT.start = BOT.bank; BOT.goal = c.goalX ? BOT.bank * c.goalX : Infinity;
-  if(c.mult && BOT.start * c.stake / 100 * c.mult * c.fee / 100 >= BOT.start * c.stake / 100){ say("The fee would eat the whole stake at this multiplier. Lower the multiplier or the fee first.", "loss"); return; }
+  if(feeOf(BOT.start * c.stake / 100, c.mult || 50, c) >= BOT.start * c.stake / 100){ say("The fee would eat the whole stake at this multiplier. Lower the multiplier or the fee first.", "loss"); return; }
   BOT.runId = (BOT.runId || 0) + 1;
   Object.assign(BOT, {running:true, cash:BOT.start, pos:null, pending:null, log:[], curve:[{t:Date.now(), v:BOT.start}],
     startedAt:Date.now(), endsAt:Date.now() + c.mins * 60000, nextAt:Date.now() + 2000, done:null});
-  say(`Run #${BOT.runId}: $${BOT.start.toFixed(2)} → ${isFinite(BOT.goal) ? "goal $" + BOT.goal.toFixed(0) : "no goal"} in ${c.mins} minutes. Trading ${c.coins.join(", ")}, ${c.dir === "ai" ? "following the AI" : "always " + c.dir.toUpperCase()}, ${c.mult ? "×" + c.mult : "auto multiplier"}, ${c.stake}% per trade, ${c.fee}% fee.`, "sys");
+  say(`Run #${BOT.runId}: $${BOT.start.toFixed(2)} → ${isFinite(BOT.goal) ? "goal $" + BOT.goal.toFixed(0) : "no goal"} in ${c.mins} minutes. Trading ${c.coins.join(", ")}, ${c.dir === "ai" ? "following the AI" : "always " + c.dir.toUpperCase()}, ${c.mult ? "×" + c.mult : "auto multiplier"}, ${c.stake}% per trade, ${feeLabel(c)} fee.`, "sys");
   renderBot();
 }
 function botStop(reason){
@@ -1998,7 +2005,7 @@ function botDecide(){
 function botFill(){
   const o = BOT.pending; if(!o || Date.now() < o.at || !priceOf(o.coin)) return;
   if(Date.now() - (S.priceT[o.coin] || 0) > 5000){ fetchPrice(o.coin); return; }   // never fill on a stale price
-  const entry = quote(o.coin, o.dir), fee = o.stake * o.mult * BOT.cfg.fee / 100;
+  const entry = quote(o.coin, o.dir), fee = feeOf(o.stake, o.mult);
   BOT.pending = null;
   BOT.pos = {coin:o.coin, dir:o.dir, entry, stake:o.stake, mult:o.mult, fee, bust:entry * (1 - o.dir / o.mult), openedAt:Date.now(),
     until:Date.now() + BOT.cfg.hold * 60000, run:BOT.runId, pWin:winChance(BOT.cfg, o.stake, o.mult)};
@@ -2198,7 +2205,7 @@ function simRun(cfg, data, start, T0){
         const mult = cfg.mult || Math.max(1, Math.min(1000, Math.floor(1 / (3 * moveHold))));
         const stake = Math.max(1, Math.min(bal, bal * cfg.stake / 100));
         // order fills on the next minute's opening price, at the ask (UP) or bid (DOWN)
-        const entry = pick.k.o * (1 + pick.dir * half), fee = stake * mult * cfg.fee / 100, d = pick.dir, size = stake * mult;
+        const entry = pick.k.o * (1 + pick.dir * half), fee = feeOf(stake, mult, cfg), d = pick.dir, size = stake * mult;
         bal -= stake;
         pos = {coin:pick.coin, dir:d, entry, stake, mult, fee, until:t + 60000 + cfg.hold * 60000,
           bust:entry * (1 - d / mult),
