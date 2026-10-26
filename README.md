@@ -324,6 +324,15 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   holds for a few seconds still does. At ×1000 a bust is only 0.1% away, so busts within a minute or
   two are still normal.
 
+### Round 17: fewer options on screen
+- Bot settings: four style cards (Careful, Balanced, Degen, Trench ×1000) plus Multiplier and Stake.
+  Everything else (direction, take profit, stop loss, hold, wait, confidence, fee, goal, time limit,
+  follow) is under "More options". The odds are one line: bust distance, win rate, break-even and
+  chance to hit the goal, plus the fee.
+- Practice ticket: UP/DOWN, stake, multiplier, a one-line risk summary and Place; trade length and
+  auto-follow are under "More options". "What if?" moves strictness and time window under "More options".
+- The Market page's folded sections are now called "Prediction settings" and "How the AI works".
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

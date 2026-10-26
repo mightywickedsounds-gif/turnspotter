@@ -224,6 +224,14 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 
 
 /* bot v2 */
+.styleCards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.styleCards button{display:grid;gap:4px;text-align:left;padding:12px;border-radius:12px;backdrop-filter:none}
+.styleCards b{font:800 14px var(--display)} .styleCards span{font:500 11.5px/1.35 var(--body);color:var(--muted)}
+.styleCards button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 0 20px -8px var(--accent)}
+.moreOpts{margin-top:10px;border-top:1px solid var(--edge);padding-top:10px}
+.moreOpts>summary{cursor:pointer;font:700 13px var(--body);color:var(--muted);list-style:none}
+.moreOpts[open]>summary{margin-bottom:10px}
+@media (max-width:640px){.styleCards{grid-template-columns:1fr 1fr}}
 .fight{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px}
 .fL,.fR{font:800 11px var(--display);letter-spacing:.08em;text-transform:uppercase}
 .fL{color:var(--down);text-shadow:0 0 12px var(--down)} .fR{color:var(--up);text-shadow:0 0 12px var(--up)}
@@ -257,8 +265,6 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .tile svg{position:absolute;left:0;right:0;bottom:0;width:100%;height:26px;opacity:.7}
 .tLive{position:absolute;top:8px;right:8px;font:700 9.5px var(--mono);color:#07091a;background:var(--warn);padding:2px 6px;border-radius:999px;display:none}
 .tile.live .tLive{display:block} .tile.live .tick{visibility:hidden}
-.presets{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.presets button{padding:6px 10px;font-size:12px;border-radius:8px}
 .botCfg{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
 .botCfg label{display:grid;gap:6px;font:600 12px var(--body);color:var(--muted)}
 .botCfg .sl{grid-template-columns:1fr auto}
@@ -484,12 +490,21 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </div>
 
     <div class="bpane" data-bpane="settings" hidden>
-        <div class="presets"><span class="acctSub">Presets:</span>
-          <button type="button" data-preset="x1000">Trench ×1000 gamble</button><button type="button" data-preset="degen">Degen</button><button type="button" data-preset="steady">Steady</button></div>
-        <div class="botCfg">
-          <label>Direction<select id="cfgDir"><option value="ai">Follow the AI</option><option value="up">Always UP</option><option value="down">Always DOWN</option></select></label>
+      <div class="sub">Pick a style</div>
+      <div class="styleCards presets">
+        <button type="button" data-preset="careful"><b>Careful</b><span>×20 · 20% per trade · slower, smaller swings</span></button>
+        <button type="button" data-preset="balanced"><b>Balanced</b><span>×100 · half the bankroll per trade</span></button>
+        <button type="button" data-preset="degen"><b>Degen</b><span>all-in · multiplier picked per coin</span></button>
+        <button type="button" data-preset="x1000"><b>Trench ×1000</b><span>all-in · a 0.1% move decides it</span></button>
+      </div>
+      <div class="botCfg">
           <label class="sl">Multiplier <b id="cfgMultV">auto</b><input type="range" id="cfgMult" min="0" max="1000" step="1" value="0"></label>
           <label class="sl">Stake per trade <b id="cfgStakeV">100%</b><input type="range" id="cfgStake" min="1" max="100" step="1" value="100"></label>
+      </div>
+      <p class="riskLine" id="botRisk"></p>
+      <details class="moreOpts"><summary>More options</summary>
+        <div class="botCfg">
+          <label>Direction<select id="cfgDir"><option value="ai">Follow the AI</option><option value="up">Always UP</option><option value="down">Always DOWN</option></select></label>
           <label class="sl">Take profit at <b id="cfgTpV">+100%</b><input type="range" id="cfgTp" min="0" max="500" step="5" value="100"></label>
           <label class="sl">Stop loss at <b id="cfgSlV">bust only</b><input type="range" id="cfgSl" min="10" max="100" step="5" value="100"></label>
           <label class="sl">Close after <b id="cfgHoldV">5 min</b><input type="range" id="cfgHold" min="1" max="60" step="1" value="5"></label>
@@ -499,9 +514,9 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
           <label>Goal for each run<select id="cfgGoalX"><option value="2">2× the bankroll</option><option value="5">5× the bankroll</option><option value="10" selected>10× the bankroll</option><option value="100">100× the bankroll</option><option value="0">No goal (until time or broke)</option></select></label>
           <label>Time limit<select id="cfgMins"><option value="15">15 min</option><option value="30">30 min</option><option value="60" selected>60 min</option><option value="240">4 hours</option></select></label>
         </div>
-        <p class="riskLine" id="botRisk"></p>
         <label class="auto"><input type="checkbox" id="botFollow" checked> <span>Switch the screen to the coin the bot is trading</span></label>
         <p class="note" id="botNote"></p>
+      </details>
     </div>
 
     <div class="bpane simBox" data-bpane="sim" hidden>
@@ -588,14 +603,17 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
           <label class="sl">Stake <b id="tkStakeV">$5.00</b><input type="range" id="tkStake" min="1" max="50" step="0.5" value="5"></label>
           <div class="quick"><button type="button" data-pct="10">10%</button><button type="button" data-pct="25">25%</button><button type="button" data-pct="50">50%</button><button type="button" data-pct="100">All in</button></div>
           <label class="sl">Multiplier <b id="tkMultV">×10</b><input type="range" id="tkMult" min="1" max="1000" step="1" value="10"></label>
-          <div class="quick" id="tkDur"><button type="button" data-min="60" aria-pressed="true">1 hour</button><button type="button" data-min="240" aria-pressed="false">4 hours</button></div>
           <div class="risk" id="tkRisk"></div>
           <button type="button" class="place" id="tkPlace">Place trade</button>
-          <label class="auto"><input type="checkbox" id="autoOn"> <span><b>Auto-follow the AI's calls</b> on every coin while this page is open</span></label>
-          <div class="autoCfg" id="autoCfg">
-            <label class="sl">Stake per call <b id="autoStakeV">10%</b><input type="range" id="autoStake" min="1" max="50" step="1" value="10"></label>
-            <label class="sl">Bust distance <b id="autoBufV">3× a normal move</b><input type="range" id="autoBuf" min="1" max="6" step="0.5" value="3"></label>
-          </div>
+          <details class="moreOpts"><summary>More options</summary>
+            <div class="sub">Trade length</div>
+            <div class="quick" id="tkDur"><button type="button" data-min="60" aria-pressed="true">1 hour</button><button type="button" data-min="240" aria-pressed="false">4 hours</button></div>
+            <label class="auto"><input type="checkbox" id="autoOn"> <span><b>Auto-follow the AI's calls</b> on every coin while this page is open</span></label>
+            <div class="autoCfg" id="autoCfg">
+              <label class="sl">Stake per call <b id="autoStakeV">10%</b><input type="range" id="autoStake" min="1" max="50" step="1" value="10"></label>
+              <label class="sl">Bust distance <b id="autoBufV">3× a normal move</b><input type="range" id="autoBuf" min="1" max="6" step="0.5" value="3"></label>
+            </div>
+          </details>
         </div>
         <div class="positions">
           <div class="sub">Open trades</div>
@@ -607,15 +625,17 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </div>
 
     <div class="pane" id="pane-whatif" hidden>
-      <p class="note">Replays every call the AI made over the loaded history (about 20 days), on days the AI was never trained on. Change anything and it re-runs instantly.</p>
+      <p class="note">Replays the AI's real calls from the last ~20 days with your settings.</p>
       <div class="wiGrid">
         <label>Start with <span class="money"><span>$</span><input type="number" id="wiStart" min="5" max="100000" value="50"></span></label>
         <label class="sl">Stake per call <b id="wiStakeV">10%</b><input type="range" id="wiStake" min="1" max="100" step="1" value="10"></label>
         <label>Multiplier<select id="wiMode"><option value="auto3">Auto: bust 3× a normal move</option><option value="auto2">Auto: bust 2× a normal move</option><option value="auto5">Auto: bust 5× a normal move</option><option value="fixed">Fixed</option></select></label>
         <label class="sl" id="wiFixedBox" hidden>Fixed multiplier <b id="wiFixedV">×10</b><input type="range" id="wiFixed" min="1" max="100" step="1" value="10"></label>
+      </div>
+      <details class="moreOpts"><summary>More options</summary><div class="wiGrid">
         <label>How picky<select id="wiConf"><option value="0.55">Normal</option><option value="0.56">Picky</option><option value="0.58">Very picky</option></select></label>
         <label>How far ahead<select id="wiLook"><option value="60">1 hour</option><option value="240">4 hours</option></select></label>
-      </div>
+      </div></details>
       <div class="coinToggles" id="wiCoins"></div>
       <div class="wiOut">
         <div class="wiBig"><span class="price" id="wiFinal">—</span> <span class="chg" id="wiRet"></span><div class="acctSub" id="wiVs"></div></div>
@@ -638,7 +658,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   <div class="toasts" id="toasts" aria-live="polite"></div>
 
   <details class="card fold" id="settings" data-page="market">
-    <summary>Settings</summary>
+    <summary>Prediction settings</summary>
     <div class="controls">
       <label>How far ahead<select id="look">
         <option value="60" selected>1 hour</option><option value="240">4 hours</option>
@@ -653,7 +673,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   </details>
 
   <details class="card fold" id="more" data-page="market">
-    <summary>Details</summary>
+    <summary>How the AI works</summary>
     <div class="moreGrid">
       <div>
         <div class="eyebrow" id="vEyebrow"></div>
@@ -1543,9 +1563,7 @@ function renderTicket(){
   const bustPct = 100 / mult, move = p && !isNaN(p.move) ? p.move * Math.sqrt(TK.mins / S.look) * 100 : NaN;
   const ratio = bustPct / move, fee = feeOf(stake, mult), win1 = stake * mult * .01;
   const call = p ? (p.modelUp ? "UP" : p.modelDown ? "DOWN" : "WAIT") : "…";
-  $("tkRisk").innerHTML = `Busts if price moves <b>${bustPct.toFixed(2)}%</b> against you (at ${price ? fmtP(price * (1 - TK.dir / mult)) : "—"}).
-    ${isNaN(move) ? "" : `A normal ${TK.mins === 60 ? "hour" : "4 hours"} moves about <b>±${move.toFixed(2)}%</b>, so this is <b class="${ratio < 1.5 ? "danger" : ratio < 3 ? "" : "ok"}">${ratio.toFixed(1)}×</b> a normal move${ratio < 1.5 ? ": likely to bust from noise alone" : ratio < 3 ? ": risky" : ": comfortable"}.`}
-    <br>A 1% move your way pays <b>+$${win1.toFixed(2)}</b>. Fee: <b>$${fee.toFixed(2)}</b>, taken when you open (${feeLabel()}). The AI says <b>${call}</b> right now.`;
+  $("tkRisk").innerHTML = `Busts at <b>${price ? fmtP(price * (1 - TK.dir / mult)) : "—"}</b> (${bustPct.toFixed(2)}% away${isNaN(move) ? "" : `, <span class="${ratio < 1.5 ? "danger" : ratio < 3 ? "" : "ok"}">${ratio < 1.5 ? "very likely" : ratio < 3 ? "risky" : "comfortable"}</span>`}) · a 1% move pays <b>+$${win1.toFixed(2)}</b> · fee <b>$${fee.toFixed(2)}</b> · AI says <b>${call}</b>`;
   const btn = $("tkPlace");
   btn.textContent = `Place ${TK.dir > 0 ? "▲ UP" : "▼ DOWN"} · $${stake.toFixed(2)} × ${mult}`;
   btn.className = "place" + (TK.dir < 0 ? " down" : "");
@@ -1961,8 +1979,9 @@ function tradeMood(){
 const BOT_KEY = "turnspotter-livebot2";
 const PRESETS = {
   x1000:  {dir:"ai", mult:1000, stake:100, tp:100, sl:100, hold:5,  gap:10, conf:50},
+  careful:  {dir:"ai", mult:20,  stake:20,  tp:30,  sl:50,  hold:30, gap:60, conf:55},
+  balanced: {dir:"ai", mult:100, stake:50,  tp:50,  sl:100, hold:15, gap:30, conf:53},
   degen:  {dir:"ai", mult:0,    stake:100, tp:60,  sl:100, hold:10, gap:15, conf:52},
-  steady: {dir:"ai", mult:0,    stake:20,  tp:25,  sl:50,  hold:30, gap:60, conf:55},
 };
 const BOT = (() => { try{ const d = JSON.parse(localStorage.getItem(BOT_KEY)); if(d && d.cfg) return d; }catch(e){} return null; })()
   || {running:false, start:50, goal:500, cash:50, pos:null, pending:null, log:[], curve:[], endsAt:0, startedAt:0, follow:true, nextAt:0, done:null,
@@ -2008,18 +2027,6 @@ function winChance(c, stake, mult){
   const winD = c.tp / 100 / mult, lossD = c.sl < 100 ? c.sl / 100 / mult : 1 / mult;
   return lossD / (winD + lossD);
 }
-function odds(c, stake){
-  if(!c.mult || !c.tp || stake <= 0) return "";
-  const fee = feeOf(stake, c.mult, c), winD = c.tp / 100 / c.mult;
-  const lossAmt = c.sl < 100 ? stake * c.sl / 100 : stake, lossD = c.sl < 100 ? c.sl / 100 / c.mult : 1 / c.mult;
-  const pWin = lossD / (winD + lossD), winAmt = stake * c.tp / 100, breakEven = (lossAmt + fee) / (winAmt + lossAmt);
-  const ev = pWin * winAmt - (1 - pWin) * lossAmt - fee;
-  const streak = c.goalX ? Math.ceil(Math.log(c.goalX) / Math.log(1 + c.tp / 100 * c.stake / 100)) : 0;
-  return `<br>Take profit is <b>${(winD * 100).toFixed(3)}%</b> away and the ${c.sl < 100 ? "stop" : "bust"} <b>${(lossD * 100).toFixed(3)}%</b> away, so expect to win about <b>${Math.round(pWin * 100)}%</b> of trades.
-    A loss costs ${(lossAmt / winAmt).toFixed(1)}× a win and every trade pays the $${fee.toFixed(2)} fee, so breaking even needs <b>${Math.round(breakEven * 100)}%</b>.
-    Average result per trade: <b class="${ev >= 0 ? "win" : "loss"}">${ev >= 0 ? "+" : "−"}${Math.abs(ev / stake * 100).toFixed(1)}% of the stake</b>.
-    ${streak && c.stake >= 100 ? `Reaching ${c.goalX}× needs about <b>${streak} wins in a row</b>: roughly a <b>${Math.max(.1, 100 * Math.pow(pWin, streak)).toFixed(1)}%</b> chance per run.` : ""}`;
-}
 function renderBotCfg(){
   const c = BOT.cfg, pw = winChance(c, 1, c.mult);
   $("botOddsMini").innerHTML = `${c.dir === "ai" ? "Follows the AI" : "Always " + c.dir.toUpperCase()} · ${c.mult ? "×" + c.mult : "auto multiplier"} · ${c.stake}% stake · take profit ${c.tp ? "+" + c.tp + "%" : "off"} · fee ${feeLabel(c)}${pw ? ` · wins about ${Math.round(pw * 100)}% of trades` : ""}. Change it under <b>Settings</b>.`;
@@ -2028,10 +2035,19 @@ function renderBotCfg(){
   $("cfgSlV").textContent = c.sl >= 100 ? "bust only" : `−${c.sl}% of stake`; $("cfgHoldV").textContent = c.hold + " min";
   $("cfgGapV").textContent = c.gap + " s"; $("cfgConfV").textContent = c.conf <= 50 ? "any lean" : c.conf + "%";
   const m = c.mult || 50, stake = BOT.bank * c.stake / 100, fee = feeOf(stake, m, c);
-  $("botRisk").innerHTML = `${c.mult ? `At ×${c.mult} a <b>${(100 / c.mult).toFixed(2)}%</b> move against you busts the trade.` : "Auto picks the multiplier per coin so the bust is 3× a normal move away."}
-    Fee: <b>${feeLabel(c)}</b> = <b>$${fee.toFixed(2)}</b> on a $${stake.toFixed(2)} stake${c.feeMode === "position" ? ` (${(fee / stake * 100).toFixed(0)}% of it${c.mult ? "" : " at ×50"})` : ""}.
-    ${c.mult && fee >= stake ? '<b class="loss">The fee alone eats the whole stake: lower the multiplier or the fee.</b>' : ""}
-    ${odds(c, stake)}`;
+  // one line of odds: bust distance, win rate, break-even and the chance of reaching the goal
+  let risk = c.mult ? `Bust at a <b>${(100 / c.mult).toFixed(2)}%</b> move against you` : "Bust at 3× a normal move (multiplier picked per coin)";
+  const pWin = winChance(c, 1, c.mult);
+  if(pWin){ const winAmt = c.tp / 100, lossAmt = c.sl < 100 ? c.sl / 100 : 1, feeR = fee / Math.max(stake, 1e-9);
+    const be = (lossAmt + feeR) / (winAmt + lossAmt), streak = c.goalX && c.stake >= 100 ? Math.ceil(Math.log(c.goalX) / Math.log(1 + winAmt)) : 0;
+    risk += ` · wins about <b>${Math.round(pWin * 100)}%</b> · needs <b>${Math.round(be * 100)}%</b> to break even`;
+    if(streak) risk += ` · about <b>${Math.max(.1, 100 * Math.pow(pWin, streak)).toFixed(1)}%</b> chance to hit ${c.goalX}×`; }
+  risk += ` · fee <b>$${fee.toFixed(2)}</b> a trade.`;
+  if(c.mult && fee >= stake) risk += ' <b class="loss">The fee eats the whole stake: lower the multiplier or the fee.</b>';
+  $("botRisk").innerHTML = risk;
+  // highlight the style card that matches the current settings
+  document.querySelectorAll(".styleCards button").forEach(btn => { const pr = PRESETS[btn.dataset.preset];
+    btn.setAttribute("aria-pressed", String(!!pr && Object.keys(pr).every(k => c[k] === pr[k]))); });
   $("botNote").textContent = `Runs while this page is open, with fake money. For any fair gamble, ${c.goalX ? `the chance of reaching ${c.goalX}× before $0 is about 1 in ${c.goalX}` : "the longer you play, the more fees and spread eat into the bankroll"}; fees and spread make it lower. Use "Run 100 times" below to see the odds for your exact settings. Trench shows the fee on its trade ticket: enter it as a % of your stake.`;
 }
 
