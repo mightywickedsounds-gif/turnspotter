@@ -351,6 +351,27 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   smoothed mark price). The odds line and the 100-run replay assume profits are banked at 40% of the
   target.
 
+### Round 20: the table (a Critic bot checks every trade)
+- Every trade the bot wants now goes past a second bot, the Critic, before it opens. The two talk it
+  out on screen in chat bubbles, and the table stamps a verdict: Approved, Half size or Vetoed.
+- The Critic only raises objections that held up on 16 months of data the model never trained on
+  (2025-07 to 2026-10, entry one candle late; `research/experiments6.py`):
+  - chasing a candle that just jumped more than 1σ the same way: those calls were right 48.4% of the
+    time, so it vetoes;
+  - a wild, high-volatility market: right 51.6%, so it halves the stake;
+  - an AI lean under 56%: right 52.9%, so it halves the stake;
+  - two half-size objections together veto, and a stale price feed always vetoes.
+- Honest result: small. Money-weighted accuracy goes from 53.4% to 53.7%. It mostly helps by
+  skipping or shrinking the worst setups, not by finding new winners. The 100-run replay uses the
+  same rules.
+
+### Round 21: less on screen
+- Coin strip: no 24-hour % numbers, just the sparkline and the call.
+- Price moves: 4 windows (5m, 15m, 1h, 24h) instead of 6, one short line for the multiplier view.
+- Today's calls: last 4 instead of 8. Bot coin tiles: no price line.
+- Shorter text for the bot's stats, goal, bankroll, odds line and open trade, and for the practice
+  cash line. The bot's thinking log moved into a fold under the table.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
