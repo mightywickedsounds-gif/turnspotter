@@ -395,6 +395,10 @@
   {
    "t": 1793009622332,
    "value": 56.93
+  },
+  {
+   "t": 1793012205468,
+   "value": 56.93
   }
  ],
  "config": {
@@ -417,18 +421,18 @@
   "conf": 0.58,
   "need": 2000
  },
- "lastRun": 1793009622332,
+ "lastRun": 1793012205468,
  "status": {
   "BTC": {
    "src": "Binance US",
    "candles": 2000,
-   "price": 80466.52,
-   "experience": 0.484,
-   "liveLearner": 0.448,
-   "record": 0.56,
+   "price": 80434.81,
+   "experience": 0.485,
+   "liveLearner": 0.428,
+   "record": 0.57,
    "call": "WAIT",
    "last400": {
-    "call": 0.245,
+    "call": 0.237,
     "bounceOrRollover": 0.005
    },
    "backtest": {
@@ -439,13 +443,13 @@
   "ETH": {
    "src": "Binance US",
    "candles": 2000,
-   "price": 2332.77,
-   "experience": 0.492,
-   "liveLearner": 0.572,
+   "price": 2331.42,
+   "experience": 0.487,
+   "liveLearner": 0.518,
    "record": 0.53,
    "call": "WAIT",
    "last400": {
-    "call": 0.233,
+    "call": 0.225,
     "bounceOrRollover": 0.013
    },
    "backtest": {
@@ -453,33 +457,16 @@
     "right": 0.5
    }
   },
-  "SOL": {
-   "src": "Binance US",
-   "candles": 2000,
-   "price": 101.6,
-   "experience": 0.482,
-   "liveLearner": 0.536,
-   "record": 0.51,
-   "call": "WAIT",
-   "last400": {
-    "call": 0.237,
-    "bounceOrRollover": 0.007
-   },
-   "backtest": {
-    "calls": 165,
-    "right": 0.533
-   }
-  },
   "XRP": {
    "src": "Binance US",
    "candles": 2000,
    "price": 1.2905,
-   "experience": 0.492,
-   "liveLearner": 0.541,
+   "experience": 0.493,
+   "liveLearner": 0.523,
    "record": 0.65,
    "call": "WAIT",
    "last400": {
-    "call": 0.29,
+    "call": 0.285,
     "bounceOrRollover": 0
    },
    "backtest": {
@@ -490,14 +477,14 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 2000,
-   "price": 0.07723,
-   "experience": 0.476,
-   "liveLearner": 0.424,
+   "price": 0.0773,
+   "experience": 0.469,
+   "liveLearner": 0.444,
    "record": 0.48,
    "call": "WAIT",
    "last400": {
-    "call": 0.318,
-    "bounceOrRollover": 0.007
+    "call": 0.31,
+    "bounceOrRollover": 0.005
    },
    "backtest": {
     "calls": 160,
