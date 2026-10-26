@@ -317,6 +317,13 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - Fix: at 100% stake the bot used to stake every dollar, leaving nothing for the fee, so the fee was
   skipped. It now keeps just enough back to pay it. The bankroll peak now counts the run in progress.
 
+### Round 16: mark price for busts
+- Busts, take-profits and stop-losses for the bot and the practice account now trigger on a mark price
+  (the median of the last 5 seconds of trades on the price feed) instead of on every single trade print.
+  One stray trade on a thin exchange like Binance US can no longer liquidate a position; a move that
+  holds for a few seconds still does. At ×1000 a bust is only 0.1% away, so busts within a minute or
+  two are still normal.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

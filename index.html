@@ -1353,7 +1353,7 @@ function addTrade(t, samePrices){
   // Trades only move prices when they come from the SAME exchange as the price feed. Different exchanges
   // trade a little apart (Binance vs Binance US can differ by ~0.1%), and mixing them handed the ×1000
   // bot fake "wins": it bought at one exchange's price and cashed out on the other's.
-  if(samePrices){ S.prices[S.coin] = t.p; S.priceT[S.coin] = Date.now();
+  if(samePrices){ S.prices[S.coin] = t.p; S.priceT[S.coin] = Date.now(); markPush(S.coin, t.p);
     if(BOT.running) botCheck(S.coin, t.p); }   // bust / stop / take-profit on every single live trade
   FLOW.trades.push(t); if(FLOW.trades.length > 600) FLOW.trades.splice(0, 200);
   const sec = Math.floor(t.t / 1000), b = FLOW.secs.get(sec) || {buy:0, sell:0};
@@ -1472,11 +1472,27 @@ function closePosition(p, price, status){
   toast(`${p.coin} ${p.dir > 0 ? "UP" : "DOWN"} ${p.status === "busted" ? "busted" : "closed"}: ${p.pnl >= 0 ? "+" : "−"}$${Math.abs(p.pnl).toFixed(2)}`, p.pnl > 0 ? "win" : "loss");
 }
 // every new price: check busts and expiries
+// Mark price: like Trench-style platforms, busts and take-profits use a smoothed price, not single trades.
+// Here it's the median of the last 5 seconds of trades on the price feed, so one stray print on a thin
+// exchange can't liquidate a position; a real move that holds still does.
+const MARK = {};
+function markPush(coin, price){
+  const b = MARK[coin] || (MARK[coin] = []), now = Date.now();
+  b.push({t:now, p:price});
+  while(b.length && b[0].t < now - 5000) b.shift();
+  if(b.length > 400) b.splice(0, b.length - 400);
+}
+function markPx(coin){
+  const b = MARK[coin], now = Date.now();
+  const recent = b ? b.filter(x => x.t >= now - 5000).map(x => x.p).sort((x, y) => x - y) : [];
+  return recent.length ? recent[recent.length >> 1] : S.prices[coin];
+}
 function onPrice(coin, price){
-  S.prices[coin] = price; S.priceT[coin] = Date.now();
+  S.prices[coin] = price; S.priceT[coin] = Date.now(); markPush(coin, price);
   if(BOT.running) botCheck(coin, price);
   for(const p of PR.positions.filter(x => x.coin === coin)){
-    if(p.dir > 0 ? price <= p.bust : price >= p.bust) closePosition(p, p.bust, "busted");
+    const m = markPx(coin);
+    if(p.dir > 0 ? m <= p.bust : m >= p.bust) closePosition(p, p.bust, "busted");
     else if(Date.now() >= p.expiresAt) closePosition(p, price);
   }
 }
@@ -1966,7 +1982,7 @@ function say(text, cls){ BOT.log.push({t:Date.now(), text, cls}); if(BOT.log.len
 // Trades open and close at the market (mark) price, like Trench-style apps, so P&L starts at $0.00.
 // The fee is taken from the balance once, when the trade opens.
 const halfSpread = 0;
-function quote(coin){ return priceOf(coin); }
+function quote(coin){ return markPx(coin) || priceOf(coin); }
 const botPnl = (p, exitPx) => Math.max(-p.stake, p.stake * p.mult * p.dir * (exitPx / p.entry - 1));
 const markOf = p => quote(p.coin);
 function botValue(){ const p = BOT.pos; return BOT.cash + (BOT.pending ? BOT.pending.stake : 0) + (p ? p.stake + (priceOf(p.coin) ? botPnl(p, markOf(p)) : 0) : 0); }
@@ -2106,7 +2122,8 @@ function botClose(exitPx, why){
 // checked on every live trade for the coin on screen, and every second otherwise
 function botCheck(coin, price){
   const p = BOT.pos; if(!BOT.running || !p || p.coin !== coin) return;
-  if(p.dir > 0 ? price <= p.bust : price >= p.bust) return botClose(p.bust, "bust");
+  const m = markPx(coin);   // smoothed mark price, not the single trade that just printed
+  if(p.dir > 0 ? m <= p.bust : m >= p.bust) return botClose(p.bust, "bust");
   const pnl = botPnl(p, markOf(p)), c = BOT.cfg;
   // take profit and stop loss close AT their trigger price, like real orders, not at whatever price came
   // through after a gap; otherwise wins overshoot (losses are capped at the stake, so that flatters the bot)
