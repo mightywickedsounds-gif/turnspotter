@@ -499,6 +499,10 @@
   {
    "t": 1793032379403,
    "value": 65.94
+  },
+  {
+   "t": 1793035535201,
+   "value": 65.94
   }
  ],
  "config": {
@@ -521,91 +525,40 @@
   "conf": 0.58,
   "need": 2000
  },
- "lastRun": 1793032379403,
+ "lastRun": 1793035535201,
  "status": {
-  "BTC": {
-   "src": "Binance US",
-   "candles": 2000,
-   "price": 79865.95,
-   "experience": 0.583,
-   "liveLearner": 0.567,
-   "record": 0.59,
-   "call": "UP",
-   "last400": {
-    "call": 0.21,
-    "bounceOrRollover": 0.005
-   },
-   "backtest": {
-    "calls": 171,
-    "right": 0.55
-   }
-  },
-  "ETH": {
-   "src": "Binance US",
-   "candles": 2000,
-   "price": 2310.81,
-   "experience": 0.576,
-   "liveLearner": 0.557,
-   "record": 0.56,
-   "call": "UP",
-   "last400": {
-    "call": 0.205,
-    "bounceOrRollover": 0.013
-   },
-   "backtest": {
-    "calls": 158,
-    "right": 0.525
-   }
-  },
   "SOL": {
    "src": "Binance US",
    "candles": 2000,
-   "price": 100.98,
-   "experience": 0.588,
-   "liveLearner": 0.519,
+   "price": 101.86,
+   "experience": 0.477,
+   "liveLearner": 0.384,
    "record": 0.54,
-   "call": "UP",
+   "call": "WAIT",
    "last400": {
     "call": 0.215,
     "bounceOrRollover": 0.007
    },
    "backtest": {
-    "calls": 164,
-    "right": 0.53
-   }
-  },
-  "XRP": {
-   "src": "Binance US",
-   "candles": 2000,
-   "price": 1.2892,
-   "experience": 0.557,
-   "liveLearner": 0.545,
-   "record": 0.64,
-   "call": "UP",
-   "last400": {
-    "call": 0.263,
-    "bounceOrRollover": 0
-   },
-   "backtest": {
-    "calls": 162,
-    "right": 0.451
+    "calls": 163,
+    "right": 0.528
    }
   },
   "DOGE": {
    "src": "Binance US",
    "candles": 2000,
-   "price": 0.07715,
-   "experience": 0.56,
-   "liveLearner": 0.605,
+   "price": 0.07774,
+   "experience": 0.484,
+   "liveLearner": 0.456,
    "record": 0.52,
-   "call": "UP",
+   "call": "WAIT",
    "last400": {
-    "call": 0.302,
+    "call": 0.305,
     "bounceOrRollover": 0.003
    },
    "backtest": {
     "calls": 159,
-    "right": 0.528
+    "right": 0.535
    }
   }
  }
