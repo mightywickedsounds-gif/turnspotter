@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [paper/trader.mjs, .github/workflows/paper-trade.yml]
+    paths: [paper/trader.mjs, paper/trend.mjs, .github/workflows/paper-trade.yml]
 permissions:
   contents: write
 concurrency:
@@ -25,10 +25,10 @@ jobs:
           git config user.email "turnspotter-bot@users.noreply.github.com"
           end=$((SECONDS + 20400)); saved=-900   # save on the first pass too
           while true; do
-            out=$(node paper/trader.mjs 2>&1) || true; echo "$out"
+            out=$( (node paper/trader.mjs; node paper/trend.mjs) 2>&1) || true; echo "$out"
             # save when a trade opens or closes, otherwise at most every 15 minutes (keeps the commit history sane)
             if echo "$out" | grep -q TRADES_CHANGED || [ $((SECONDS - saved)) -ge 900 ] || [ $SECONDS -ge $end ]; then
-              git add paper/ledger.json
+              git add paper/ledger.json paper/trend.json
               if git commit -qm "Paper trading update"; then
                 for i in 1 2 3; do git pull -q --rebase origin main && git push -q && break; sleep 5; done
               fi

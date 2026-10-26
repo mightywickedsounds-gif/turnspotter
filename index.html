@@ -448,6 +448,9 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
 .foot{margin-top:4px}
 .ppTop{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
 .spark{width:min(300px,100%);height:60px}
+.tbCoins{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tbCoins span{font:600 12px var(--mono);padding:5px 10px;border-radius:999px;border:1px solid var(--edge);color:var(--muted)}
+.tbCoins span.hold{color:var(--up);border-color:color-mix(in srgb,var(--up) 45%,transparent);background:color-mix(in srgb,var(--up) 10%,transparent)}
 #log td{border-bottom:1px solid var(--edge)}
 @media (max-width:760px){.moreGrid,.fold .controls{grid-template-columns:1fr}}
 </style>
@@ -681,11 +684,17 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
 
     <div class="pane" id="pane-bot" hidden>
       <div class="ppTop">
-        <div><div class="coinName">$50 of fake money, following every call, running on GitHub 24/7</div><span class="price" id="ppBal">—</span> <span class="chg" id="ppChg"></span><div class="acctSub" id="ppMeta"></div></div>
+        <div><div class="coinName">AI calls bot: $50 of fake money, following every call 24/7</div><span class="price" id="ppBal">—</span> <span class="chg" id="ppChg"></span><div class="acctSub" id="ppMeta"></div></div>
         <svg class="spark" id="ppSpark" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true"></svg>
       </div>
       <div class="tablewrap"><table><tbody id="ppLog"></tbody></table></div>
-      <p class="note">Simulated Trench-style trades: 10% of the balance per trade, multiplier set so the bust price is 3× the typical move away, 1% of the stake as a fee. Trench doesn't publish its exact formulas, so real results will differ.</p>
+      <p class="note">Simulated Trench-style trades: 10% of the balance per trade, multiplier up to ×50 (bust 3× the typical move away), 1% of the stake as a fee. Since Oct 26 it pays the real bid/ask spread and checks for busts every minute. Honest odds: on the last 30 unseen days these rules lost money, because the calls move the price only about 0.01% their way on average, less than the costs. The first version (no spread) ended at $72.58 after 23 trades, mostly luck.</p>
+      <div class="ppTop" style="margin-top:22px">
+        <div><div class="coinName">Trend bot: $50 of fake money, plain buying, no leverage</div><span class="price" id="tbBal">—</span> <span class="chg" id="tbChg"></span><div class="acctSub" id="tbMeta"></div></div>
+        <svg class="spark" id="tbSpark" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true"></svg>
+      </div>
+      <div class="tbCoins" id="tbCoins"></div>
+      <p class="note">Once a day it holds each coin whose price closed above its 50-day average, and keeps the rest in cash. On 2023–2026 data this beat simply holding all five coins (×3.7 vs ×2.4) and roughly broke even in 2025 and 2026 while holding lost about a fifth each year. It still fell 40% at its worst, and it's only 3 years of data. Pays the real spread plus a 0.1% fee per buy or sell.</p>
     </div>
   </section>
   <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -1362,6 +1371,21 @@ async function loadPaper(){
       <td class="${t.status === "open" ? "pend" : t.pnl > 0 ? "win" : "loss"}">${t.status === "open" ? "open…" : t.status === "busted" ? "busted −$" + t.stake.toFixed(2) : (t.pnl > 0 ? "+$" : "−$") + Math.abs(t.pnl).toFixed(2)}</td></tr>`).join("")
       || `<tr><td colspan="5" class="pend">No trades yet. It trades whenever the site makes a call.</td></tr>`;
   }catch(e){ $("ppMeta").textContent = "The bot's ledger isn't reachable from here."; }
+}
+async function loadTrend(){
+  try{
+    const L = await (await fetch("paper/trend.json?" + Date.now(), {cache:"no-store"})).json();
+    const value = L.equity.length ? L.equity.at(-1).value : L.start, chg = value / L.start - 1, mins = Math.round((Date.now() - L.lastRun) / 60000);
+    countTo($("tbBal"), value, v => "$" + v.toFixed(2));
+    $("tbChg").textContent = (chg >= 0 ? "▲ " : "▼ ") + Math.abs(chg * 100).toFixed(1) + "%"; $("tbChg").className = "chg " + (chg >= 0 ? "win" : "loss");
+    const held = Object.keys(L.holdings);
+    $("tbMeta").textContent = `${held.length ? "Holding " + held.join(", ") : "All in cash"} · $${L.cash.toFixed(2)} cash · updated ${mins < 1 ? "just now" : mins + " min ago"}`;
+    $("tbCoins").innerHTML = Object.entries(L.status).map(([c, s]) => `<span class="${L.holdings[c] ? "hold" : ""}" title="${s.trend === "UP" ? "above" : "below"} its 50-day average">${c} ${s.trend === "UP" ? "▲" : "▼"}</span>`).join("");
+    const eq = L.equity.map(e => e.value);
+    if(eq.length > 1){ const lo = Math.min(...eq, L.start), hi = Math.max(...eq, L.start), y = v => 56 - (v - lo) / ((hi - lo) || 1) * 52;
+      $("tbSpark").innerHTML = `<line x1="0" x2="300" y1="${y(L.start)}" y2="${y(L.start)}" stroke="var(--faint)" stroke-dasharray="3 4"/>
+        <polyline points="${eq.map((v, i) => `${(i / (eq.length - 1) * 300).toFixed(1)},${y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${chg >= 0 ? "var(--up)" : "var(--down)"}" stroke-width="2" vector-effect="non-scaling-stroke"/>`; }
+  }catch(e){ $("tbMeta").textContent = "Starting up: the trend bot's first check is on its way."; }
 }
 // ───────── live buys & sells (exchange trade stream, straight into the browser) ─────────
 const FLOW = {ws:null, trades:[], secs:new Map(), bubbles:[], coin:null, tries:0, retry:null, lastPrice:0, rendered:0};
@@ -2872,7 +2896,7 @@ function showSim(runs, start, cfg, hours){
 $("simBtn").addEventListener("click", runSim);
 
 
-loadPaper(); setInterval(loadPaper, 60000);
+loadPaper(); loadTrend(); setInterval(() => { loadPaper(); loadTrend(); }, 60000);
 window.addEventListener("resize", () => S.A && drawChart(S.candles, S.A, S.viewBars, S.disp));
 // ───────── pages: one section of the site at a time ─────────
 function showPage(name){

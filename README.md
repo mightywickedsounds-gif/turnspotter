@@ -420,6 +420,45 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - Follow-up: the 50-minute jobs left gaps of up to ~50 minutes when GitHub was slow to start the next
   one, so each job now stays awake for about 5h40m (GitHub's limit is 6 hours).
 
+### Round 24: realistic paper trading, and a second bot built for real money
+- **Does the AI-calls paper bot really make money?** `research/paper_backtest.mjs` replays its exact rules on
+  the 30 days the Experience brain never trained on (from 2026-09-26), with 1-minute bust checks:
+
+  | Version | $50 became | Trades | Won | Busts |
+  |---|---|---|---|---|
+  | as it ran (no spread, x50 cap) | $18.64 | 1,181 | 53.6% | 21 |
+  | with the real spread | $0.73 | 463 | 46.0% | 10 |
+  | with the spread, x20 cap | $1.97 | 1,125 | 40.9% | 0 |
+  | with the spread, x10 cap | $9.86 | 1,181 | 35.7% | 0 |
+
+  Even before costs the average call moved the price −0.8 bp (a basis point is 0.01%) its way.
+  `research/experiments7.py` checks 15 unseen months (2025-07..2026-10): calls are right 52–53% of the time
+  but the average move their way is only +0.5 to +2 bp at a 1-hour hold, while a real trade costs about
+  5–15 bp. Longer holds (4h, 12h, 24h) are no better. **Conclusion: the short-term calls can't make money
+  after costs.** The paper bot's +45% in its first day (23 trades) was luck.
+- **Paper bot, version 2:** buys at the live ask and sells at the bid, checks for a bust on every 1-minute
+  candle, and only acts on calls from closed candles. Version 1 is archived in `paper/ledger-v1.json`
+  ($72.58 after 23 trades); version 2 started fresh at $50.
+- **What can work: slow trend-following** (`research/experiments8.py`, daily candles 2023-07..2026-10, five
+  coins split equally, 0.15% per buy or sell, trades at the next day's open):
+
+  | Rule | Growth | Per year | Worst drop | 2025 | 2026 |
+  |---|---|---|---|---|---|
+  | buy and hold | x2.38 | +30% | 66% | −24% | −22% |
+  | above 20-day average | x2.58 | +33% | 50% | −26% | −2% |
+  | above 50-day average | x3.67 | +49% | 40% | +1% | +1% |
+  | above 100-day average | x2.81 | +37% | 42% | −1% | −1% |
+  | above its price 14 days ago | x3.01 | +40% | 48% | −19% | −0% |
+  | above its price 30 days ago | x2.71 | +35% | 45% | −3% | −20% |
+  | above its price 90 days ago | x2.22 | +27% | 46% | −21% | −15% |
+
+  Six of the seven trend rules beat holding, which suggests a real effect rather than one lucky setting. The
+  gain mostly comes from sitting out crashes. It's only ~3 years of data and still fell 40% at its worst.
+- **New: the Trend bot** (`paper/trend.mjs`, ledger `paper/trend.json`): $50 of fake money, plain buying,
+  no leverage. Once a day after 00:00 UTC it holds each coin above its 50-day average (a fifth of the money
+  each) and keeps the rest in cash, paying the live spread plus a 0.1% fee. It runs in the same GitHub
+  loop, and both bots show on the Practice → Bot tab.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
@@ -427,5 +466,5 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)
 - `research/experiments*.py`: tests of candidate upgrades; `research/train.py`: trains the Experience brain
 - `research/data/`: 2023–2026 candles for all five coins, plus the last 45 days of 1-minute candles (refreshed weekly)
-- `paper/`: the paper trader and its ledger
+- `paper/`: the two paper bots (`trader.mjs` follows the AI calls, `trend.mjs` follows 50-day trends) and their ledgers
 - `research/btc_1h_2011_2017.csv`: the hourly BTC data used for testing
