@@ -468,6 +468,16 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   honest bottom line to How the AI works: the calls' edge is smaller than trading costs, so treat them as a lean.
 - Nothing was deleted that a feature needs: settings, history, replay, practice and alerts all still work.
 
+### Round 26: calmer pages
+- Market: the call with one short line under it, the four move boxes, the chart and the last 4 calls.
+  Live buys & sells, Waiting orders, Settings (now including the multiplier slider) and How the AI works
+  are folded away at the bottom.
+- Explanations cut to a few words or removed throughout (bot odds line, replay notes, 24/7 bot notes,
+  practice ticket, footer). The honest points stay: break-even win rate on the bot, "the edge is smaller than
+  the costs" on the 24/7 page and in How the AI works.
+- AI bot on phones: the five coin tiles are one compact row; the empty "No trade open" box is hidden; the coin
+  strip at the top is hidden on the AI bot and 24/7 bots pages, where it isn't used.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

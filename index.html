@@ -55,6 +55,7 @@ body[data-mood="up"]{--mood:var(--up)} body[data-mood="down"]{--mood:var(--down)
 @keyframes ping{0%{box-shadow:0 0 0 0 rgba(62,230,162,.55)}80%,100%{box-shadow:0 0 0 10px rgba(62,230,162,0)}}
 
 /* ticker */
+body[data-on="bot"] .watch,body[data-on="auto"] .watch{display:none}
 .watch{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .watch::-webkit-scrollbar{display:none}
 .chip{flex:none;display:flex;align-items:center;gap:10px;font:700 13px var(--body);padding:8px 14px;border-radius:12px;
@@ -302,7 +303,7 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .histChart{width:100%;height:80px}
 .histCols{display:grid;grid-template-columns:1fr 1.4fr;gap:14px}
 @media (max-width:860px){.botTiles{grid-template-columns:repeat(3,1fr)}.histStats{grid-template-columns:1fr 1fr}.histCols{grid-template-columns:1fr}}
-@media (max-width:520px){.botTiles{grid-template-columns:1fr 1fr}.botCfg{grid-template-columns:1fr}}
+@media (max-width:520px){.botTiles{grid-template-columns:repeat(5,1fr);gap:5px}.tile{padding:7px 4px 8px;text-align:center;justify-items:center}.tile svg,.tile .tick,.tile .tLive{display:none!important}.tile .arrow{font-size:20px}.tile .tLean{font-size:10.5px}.tHead{font-size:12px;justify-content:center}.botCfg{grid-template-columns:1fr}}
 
 /* live buys & sells */
 .tug{display:grid;gap:6px;margin:4px 0 12px}
@@ -362,6 +363,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:24px}
 .auto input{width:18px;height:18px;accent-color:var(--up);margin-top:1px}
 .autoCfg{display:grid;gap:10px}
 .positions{min-width:0}
+.pos:has(> p.pend:empty){display:none}
 .pos{display:grid;gap:8px;padding:12px 14px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.04);margin-bottom:8px}
 .posTop{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .posTop .pnl{font:700 18px var(--mono)}
@@ -482,11 +484,6 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <p class="callSub" id="bigSub">Reading today's market…</p>
     <div id="countLine" hidden><p class="countLine">This call gets checked in <b id="fCount">—</b></p><div class="cbar"><i id="cbarFill"></i></div></div>
     <div class="moves" id="moves" role="group" aria-label="Price change over different time windows"></div>
-    <div class="lens">
-      <label class="sl" for="lens">Show moves at a Trench multiplier of <b id="lensV">×25</b></label>
-      <input type="range" id="lens" min="1" max="1000" step="1" value="25" aria-label="Trench multiplier">
-      <p class="lensTxt" id="lensTxt"></p>
-    </div>
   </section>
 
   <section class="card" id="botCard" data-page="bot" hidden>
@@ -505,7 +502,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
       <div class="botGrid">
         <div class="botCtl">
           <div id="botPos" class="pos"></div>
-          <div class="bank"><div><span class="eyebrow">Bankroll · carries over between runs</span><b id="bankVal">$50.00</b><span class="acctSub" id="bankSub"></span></div>
+          <div class="bank"><div><span class="eyebrow">Bankroll</span><b id="bankVal">$50.00</b><span class="acctSub" id="bankSub"></span></div>
             <span id="bankResetBox"><button type="button" class="ghost" id="bankReset">Reset</button></span></div>
           <p class="acctSub" id="botOddsMini"></p>
           <button type="button" class="place" id="botStartBtn">Start the bot</button>
@@ -556,7 +553,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </div>
 
     <div class="bpane simBox" data-bpane="sim" hidden>
-      <div class="rowHead"><div><div class="sub" style="margin:0">Reality check</div><p class="acctSub" style="margin:2px 0 0">Replay these exact settings 100 times on the last 2 days of real 1-minute prices, starting from your bankroll.</p></div>
+      <div class="rowHead"><div><div class="sub" style="margin:0">Reality check</div><p class="acctSub" style="margin:2px 0 0">100 replays of your settings on the last 2 days of real prices.</p></div>
         <button type="button" class="place simBtn" id="simBtn">Run 100 times</button></div>
       <div id="simOut" hidden>
         <div class="histStats" id="simStats"></div>
@@ -567,7 +564,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </div>
 
     <div class="bpane botHist" data-bpane="hist" hidden>
-      <div class="rowHead"><div class="sub" style="margin:0">Bot history · every run, saved on this device</div><span id="histClearBox"><button type="button" class="ghost" id="histClear">Clear history</button></span></div>
+      <div class="rowHead"><div class="sub" style="margin:0">History</div><span id="histClearBox"><button type="button" class="ghost" id="histClear">Clear history</button></span></div>
       <div class="histStats" id="histStats"></div>
       <svg class="histChart" id="histChart" viewBox="0 0 600 80" preserveAspectRatio="none" aria-label="All-time bot profit and loss, trade by trade"></svg>
       <div class="histCols">
@@ -582,16 +579,16 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 4 8-9"/><path d="M3 21h18"/></svg>Chart</h2>
       <div class="seg" id="range" role="group" aria-label="Chart range"><button type="button" data-bars="24">6h</button><button type="button" data-bars="48">12h</button><button type="button" data-bars="96" aria-pressed="true">24h</button><button type="button" data-bars="288">3d</button></div></div>
     <div class="chartWrap"><canvas id="chart" aria-label="Price chart with the calls the AI made. Hover for details, drag to measure a move."></canvas><span class="pulse" id="pulse" hidden></span></div>
-    <div class="legend"><span style="color:var(--up)">● UP call</span><span style="color:var(--down)">● DOWN call</span><span>✓ right · ✕ wrong</span><span class="hint">Hover for details · drag across the chart to measure a move</span><span class="record" id="recordLine"></span></div>
+    <div class="legend"><span style="color:var(--up)">● UP call</span><span style="color:var(--down)">● DOWN call</span><span>✓ right · ✕ wrong</span><span class="record" id="recordLine"></span></div>
     <div class="tablewrap"><table><tbody id="log"></tbody></table></div>
   </section>
 
-  <section class="card" id="flowCard" data-page="market">
-    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M7 4v16M3 8l4-4 4 4"/><path d="M17 20V4M13 16l4 4 4-4"/></svg>Live buys &amp; sells</h2><span class="record" id="flowMeta">connecting…</span></div>
+  <details class="card fold" id="flowCard" data-page="market"><summary>Live buys &amp; sells</summary>
+    <div class="rowHead"><span class="record" id="flowMeta">connecting…</span></div>
     <div class="tug">
       <div class="tugLbl"><span class="win">Buyers <b id="tugBuyPct">50%</b></span><span id="tugWho">last minute</span><span class="loss"><b id="tugSellPct">50%</b> Sellers</span></div>
       <div class="tugBar"><i id="tugFill"></i><span class="tugMid"></span></div>
-      <div class="tugLbl"><span id="tugBuyAmt">$0 bought</span><span id="tug5">5 min: —</span><span id="tugSellAmt">$0 sold</span></div>
+      <div class="tugLbl" hidden><span id="tugBuyAmt">$0 bought</span><span id="tug5">5 min: —</span><span id="tugSellAmt">$0 sold</span></div>
     </div>
     <div class="flowGrid">
       <div class="flowViz"><canvas id="flowChart" aria-label="Buying and selling over the last 90 seconds"></canvas>
@@ -602,11 +599,10 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
         <ul class="tape" id="tape"><li class="pend">Waiting for trades…</li></ul>
       </div>
     </div>
-    <p class="note">Green = someone bought (pushing price up) · red = someone sold (pushing it down) · 🐋 = unusually big trade.</p>
-  </section>
+  </details>
 
-  <section class="card" id="bookCard" data-page="market">
-    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M3 20V12h4v8M10 20V6h4v14M17 20v-9h4v9"/></svg>Waiting orders</h2>
+  <details class="card fold" id="bookCard" data-page="market"><summary>Waiting orders</summary>
+    <div class="rowHead">
       <div class="seg" id="bookRange" role="group" aria-label="How far from the price"><button type="button" data-r="0.005">±0.5%</button><button type="button" data-r="0.01" aria-pressed="true">±1%</button><button type="button" data-r="0.02">±2%</button></div></div>
     <div class="bookStats">
       <div><span class="eyebrow">Buyers waiting</span><b class="win" id="bkBid">—</b><span class="acctSub" id="bkBidWall"></span></div>
@@ -614,23 +610,23 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
       <div class="r"><span class="eyebrow">Sellers waiting</span><b class="loss" id="bkAsk">—</b><span class="acctSub" id="bkAskWall"></span></div>
     </div>
     <div class="chartWrap"><canvas id="bookChart" aria-label="Order book depth: buy orders left, sell orders right"></canvas></div>
-    <p class="note">Orders waiting to be filled: buyers below the price (green), sellers above (red). Tall steps are "walls". <span id="bookMeta"></span></p>
-  </section>
+    <span id="bookMeta" hidden></span>
+  </details>
 
   <section class="card" id="autoCard" data-page="auto" hidden>
-    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>24/7 bots</h2><span class="record">$50 of fake money each, running on GitHub</span></div>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>24/7 bots</h2><span class="record">$50 fake money each</span></div>
       <div class="ppTop">
         <div><div class="coinName">Trend bot · built to grow slowly</div><span class="price" id="tbBal">—</span> <span class="chg" id="tbChg"></span><div class="acctSub" id="tbMeta"></div></div>
         <svg class="spark" id="tbSpark" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true"></svg>
       </div>
       <div class="tbCoins" id="tbCoins"></div>
-      <p class="note">Once a day it holds each coin whose price closed above its 50-day average and keeps the rest in cash. Plain buying, no leverage, pays the real spread plus a 0.1% fee. Tested on 2023–2026: ×3.7 vs ×2.4 for just holding, worst drop 40%.</p>
+      <p class="note">Holds coins above their 50-day average, cash otherwise. Checked daily, no leverage.</p>
       <div class="ppTop" style="margin-top:26px">
         <div><div class="coinName">AI calls bot · Trench-style, on every call</div><span class="price" id="ppBal">—</span> <span class="chg" id="ppChg"></span><div class="acctSub" id="ppMeta"></div></div>
         <svg class="spark" id="ppSpark" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true"></svg>
       </div>
       <div class="tablewrap"><table><tbody id="ppLog"></tbody></table></div>
-      <p class="note">Takes every AI call Trench-style: 10% per trade, up to ×50, 1% fee, real spread, busts checked every minute. On the last 30 days these rules lost money: the calls' edge is smaller than trading costs. Restarted with real costs on Oct 26 (the first version reached $72.58 in 23 trades, mostly luck).</p>
+      <p class="note">Every AI call, Trench-style, with real costs. Expect slow losses: the edge is smaller than the costs.</p>
   </section>
 
   <section class="card" id="practice" data-page="practice" hidden>
@@ -643,7 +639,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
 
     <div class="pane" id="pane-trade">
       <div class="acct">
-        <div><div class="coinName">Your practice money (saved on this device)</div><span class="price" id="prEq">$50.00</span> <span class="chg" id="prChg"></span>
+        <div><div class="coinName">Practice money</div><span class="price" id="prEq">$50.00</span> <span class="chg" id="prChg"></span>
           <div class="acctSub" id="prCash"></div></div>
         <div class="acctBtns"><span id="resetBox"><button type="button" id="prReset" class="ghost">Reset</button></span></div>
       </div>
@@ -676,7 +672,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </div>
 
     <div class="pane" id="pane-whatif" hidden>
-      <p class="note">Replays the AI's real calls from the last ~20 days with your settings.</p>
+      <p class="note">The AI's last ~20 days of calls, with your settings.</p>
       <div class="wiGrid">
         <label>Start with <span class="money"><span>$</span><input type="number" id="wiStart" min="5" max="100000" value="50"></span></label>
         <label class="sl">Stake per call <b id="wiStakeV">10%</b><input type="range" id="wiStake" min="1" max="100" step="1" value="10"></label>
@@ -693,7 +689,6 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
         <svg class="wiChart" id="wiChart" viewBox="0 0 600 170" preserveAspectRatio="none" aria-label="Money over time"></svg>
         <div class="legend"><span><i style="background:var(--up)"></i>your settings</span><span><i style="background:var(--muted)"></i>same calls, no multiplier</span><span><i style="background:var(--faint)"></i>starting money</span></div>
         <div class="wiStats" id="wiStats"></div>
-        <p class="note">Uses the price at the moment of each call. Entering a little later tested 2–3 points worse, and Trench's real fees and bust rules may differ.</p>
       </div>
     </div>
 
@@ -701,7 +696,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   <div class="toasts" id="toasts" aria-live="polite"></div>
 
   <details class="card fold" id="settings" data-page="market">
-    <summary>Prediction settings</summary>
+    <summary>Settings</summary>
     <div class="controls">
       <label>How far ahead<select id="look">
         <option value="60" selected>1 hour</option><option value="240">4 hours</option>
@@ -712,7 +707,11 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
       <select id="tf" hidden><option value="15m" selected>15m</option></select>
       <select id="coin" hidden><option value="BTC">BTC</option><option value="ETH">ETH</option><option value="SOL">SOL</option><option value="XRP">XRP</option><option value="DOGE">DOGE</option></select>
     </div>
-    <p class="note">Set "How far ahead" to how long your Trench trade stays open.</p>
+    <div class="lens" style="margin-top:14px">
+      <label class="sl" for="lens">Show moves at a Trench multiplier of <b id="lensV">×25</b></label>
+      <input type="range" id="lens" min="1" max="1000" step="1" value="25" aria-label="Trench multiplier">
+      <p class="lensTxt" id="lensTxt"></p>
+    </div>
   </details>
 
   <details class="card fold" id="more" data-page="market">
@@ -728,7 +727,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
         </div>
         <div class="facts">
           <div class="fact"><div class="eyebrow">Typical move · <span id="fLook">1 hour</span></div><b id="fMove">—</b>
-            <p>If your Trench bust price is closer than this, normal wiggles can wipe you out even when the call is right.</p></div>
+            <p>Bust closer than this = likely wiped out.</p></div>
           <div class="fact"><div class="eyebrow">Recent record</div><b id="fRec">—</b><p id="fRecSub"></p></div>
         </div>
         <p class="note" id="fCountSub" hidden></p>
@@ -776,13 +775,12 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </details>
     <details>
       <summary>How it works</summary>
-      <p class="note" style="margin-top:10px">Calls come from the <b>Experience brain</b>: a model trained on every 15-minute candle of all five coins since January 2023, retrained every week. It looks at recent moves, RSI, trend, where price sits in its daily range, volume and volatility. A call fires when its confidence passes your "How picky" setting.</p>
-      <p class="note" style="margin-top:10px">Tested on 16 months of data it had never seen (July 2025 to October 2026), calls were right 54–58% of the time, or 53–56% if you entered 15 minutes late. The main pattern it found: in today's market, short moves tend to partly reverse. The old live learner, which bet on moves continuing, was no better than a coin flip there. The catch: when it's right, the price only moves about 0.01% its way on average, which is less than real trading costs, so use it as a lean, not a money machine. Past results don't guarantee future ones.</p>
+      <p class="note" style="margin-top:10px">A model trained on every 15-minute candle of all five coins since 2023, retrained weekly. On 16 months it never saw, it was right about 53–56% of the time, but by tiny moves: use it as a lean, not a money machine.</p>
     </details>
     <p class="status" id="status">Starting…</p>
   </details>
 
-  <p class="note foot">Not financial advice. A Trench multiplier can wipe out your stake on a small move against you. Only bet what you can afford to lose.</p>
+  <p class="note foot">Not financial advice. Only bet what you can afford to lose.</p>
 </div>
 
 <script>
@@ -1078,11 +1076,11 @@ function render(){
   let big = "WAIT", sub;
   // quote the real track record, not the model's raw confidence (which runs hotter than reality)
   const doneAll = A.sigs.filter(s => s.win !== undefined), hit = doneAll.length >= 10 ? doneAll.filter(s => s.win).length / doneAll.length : NaN;
-  const record = !isNaN(hit) ? `Calls like this were right ${pctTxt(hit)} of the time recently.` : "Calls like this were right about 54–57% of the time in testing.";
-  if(p.modelUp){ big = "UP ▲"; sub = `Likely higher in ${look}. ${record}`; }
-  else if(p.modelDown){ big = "DOWN ▼"; sub = `Likely lower in ${look}. ${record}`; }
+  const record = !isNaN(hit) ? `right ${pctTxt(hit)} recently` : "right ~55% in testing";
+  if(p.modelUp){ big = "UP ▲"; sub = `Likely higher in ${look} · ${record}`; }
+  else if(p.modelDown){ big = "DOWN ▼"; sub = `Likely lower in ${look} · ${record}`; }
   else if(!hasE) sub = "Reading today's market…";
-  else sub = "Not confident either way right now. No bet.";
+  else sub = "No clear lean right now";
   const bc = $("bigCall");
   if(bc.dataset.v !== big){ bc.dataset.v = big; const [w, arrow] = big.split(" ");
     bc.innerHTML = w + (arrow ? ` <span class="arrow">${arrow}</span>` : "");
@@ -1367,7 +1365,7 @@ async function loadPaper(){
       const pts = eq.map((v,i) => `${(i/(eq.length-1)*300).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
       $("ppSpark").innerHTML = `<line x1="0" x2="300" y1="${y(L.start)}" y2="${y(L.start)}" stroke="var(--faint)" stroke-dasharray="3 4"/>
         <polyline points="${pts}" fill="none" stroke="${chg >= 0 ? "var(--up)" : "var(--down)"}" stroke-width="2" vector-effect="non-scaling-stroke"/>`; }
-    $("ppLog").innerHTML = L.trades.slice(-6).reverse().map(t => `<tr><td>${fmtT(t.openedAt)}</td><td>${t.coin}</td>
+    $("ppLog").innerHTML = L.trades.slice(-4).reverse().map(t => `<tr><td>${fmtT(t.openedAt)}</td><td>${t.coin}</td>
       <td><span class="pill ${t.dir > 0 ? "up" : "down"}">${t.dir > 0 ? "▲ UP" : "▼ DOWN"}</span></td><td>$${t.stake.toFixed(2)} × ${t.mult}</td>
       <td class="${t.status === "open" ? "pend" : t.pnl > 0 ? "win" : "loss"}">${t.status === "open" ? "open…" : t.status === "busted" ? "busted −$" + t.stake.toFixed(2) : (t.pnl > 0 ? "+$" : "−$") + Math.abs(t.pnl).toFixed(2)}</td></tr>`).join("")
       || `<tr><td colspan="5" class="pend">No trades yet. It trades whenever the site makes a call.</td></tr>`;
@@ -1621,7 +1619,7 @@ function renderTicket(){
   const bustPct = 100 / mult, move = p && !isNaN(p.move) ? p.move * Math.sqrt(TK.mins / S.look) * 100 : NaN;
   const ratio = bustPct / move, fee = feeOf(stake, mult), win1 = stake * mult * .01;
   const call = p ? (p.modelUp ? "UP" : p.modelDown ? "DOWN" : "WAIT") : "…";
-  $("tkRisk").innerHTML = `Busts at <b>${price ? fmtP(price * (1 - TK.dir / mult)) : "—"}</b> (${bustPct.toFixed(2)}% away${isNaN(move) ? "" : `, <span class="${ratio < 1.5 ? "danger" : ratio < 3 ? "" : "ok"}">${ratio < 1.5 ? "very likely" : ratio < 3 ? "risky" : "comfortable"}</span>`}) · a 1% move pays <b>+$${win1.toFixed(2)}</b> · fee <b>$${fee.toFixed(2)}</b> · AI says <b>${call}</b>`;
+  $("tkRisk").innerHTML = `Busts at <b>${price ? fmtP(price * (1 - TK.dir / mult)) : "—"}</b> (${bustPct.toFixed(2)}% away${isNaN(move) ? "" : `, <span class="${ratio < 1.5 ? "danger" : ratio < 3 ? "" : "ok"}">${ratio < 1.5 ? "very likely" : ratio < 3 ? "risky" : "comfortable"}</span>`}) · fee <b>$${fee.toFixed(2)}</b>`;
   const btn = $("tkPlace");
   btn.textContent = `Place ${TK.dir > 0 ? "▲ UP" : "▼ DOWN"} · $${stake.toFixed(2)} × ${mult}`;
   btn.className = "place" + (TK.dir < 0 ? " down" : "");
@@ -2485,19 +2483,18 @@ function renderBotCfg(){
   $("cfgGapV").textContent = c.gap + " s"; $("cfgConfV").textContent = c.conf <= 50 ? "any lean" : c.conf + "%";
   const m = c.mult || 50, stake = BOT.bank * c.stake / 100, fee = feeOf(stake, m, c);
   // one line of odds: bust distance, win rate, break-even and the chance of reaching the goal
-  let risk = c.mult ? `Bust at a <b>${(100 / c.mult).toFixed(2)}%</b> move against you` : "Bust at 3× a normal move (multiplier picked per coin)";
+  let risk = c.mult ? `Busts on a <b>${(100 / c.mult).toFixed(2)}%</b> move` : "Busts at 3× a normal move";
   const pWin = winChance(c, 1, c.mult);
   if(pWin){ const winAmt = HOLD_AT * c.tp / 100, lossAmt = c.sl < 100 ? c.sl / 100 : 1, feeR = fee / Math.max(stake, 1e-9);
     const be = (lossAmt + feeR) / (winAmt + lossAmt), streak = c.goalX && c.stake >= 100 ? Math.ceil(Math.log(c.goalX) / Math.log(1 + winAmt)) : 0;
-    risk += ` · wins about <b>${Math.round(pWin * 100)}%</b> · needs <b>${Math.round(be * 100)}%</b> to break even`;
-    if(streak) risk += ` · about <b>${Math.max(.1, 100 * Math.pow(pWin, streak)).toFixed(1)}%</b> chance to hit ${c.goalX}×`; }
-  risk += ` · fee <b>$${fee.toFixed(2)}</b> a trade.`;
+    risk += ` · wins ~<b>${Math.round(pWin * 100)}%</b>, needs <b>${Math.round(be * 100)}%</b> to profit`; }
+  risk += ` · fee <b>$${fee.toFixed(2)}</b>`;
   if(c.mult && fee >= stake) risk += ' <b class="loss">The fee eats the whole stake: lower the multiplier or the fee.</b>';
   $("botRisk").innerHTML = risk;
   // highlight the style card that matches the current settings
   document.querySelectorAll(".styleCards button").forEach(btn => { const pr = PRESETS[btn.dataset.preset];
     btn.setAttribute("aria-pressed", String(!!pr && Object.keys(pr).every(k => c[k] === pr[k]))); });
-  $("botNote").textContent = `Runs while this page is open, with fake money. For any fair gamble, ${c.goalX ? `the chance of reaching ${c.goalX}× before $0 is about 1 in ${c.goalX}` : "the longer you play, the more fees and spread eat into the bankroll"}; fees and spread make it lower. Use "Run 100 times" below to see the odds for your exact settings. Trench shows the fee on its trade ticket: enter it as a % of your stake.`;
+  $("botNote").textContent = "Fake money. Runs while this page is open.";
 }
 
 function botStart(){
@@ -2692,7 +2689,7 @@ function renderBot(){
         <div class="posMeta" id="posMeta"></div>`; }
     botFight();
   }
-  else { el.dataset.pid = ""; el.innerHTML = `<p class="pend">${BOT.pending ? (Date.now() < BOT.pending.at - 1000 ? `The table is discussing ${BOT.pending.coin}…` : `Sending ${BOT.pending.coin} ${BOT.pending.dir > 0 ? "UP" : "DOWN"} order…`) : BOT.running ? `${BOT.noSetup ? "No good setup yet, checking again in" : "Between trades, next look in"} ${Math.max(0, Math.ceil((BOT.nextAt - Date.now()) / 1000))}s…` : "No trade open."}</p>`; }
+  else { el.dataset.pid = ""; el.innerHTML = `<p class="pend">${BOT.pending ? (Date.now() < BOT.pending.at - 1000 ? `The table is discussing ${BOT.pending.coin}…` : `Sending ${BOT.pending.coin} ${BOT.pending.dir > 0 ? "UP" : "DOWN"} order…`) : BOT.running ? `${BOT.noSetup ? "No good setup yet, checking again in" : "Between trades, next look in"} ${Math.max(0, Math.ceil((BOT.nextAt - Date.now()) / 1000))}s…` : ""}</p>`; }
   const c = BOT.curve.length > 1 ? BOT.curve : [{t:0, v:BOT.start}, {t:1, v}];
   const t0 = c[0].t, t1 = Math.max(c.at(-1).t, t0 + 1), hi = Math.max(hasGoal ? BOT.goal : BOT.start * 1.5, ...c.map(x => x.v));
   const X = t => (t - t0) / (t1 - t0) * 400, Y = val => 96 - val / hi * 92;
@@ -2704,7 +2701,7 @@ function renderBot(){
 // sanity check: do live wins match what the take-profit / bust distances predict?
 function liveVsExpected(H){
   const T = H.filter(t => typeof t.pWin === "number" && t.why !== "time" && t.why !== "stopped");
-  if(!T.length) return `<div class="lve">Live vs expected<b>—</b><span>New live trades record their predicted win chance; the comparison appears here.</span></div>`;
+  if(!T.length) return `<div class="lve">Live vs expected<b>—</b><span></span></div>`;
   const won = T.filter(t => t.pnl > 0).length, exp = T.reduce((s, t) => s + t.pWin, 0), sd = Math.sqrt(T.reduce((s, t) => s + t.pWin * (1 - t.pWin), 0));
   const z = sd ? (won - exp) / sd : 0, verdict = T.length < 30 ? "too few trades to judge yet (30+ needed)" : Math.abs(z) < 2 ? "in line with the math: the wins are ordinary luck" : z > 0 ? "well above the math: tell Claude, this points to a bug or a strong trend" : "below the math";
   return `<div class="lve">Live vs expected<b>${won} won vs ~${exp.toFixed(1)} expected</b><span>${T.length} trades · ${verdict}</span></div>`;
@@ -2892,7 +2889,7 @@ function showSim(runs, start, cfg, hours){
     return `<rect x="${x}" y="${135 - h}" width="46" height="${h}" rx="4" fill="${i < 2 ? "var(--down)" : "var(--up)"}" opacity="${.35 + .65 * counts[i] / mx}"/>
       <text x="${x + 23}" y="${130 - h}" text-anchor="middle" fill="var(--ink)" font-size="12" font-family="JetBrains Mono" font-weight="700">${counts[i]}</text>
       <text x="${x + 23}" y="152" text-anchor="middle" fill="var(--muted)" font-size="9.5" font-family="JetBrains Mono">${lbl}</text>`; }).join("");
-  $("simNote").textContent = `Each run starts at a random moment in the last ${hours.toFixed(0)} hours of real 1-minute prices, with your bankroll (${money(start)}) and these exact settings: fills on the next minute at the market price, your fee, take profit, stop loss and hold time. The AI's lean comes from the 15-minute brain; live buying/selling and the order book aren't available for the past, so they're left out. When a single minute touched both the take-profit and the bust, the replay picks which came first with odds based on how far each was from that minute's opening price (the closer one usually wins).`;
+  $("simNote").textContent = `Real 1-minute prices from the last ${hours.toFixed(0)} hours, your exact settings and fee.`;
 }
 $("simBtn").addEventListener("click", runSim);
 
@@ -2903,6 +2900,7 @@ window.addEventListener("resize", () => S.A && drawChart(S.candles, S.A, S.viewB
 function showPage(name){
   document.querySelectorAll("[data-page]").forEach(el => { if(el.tagName !== "BUTTON") el.hidden = el.dataset.page !== name; });
   document.querySelectorAll("#pages button").forEach(b => { if(b.dataset.page === name) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  document.body.dataset.on = name;
   try{ localStorage.setItem("turnspotter-page", name); }catch(e){}
   if(name === "practice" && !$("pane-whatif").hidden) runWhatIf();
   if(name === "bot") tableInit();
