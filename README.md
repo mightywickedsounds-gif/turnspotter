@@ -341,6 +341,9 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   run stays in profit; back at the starting balance, the normal stake returns.
 - No new settings. The odds line and the 100-run replay follow the same rules.
 
+- Fix: when nothing meets the confidence bar, the bot re-checks on the user's "wait between trades"
+  setting instead of a fixed 15 seconds, and the countdown says "No good setup yet".
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

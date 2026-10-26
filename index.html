@@ -2101,7 +2101,7 @@ function botDecide(){
   let pick, dir;
   if(c.dir === "ai"){
     const ok = cands.filter(x => Math.max(x.exp, 1 - x.exp) * 100 >= c.conf);
-    if(!ok.length){ BOT.nextAt = Date.now() + 15000;
+    if(!ok.length){ BOT.nextAt = Date.now() + Math.max(3, c.gap) * 1000; BOT.noSetup = true;   // re-check on the user's own wait setting
       if(Date.now() - (BOT.lastWaitMsg || 0) > 60000){ BOT.lastWaitMsg = Date.now(); say(`Nothing at ${c.conf}%+ right now (best: ${cands.sort((a, b) => Math.abs(b.score) - Math.abs(a.score))[0].why[0]} on ${cands[0].coin}). Waiting.`, "sys"); }
       return; }
     pick = ok.sort((a, b) => Math.abs(b.score) - Math.abs(a.score))[0]; dir = pick.score >= 0 ? 1 : -1;
@@ -2115,6 +2115,7 @@ function botDecide(){
   const stake = Math.max(1, Math.min(BOT.cash * pct / 100, BOT.cash / (1 + feeOf(1, mult, c))));
   if(stake < 1 || BOT.cash < 1){ return botStop("bust"); }
   BOT.cash -= stake;
+  BOT.noSetup = false;
   BOT.pending = {coin:pick.coin, dir, stake, mult, at:Date.now() + 1000};
   const strength = Math.abs(pick.score) > .8 ? "Strong read" : Math.abs(pick.score) > .35 ? "Decent read" : "Weak read";
   say(`${strength} on ${pick.coin}: ${pick.why.join(", ")}. Sending ${dir > 0 ? "▲ UP" : "▼ DOWN"} $${stake.toFixed(2)} × ${mult}. Bust is ${(100 / mult).toFixed(2)}% away; a normal ${c.hold} min moves about ${(moveHold * 100).toFixed(2)}%.`, dir > 0 ? "up" : "down");
@@ -2233,7 +2234,7 @@ function renderBot(){
         <div class="posMeta" id="posMeta"></div>`; }
     botFight();
   }
-  else { el.dataset.pid = ""; el.innerHTML = `<p class="pend">${BOT.pending ? `Sending ${BOT.pending.coin} ${BOT.pending.dir > 0 ? "UP" : "DOWN"} order…` : BOT.running ? `Between trades, next look in ${Math.max(0, Math.ceil((BOT.nextAt - Date.now()) / 1000))}s…` : "No trade open."}</p>`; }
+  else { el.dataset.pid = ""; el.innerHTML = `<p class="pend">${BOT.pending ? `Sending ${BOT.pending.coin} ${BOT.pending.dir > 0 ? "UP" : "DOWN"} order…` : BOT.running ? `${BOT.noSetup ? "No good setup yet, checking again in" : "Between trades, next look in"} ${Math.max(0, Math.ceil((BOT.nextAt - Date.now()) / 1000))}s…` : "No trade open."}</p>`; }
   const c = BOT.curve.length > 1 ? BOT.curve : [{t:0, v:BOT.start}, {t:1, v}];
   const t0 = c[0].t, t1 = Math.max(c.at(-1).t, t0 + 1), hi = Math.max(hasGoal ? BOT.goal : BOT.start * 1.5, ...c.map(x => x.v));
   const X = t => (t - t0) / (t1 - t0) * 400, Y = val => 96 - val / hi * 92;
