@@ -23,7 +23,7 @@ jobs:
         run: |
           git config user.name "turnspotter-bot"
           git config user.email "turnspotter-bot@users.noreply.github.com"
-          end=$((SECONDS + 3000)); saved=0
+          end=$((SECONDS + 3000)); saved=-900   # save on the first pass too
           while true; do
             out=$(node paper/trader.mjs 2>&1) || true; echo "$out"
             # save when a trade opens or closes, otherwise at most every 15 minutes (keeps the commit history sane)
