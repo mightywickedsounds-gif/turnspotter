@@ -406,6 +406,9 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   won about 42% of ×1000 trades where the random-walk math says about 71%: one-minute candles on
   Binance US have deep wicks, so the replay is harsher than live trading on the smoothed mark price.
 
+- Fix: a stray closing tag from round 22 pushed the bot's Settings, Reality check and History panels
+  outside the bot card, so those tabs showed nothing. Removed it; all four tabs tested on a phone-sized screen.
+
 ### Round 23: the paper bot checks every 5 minutes
 - GitHub's 15-minute timer actually fired every 40–90 minutes, so the 24/7 paper bot missed calls that
   came and went between its turns. Each GitHub run now stays awake for about 50 minutes and checks every
