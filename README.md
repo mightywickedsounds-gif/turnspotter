@@ -303,6 +303,13 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   fee comes out of the balance once when the trade opens. History shows each trade's result after its
   fee. With ×1000 and a +100% take-profit, each trade is now a 50/50 coin flip minus the fee.
 
+### Round 14: candlestick background that reacts to your trades
+- The background is now a fast, glowing candlestick stream in three depth layers with light streaks.
+- It follows your open trades (the bot's and the practice account's): the deeper in the green, the
+  more green candles and the more the stream climbs and speeds up; the deeper in the red, the more red
+  candles sliding down. With no trade open it leans gently with the coin's last 15 minutes. Cards are
+  a bit more see-through so it shows. It goes still for people who ask for reduced motion.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
