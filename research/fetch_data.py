@@ -1,15 +1,16 @@
 """Download recent real candles (with taker-buy volume) for research.
 
 Runs on GitHub's servers (see .github/workflows/fetch-data.yml), which can reach the exchange.
-Uses the Binance US API in parallel. Writes research/data/<SYMBOL>_<interval>.csv.gz
+Uses the Binance US API in parallel. 1-minute candles cover only the last 45 days. Writes research/data/<SYMBOL>_<interval>.csv.gz
 """
 import csv, gzip, json, os, time, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
 COINS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "DOGEUSDT"]
-INTERVALS = {"15m": 900, "1h": 3600}
+INTERVALS = {"15m": 900, "1h": 3600, "1m": 60}
 START = int(datetime(2023, 1, 1, tzinfo=timezone.utc).timestamp())
+RECENT = {"1m": 45 * 86400}   # 1-minute candles: only the last 45 days (for replaying the AI bot)
 OUT = os.path.join(os.path.dirname(__file__), "data")
 API = "https://api.binance.us/api/v3/klines?symbol={sym}&interval={iv}&startTime={st}&limit=1000"
 
@@ -30,7 +31,7 @@ os.makedirs(OUT, exist_ok=True)
 now = int(time.time())
 for sym in COINS:
     for iv, sec in INTERVALS.items():
-        starts = list(range(START, now, 1000 * sec))
+        starts = list(range(max(START, now - RECENT.get(iv, now)), now, 1000 * sec))
         with ThreadPoolExecutor(4) as ex:
             parts = list(ex.map(chunk, [(sym, iv, s) for s in starts]))
         seen, out = set(), []
