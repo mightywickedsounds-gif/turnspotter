@@ -1,0 +1,64 @@
+{
+ "start": 50,
+ "cash": 50,
+ "startedAt": 1793055466887,
+ "holdings": {},
+ "trades": [],
+ "equity": [
+  {
+   "t": 1793055466887,
+   "value": 50
+  }
+ ],
+ "lastDay": 1792972800000,
+ "status": {
+  "BTC": {
+   "close": 80131.63,
+   "avg50": 81854.3,
+   "trend": "DOWN",
+   "bid": 79985.27,
+   "ask": 79985.51
+  },
+  "ETH": {
+   "close": 2331.04,
+   "avg50": 2545.01,
+   "trend": "DOWN",
+   "bid": 2312.99,
+   "ask": 2313.03
+  },
+  "SOL": {
+   "close": 101.44,
+   "avg50": 109.652,
+   "trend": "DOWN",
+   "bid": 100.34,
+   "ask": 100.35
+  },
+  "XRP": {
+   "close": 1.2971,
+   "avg50": 1.40567,
+   "trend": "DOWN",
+   "bid": 1.291,
+   "ask": 1.2912
+  },
+  "DOGE": {
+   "close": 0.07696,
+   "avg50": 0.0873392,
+   "trend": "DOWN",
+   "bid": 0.07727,
+   "ask": 0.0773
+  }
+ },
+ "config": {
+  "start": 50,
+  "coins": [
+   "BTC",
+   "ETH",
+   "SOL",
+   "XRP",
+   "DOGE"
+  ],
+  "avgDays": 50,
+  "feePct": 0.1
+ },
+ "lastRun": 1793055466887
+}
