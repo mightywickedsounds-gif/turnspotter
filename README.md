@@ -274,6 +274,18 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - Bot history has a "live vs expected" check: each live trade stores its predicted win chance, so
   real live wins can be compared with the math over 30+ trades.
 
+### Round 11: fixed the bug behind the impossible bot runs
+- **Bug:** for US visitors the prices came from Binance US (Binance.com's API blocks the US), but
+  the live trade stream could connect to Binance.com's global feed, which trades about 0.1% apart.
+  The bot then bought on one exchange's price and cashed out on the other's. At ×1000 a 0.1% gap is
+  a full win or bust, so runs like $50 → $13 million (18 wins in a row, roughly a 1-in-10-million
+  event at the real odds) came from the price mix-up, not the market.
+- **Fix:** live trades only move prices (and only check the bot's bust / take-profit) when they come
+  from the same exchange as the price feed. Otherwise they're shown as buying/selling activity only,
+  labelled "prices still come from …". The bot also refuses to fill an order on a price older than
+  5 seconds. Bot results from before this fix are not trustworthy: reset the bankroll and clear the
+  history.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

@@ -1314,16 +1314,21 @@ function startFlow(i = 0){
     // Coinbase: side is the maker's side, so the aggressive side is the opposite
     else if(src.kind === "coinbase" && d.type === "match") t = {t:Date.parse(d.time), p:+d.price, q:+d.size, buy:d.side === "sell"};
     if(!t || !(t.p > 0) || coin !== S.coin) return;
-    if(!got){ got = true; $("flowMeta").innerHTML = `<span class="live" style="padding:3px 9px"><i></i>live from ${src.name}</span>`; }
-    addTrade(t);
+    const samePrices = !!S.src && S.src.name === src.name;
+    if(!got){ got = true; $("flowMeta").innerHTML = `<span class="live" style="padding:3px 9px"><i></i>live from ${src.name}</span>` +
+      (samePrices ? "" : ` <span class="acctSub">prices still come from ${S.src ? S.src.name : "the price feed"}</span>`); }
+    addTrade(t, samePrices);
   };
   ws.onclose = () => { if(FLOW.ws !== ws) return; FLOW.retry = setTimeout(() => startFlow(got ? i : i + 1), got ? 1500 : 2500); };
   setTimeout(() => { if(FLOW.ws === ws && !got){ ws.onclose = null; try{ ws.close(); }catch(e){} startFlow(i + 1); } }, 8000);
 }
-function addTrade(t){
+function addTrade(t, samePrices){
   t.v = t.p * t.q; t.id = ++FLOW.rendered;
-  S.prices[S.coin] = t.p;
-  if(BOT.running) botCheck(S.coin, t.p);   // bust / stop / take-profit on every single live trade
+  // Trades only move prices when they come from the SAME exchange as the price feed. Different exchanges
+  // trade a little apart (Binance vs Binance US can differ by ~0.1%), and mixing them handed the ×1000
+  // bot fake "wins": it bought at one exchange's price and cashed out on the other's.
+  if(samePrices){ S.prices[S.coin] = t.p; S.priceT[S.coin] = Date.now();
+    if(BOT.running) botCheck(S.coin, t.p); }   // bust / stop / take-profit on every single live trade
   FLOW.trades.push(t); if(FLOW.trades.length > 600) FLOW.trades.splice(0, 200);
   const sec = Math.floor(t.t / 1000), b = FLOW.secs.get(sec) || {buy:0, sell:0};
   if(t.buy) b.buy += t.v; else b.sell += t.v;
@@ -1334,7 +1339,7 @@ function addTrade(t){
     FLOW.bubbles.push({born:performance.now(), buy:t.buy, v:t.v}); if(FLOW.bubbles.length > 70) FLOW.bubbles.shift(); }
   // real trades are the freshest price there is: feed them to the chart (at most twice a second)
   const now = performance.now();
-  if(now - FLOW.lastPrice > 500 && S.candles.length){ FLOW.lastPrice = now;
+  if(samePrices && now - FLOW.lastPrice > 500 && S.candles.length){ FLOW.lastPrice = now;
     const k = S.candles[S.candles.length-1]; k.c = t.p; k.h = Math.max(k.h, t.p); k.l = Math.min(k.l, t.p);
     S.prices[S.coin] = t.p; setLivePrice(t.p); onPrice(S.coin, t.p); }
 }
@@ -1406,7 +1411,7 @@ requestAnimationFrame(flowLoop);
 // ───────── practice trading (your own fake account, saved in this browser) ─────────
 const FEE = 0.001;   // same assumed Trench fee as the bot: 0.1% of the position size
 const PR_KEY = "turnspotter-practice";
-S.prices = {}; S.hist = {};
+S.prices = {}; S.priceT = {}; S.hist = {};
 const PR = (() => { try{ const d = JSON.parse(localStorage.getItem(PR_KEY)); if(d && Array.isArray(d.positions)) return d; }catch(e){}
   return {start:50, cash:50, positions:[], history:[], auto:{on:false, stakePct:10, buffer:3}, seen:{}}; })();
 const TK = {dir:1, mins:60, touched:false};
@@ -1439,7 +1444,7 @@ function closePosition(p, price, status){
 }
 // every new price: check busts and expiries
 function onPrice(coin, price){
-  S.prices[coin] = price;
+  S.prices[coin] = price; S.priceT[coin] = Date.now();
   if(BOT.running) botCheck(coin, price);
   for(const p of PR.positions.filter(x => x.coin === coin)){
     if(p.dir > 0 ? price <= p.bust : price >= p.bust) closePosition(p, p.bust, "busted");
@@ -1992,6 +1997,7 @@ function botDecide(){
 }
 function botFill(){
   const o = BOT.pending; if(!o || Date.now() < o.at || !priceOf(o.coin)) return;
+  if(Date.now() - (S.priceT[o.coin] || 0) > 5000){ fetchPrice(o.coin); return; }   // never fill on a stale price
   const entry = quote(o.coin, o.dir), fee = o.stake * o.mult * BOT.cfg.fee / 100;
   BOT.pending = null;
   BOT.pos = {coin:o.coin, dir:o.dir, entry, stake:o.stake, mult:o.mult, fee, bust:entry * (1 - o.dir / o.mult), openedAt:Date.now(),
