@@ -210,11 +210,6 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .botGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:16px;align-items:start}
 .botCtl{display:grid;gap:12px}
 .place.stop{background:linear-gradient(135deg,var(--down),#ff9a6b)}
-.tpBar{position:relative;height:22px;border-radius:8px;background:rgba(140,155,255,.08);overflow:hidden;display:flex;justify-content:space-between;align-items:center;padding:0 8px;font:600 10px var(--mono);color:var(--muted)}
-.tpBar i{position:absolute;top:0;bottom:0;transition:width .5s}
-.tpBar .lossSide{right:50%;background:linear-gradient(270deg,color-mix(in srgb,var(--down) 70%,transparent),var(--down))}
-.tpBar .winSide{left:50%;background:linear-gradient(90deg,color-mix(in srgb,var(--up) 70%,transparent),var(--up))}
-.tpBar span{position:relative;z-index:1}
 .botLog{list-style:none;margin:0;padding:0;display:grid;gap:6px;max-height:330px;overflow:auto}
 .botLog li{display:grid;grid-template-columns:64px 1fr;gap:8px;font:500 13px/1.4 var(--body);padding:8px 10px;border-radius:10px;background:rgba(140,155,255,.05);border-left:3px solid var(--faint)}
 .botLog li time{font:500 11px var(--mono);color:var(--muted);padding-top:2px}
@@ -229,6 +224,16 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 
 
 /* bot v2 */
+.fight{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px}
+.fL,.fR{font:800 11px var(--display);letter-spacing:.08em;text-transform:uppercase}
+.fL{color:var(--down);text-shadow:0 0 12px var(--down)} .fR{color:var(--up);text-shadow:0 0 12px var(--up)}
+.fBar{position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--down) 22%,transparent),rgba(140,155,255,.08) 50%,color-mix(in srgb,var(--up) 22%,transparent))}
+.fBar .fLoss,.fBar .fWin{position:absolute;top:0;bottom:0;transition:width .25s ease-out}
+.fBar .fLoss{right:50%;border-radius:999px 0 0 999px;background:linear-gradient(270deg,color-mix(in srgb,var(--down) 60%,transparent),var(--down));box-shadow:0 0 14px var(--down)}
+.fBar .fWin{left:50%;border-radius:0 999px 999px 0;background:linear-gradient(90deg,color-mix(in srgb,var(--up) 60%,transparent),var(--up));box-shadow:0 0 14px var(--up)}
+.fMid{position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.35}
+.fMark{position:absolute;top:50%;left:50%;width:18px;height:18px;border-radius:50%;background:var(--ink);transform:translate(-50%,-50%);transition:left .25s ease-out;box-shadow:0 0 0 3px var(--bg),0 0 14px var(--ink)}
+.fMark.w{box-shadow:0 0 0 3px var(--bg),0 0 18px var(--up)} .fMark.l{box-shadow:0 0 0 3px var(--bg),0 0 18px var(--down)}
 .bank{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border-radius:12px;border:1px solid color-mix(in srgb,var(--warn) 35%,var(--edge));background:rgba(255,194,75,.05)}
 .bank b{display:block;font:800 22px var(--display)}
 .simBox{margin-top:18px;padding:14px;border-radius:14px;border:1px solid var(--edge);background:rgba(140,155,255,.04)}
@@ -2066,7 +2071,8 @@ function botDecide(){
   } else { dir = c.dir === "up" ? 1 : -1; pick = cands.sort((a, b) => dir * (b.score - a.score))[0]; }
   const moveHold = pick.move * Math.sqrt(c.hold / S.look);
   const mult = c.mult || Math.max(1, Math.min(1000, Math.floor(1 / (3 * moveHold))));
-  const stake = Math.max(1, Math.min(BOT.cash, BOT.cash * c.stake / 100));
+  // stake no more than what still leaves room to pay the fee at open
+  const stake = Math.max(1, Math.min(BOT.cash * c.stake / 100, BOT.cash / (1 + feeOf(1, mult, c))));
   if(stake < 1 || BOT.cash < 1){ return botStop("bust"); }
   BOT.cash -= stake;
   BOT.pending = {coin:pick.coin, dir, stake, mult, at:Date.now() + 1000};
@@ -2119,6 +2125,19 @@ function botTick(){
   if((BOT.curve.at(-1)?.t || 0) < now - 5000) BOT.curve.push({t:now, v});
   renderBot();
 }
+// the fight bar: the marker slides toward "bullshit" as the trade nears its bust, toward "larp" as it nears take profit
+function botFight(){
+  const p = BOT.pos; if(!p || !$("fMark")) return;
+  const mark = priceOf(p.coin) ? markOf(p) : p.entry, pnl = botPnl(p, mark), tpAt = p.stake * (BOT.cfg.tp || 100) / 100;
+  const toBust = priceOf(p.coin) ? Math.abs(priceOf(p.coin) - p.bust) / Math.abs(p.entry - p.bust) : 1;
+  const lose = Math.min(1, Math.max(0, -pnl) / p.stake), win = Math.min(1, Math.max(0, pnl) / tpAt);
+  $("fLoss").style.width = (lose * 50).toFixed(1) + "%"; $("fWin").style.width = (win * 50).toFixed(1) + "%";
+  $("fMark").style.left = (50 + (win - lose) * 50).toFixed(1) + "%";
+  $("fMark").className = "fMark " + (pnl > 0 ? "w" : pnl < 0 ? "l" : "");
+  $("posPnl").textContent = `${pnl >= 0 ? "+" : "−"}$${Math.abs(pnl).toFixed(2)}`; $("posPnl").className = "pnl " + (pnl >= 0 ? "win" : "loss");
+  $("posMeta").innerHTML = `<span>in at ${fmtP(p.entry)}</span><span>now ${fmtP(mark)}</span><span>bust ${fmtP(p.bust)}</span><span>fee $${p.fee.toFixed(2)} paid</span><span>${toBust < .35 ? "⚠ close to busting" : "safe for now"}</span><span>${Math.max(0, Math.ceil((p.until - Date.now()) / 1000))}s max</span>`;
+}
+setInterval(() => { if(BOT.pos && !document.hidden) botFight(); }, 150);
 function renderBotLog(){
   $("botLog").innerHTML = BOT.log.slice(-40).reverse().map((l, i) => `<li class="${l.cls || ""}${i === 0 ? " new" : ""}"><time>${new Date(l.t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"}).replace(/ ?[AP]M/, "")}</time><span>${l.text}</span></li>`).join("")
     || `<li class="sys"><span>Pick coins and settings, then press <b>Start the bot</b>.</span></li>`;
@@ -2149,20 +2168,23 @@ function renderBot(){
   $("botClock").textContent = BOT.running ? `${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")}` : BOT.done ? "done" : `${BOT.cfg.mins}:00`;
   $("botStartBtn").textContent = BOT.running ? "Stop the bot" : BOT.bank < 1 ? "Bankroll empty: reset it" : `${BOT.done ? "Keep going" : "Start"} with $${BOT.bank.toFixed(2)}`;
   $("bankVal").textContent = "$" + (BOT.running ? v : BOT.bank).toFixed(2);
-  $("bankSub").textContent = `started with $${(BOT.bankStart || 50).toFixed(0)} on ${new Date(BOT.bankSince || Date.now()).toLocaleDateString([], {month:"short", day:"numeric"})} · ${((BOT.running ? v : BOT.bank) / (BOT.bankStart || 50)).toFixed(2)}× · peak $${(BOT.peak || BOT.bank).toFixed(2)}`;
+  $("bankSub").textContent = `started with $${(BOT.bankStart || 50).toFixed(0)} on ${new Date(BOT.bankSince || Date.now()).toLocaleDateString([], {month:"short", day:"numeric"})} · ${((BOT.running ? v : BOT.bank) / (BOT.bankStart || 50)).toFixed(2)}× · peak $${(BOT.peak = Math.max(BOT.peak || 0, BOT.bank, BOT.running ? v : 0)).toFixed(2)}`;
   $("bankReset").disabled = BOT.running;
   $("botStartBtn").classList.toggle("stop", BOT.running);
   document.querySelectorAll(".botCfg input, .botCfg select, .presets button").forEach(el => el.disabled = BOT.running);
   const run = BOT.history.filter(t => t.run === BOT.runId), w = run.filter(t => t.pnl > 0).length;
   $("botStats").textContent = `this run: ${run.length} trades · ${w} won · ${run.filter(t => t.why === "bust").length} busted`;
   const p = BOT.pos, el = $("botPos");
-  if(p){ const mark = priceOf(p.coin) ? markOf(p) : p.entry, pnl = botPnl(p, mark), toBust = priceOf(p.coin) ? Math.abs(priceOf(p.coin) - p.bust) / Math.abs(p.entry - p.bust) : 1;
-    const tpAt = p.stake * (BOT.cfg.tp || 100) / 100;
-    el.innerHTML = `<div class="posTop"><span><b>${p.coin}</b> <span class="pill ${p.dir > 0 ? "up" : "down"}">${p.dir > 0 ? "▲ UP" : "▼ DOWN"}</span> <span class="pill" style="color:var(--muted)">$${p.stake.toFixed(2)} × ${p.mult}</span></span>
-      <span class="pnl ${pnl >= 0 ? "win" : "loss"}">${pnl >= 0 ? "+" : "−"}$${Math.abs(pnl).toFixed(2)}</span></div>
-      <div class="tpBar"><i class="lossSide" style="width:${(Math.min(1, Math.max(0, -pnl) / p.stake) * 50).toFixed(1)}%"></i><i class="winSide" style="width:${(Math.min(1, Math.max(0, pnl) / tpAt) * 50).toFixed(1)}%"></i><span>bust</span><span>entry</span><span>${BOT.cfg.tp ? "take profit" : "+100%"}</span></div>
-      <div class="posMeta"><span>in at ${fmtP(p.entry)}</span><span>now ${fmtP(mark)}</span><span>bust ${fmtP(p.bust)}</span><span>fee $${p.fee.toFixed(2)} paid</span><span>${toBust < .35 ? "⚠ close to busting" : "safe for now"}</span><span>${Math.max(0, Math.ceil((p.until - Date.now()) / 1000))}s max</span></div>`; }
-  else el.innerHTML = `<p class="pend">${BOT.pending ? `Sending ${BOT.pending.coin} ${BOT.pending.dir > 0 ? "UP" : "DOWN"} order…` : BOT.running ? `Between trades, next look in ${Math.max(0, Math.ceil((BOT.nextAt - Date.now()) / 1000))}s…` : "No trade open."}</p>`;
+  if(p){
+    if(el.dataset.pid !== String(p.openedAt)){ el.dataset.pid = p.openedAt;
+      el.innerHTML = `<div class="fight" aria-label="How close the trade is to busting (left) or taking profit (right)">
+          <span class="fL">bullshit</span><div class="fBar"><i class="fLoss" id="fLoss"></i><i class="fWin" id="fWin"></i><span class="fMid"></span><b class="fMark" id="fMark"></b></div><span class="fR">larp</span></div>
+        <div class="posTop"><span><b>${p.coin}</b> <span class="pill ${p.dir > 0 ? "up" : "down"}">${p.dir > 0 ? "▲ UP" : "▼ DOWN"}</span> <span class="pill" style="color:var(--muted)">$${p.stake.toFixed(2)} × ${p.mult}</span></span>
+          <span class="pnl" id="posPnl"></span></div>
+        <div class="posMeta" id="posMeta"></div>`; }
+    botFight();
+  }
+  else { el.dataset.pid = ""; el.innerHTML = `<p class="pend">${BOT.pending ? `Sending ${BOT.pending.coin} ${BOT.pending.dir > 0 ? "UP" : "DOWN"} order…` : BOT.running ? `Between trades, next look in ${Math.max(0, Math.ceil((BOT.nextAt - Date.now()) / 1000))}s…` : "No trade open."}</p>`; }
   const c = BOT.curve.length > 1 ? BOT.curve : [{t:0, v:BOT.start}, {t:1, v}];
   const t0 = c[0].t, t1 = Math.max(c.at(-1).t, t0 + 1), hi = Math.max(hasGoal ? BOT.goal : BOT.start * 1.5, ...c.map(x => x.v));
   const X = t => (t - t0) / (t1 - t0) * 400, Y = val => 96 - val / hi * 92;

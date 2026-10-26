@@ -310,6 +310,13 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   candles sliding down. With no trade open it leans gently with the coin's last 15 minutes. Cards are
   a bit more see-through so it shows. It goes still for people who ask for reduced motion.
 
+### Round 15: the fight bar
+- The bot's open trade has a tug-of-war bar above it: the marker slides toward "bullshit" (red) as
+  the trade nears its bust and toward "larp" (green) as it nears take profit, updating several times a
+  second.
+- Fix: at 100% stake the bot used to stake every dollar, leaving nothing for the fee, so the fee was
+  skipped. It now keeps just enough back to pay it. The bankroll peak now counts the run in progress.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
