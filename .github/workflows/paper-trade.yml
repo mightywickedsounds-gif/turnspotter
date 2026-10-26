@@ -9,7 +9,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: paper-trade
+  group: paper-trade-v2
   cancel-in-progress: false   # the next run waits its turn, so there's almost always one awake
 jobs:
   trade:
@@ -25,7 +25,7 @@ jobs:
           git config user.email "turnspotter-bot@users.noreply.github.com"
           end=$((SECONDS + 20400)); saved=-900   # save on the first pass too
           while true; do
-            out=$( (node paper/trader.mjs; node paper/trend.mjs) 2>&1) || true; echo "$out"
+            out=$( (timeout 240 node paper/trader.mjs; timeout 120 node paper/trend.mjs) 2>&1) || true; echo "$out"   # hard time limits so one stuck request can't freeze the loop
             # save when a trade opens or closes, otherwise at most every 15 minutes (keeps the commit history sane)
             if echo "$out" | grep -q TRADES_CHANGED || [ $((SECONDS - saved)) -ge 900 ] || [ $SECONDS -ge $end ]; then
               git add paper/ledger.json paper/trend.json

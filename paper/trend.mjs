@@ -10,7 +10,8 @@ const CFG = {start: 50, coins: ["BTC", "ETH", "SOL", "XRP", "DOGE"], avgDays: 50
 const FILE = new URL("./trend.json", import.meta.url);
 const DAY = 86400000;
 
-async function getJSON(url){ const r = await fetch(url); if(!r.ok) throw new Error(`HTTP ${r.status} ${url}`); return r.json(); }
+async function getJSON(url){ const r = await fetch(url, {signal:AbortSignal.timeout(20000)});   // never hang on a stuck request
+  if(!r.ok) throw new Error(`HTTP ${r.status} ${url}`); return r.json(); }
 async function daily(coin){
   try{ const d = await getJSON(`https://api.binance.us/api/v3/klines?symbol=${coin}USDT&interval=1d&limit=${CFG.avgDays + 10}`);
     return {src:"Binance US", c:d.map(k => ({t:k[0], c:+k[4]}))}; }

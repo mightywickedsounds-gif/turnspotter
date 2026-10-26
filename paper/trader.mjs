@@ -27,7 +27,8 @@ const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const logic = html.split("/*LOGIC-START*/")[1].split("/*LOGIC-END*/")[0];
 const { analyze } = new Function(`${logic}; return { analyze };`)();
 
-async function getJSON(url){ const r = await fetch(url); if(!r.ok) throw new Error(`HTTP ${r.status} ${url}`); return r.json(); }
+async function getJSON(url){ const r = await fetch(url, {signal:AbortSignal.timeout(20000)});   // never hang on a stuck request
+  if(!r.ok) throw new Error(`HTTP ${r.status} ${url}`); return r.json(); }
 async function binanceUS(coin){
   let out = [], end = null;
   while(out.length < CFG.need){
