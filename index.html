@@ -2022,19 +2022,21 @@ function writeCfg(){
 // Why it "wins all the time": with a nearby take profit and a far-away bust, price usually touches the
 // take profit first, but each loss costs more than each win. For a random price path, the chance of
 // hitting the take profit first is (distance to loss) / (distance to win + distance to loss).
-// Automatic rules (no settings): the bot takes profit once it's within 15% of the target for 2 seconds,
-// locks in a winner that slips back from 60% of the target to 30%, and stops going all-in once the run is
-// up 10%: any stake above 55% is cut to 55% while the run is in profit.
-const NEAR_TP = .85, NEAR_MS = 2000, LOCK_FROM = .6, LOCK_AT = .3, PROTECT_AT = 1.10, PROTECT_STAKE = 55;
+// Automatic rules (no settings), judged on the latest live price so a fast drop can't skip past them:
+//  - at 85% of the take-profit target or more, close right away
+//  - at 40% of the target or more for 3 seconds, bank it
+//  - once a trade has been up 40% of the target, close if it gives back half of its best profit
+//  - once the run is up 10%, any stake above 55% is cut to 55% while the run is in profit
+const NEAR_TP = .85, HOLD_AT = .4, HOLD_MS = 3000, GIVEBACK = .5, PROTECT_AT = 1.10, PROTECT_STAKE = 55;
 function effStake(c, bal, start){ return bal >= start * PROTECT_AT && c.stake > PROTECT_STAKE ? PROTECT_STAKE : c.stake; }
 function winChance(c, stake, mult){
   if(!c.tp || !mult) return null;
-  const winD = NEAR_TP * c.tp / 100 / mult, lossD = c.sl < 100 ? c.sl / 100 / mult : 1 / mult;
+  const winD = HOLD_AT * c.tp / 100 / mult, lossD = c.sl < 100 ? c.sl / 100 / mult : 1 / mult;
   return lossD / (winD + lossD);
 }
 function renderBotCfg(){
   const c = BOT.cfg, pw = winChance(c, 1, c.mult);
-  $("botOddsMini").innerHTML = `${c.dir === "ai" ? "Follows the AI" : "Always " + c.dir.toUpperCase()} · ${c.mult ? "×" + c.mult : "auto multiplier"} · ${c.stake}% stake · take profit ${c.tp ? "+" + c.tp + "%" : "off"} · fee ${feeLabel(c)}${pw ? ` · wins about ${Math.round(pw * 100)}% of trades` : ""}. Automatic: grabs profit when it's close to the target, and stops going all-in once you're up 10%.`;
+  $("botOddsMini").innerHTML = `${c.dir === "ai" ? "Follows the AI" : "Always " + c.dir.toUpperCase()} · ${c.mult ? "×" + c.mult : "auto multiplier"} · ${c.stake}% stake · take profit ${c.tp ? "+" + c.tp + "%" : "off"} · fee ${feeLabel(c)}${pw ? ` · wins about ${Math.round(pw * 100)}% of trades` : ""}. Automatic: banks a profit it holds for 3 seconds, never gives back half of a winner, and stops going all-in once you're up 10%.`;
   $("cfgMultV").textContent = c.mult ? "×" + c.mult : "auto (bust 3× a normal move)";
   $("cfgStakeV").textContent = c.stake + "%"; $("cfgTpV").textContent = c.tp ? `+${c.tp}% of stake` : "off";
   $("cfgSlV").textContent = c.sl >= 100 ? "bust only" : `−${c.sl}% of stake`; $("cfgHoldV").textContent = c.hold + " min";
@@ -2043,7 +2045,7 @@ function renderBotCfg(){
   // one line of odds: bust distance, win rate, break-even and the chance of reaching the goal
   let risk = c.mult ? `Bust at a <b>${(100 / c.mult).toFixed(2)}%</b> move against you` : "Bust at 3× a normal move (multiplier picked per coin)";
   const pWin = winChance(c, 1, c.mult);
-  if(pWin){ const winAmt = NEAR_TP * c.tp / 100, lossAmt = c.sl < 100 ? c.sl / 100 : 1, feeR = fee / Math.max(stake, 1e-9);
+  if(pWin){ const winAmt = HOLD_AT * c.tp / 100, lossAmt = c.sl < 100 ? c.sl / 100 : 1, feeR = fee / Math.max(stake, 1e-9);
     const be = (lossAmt + feeR) / (winAmt + lossAmt), streak = c.goalX && c.stake >= 100 ? Math.ceil(Math.log(c.goalX) / Math.log(1 + winAmt)) : 0;
     risk += ` · wins about <b>${Math.round(pWin * 100)}%</b> · needs <b>${Math.round(be * 100)}%</b> to break even`;
     if(streak) risk += ` · about <b>${Math.max(.1, 100 * Math.pow(pWin, streak)).toFixed(1)}%</b> chance to hit ${c.goalX}×`; }
@@ -2138,7 +2140,7 @@ function botClose(exitPx, why){
   const rec = {...p, exit:exitPx, pnl, gross, why, closedAt:Date.now()};
   BOT.history.push(rec); if(BOT.history.length > 600) BOT.history.shift();
   BOT.curve.push({t:Date.now(), v:BOT.cash});
-  const msg = {bust:"💥 Busted", tp:"💰 Took profit", near:"💰 Took profit just short of the target", lock:"🔒 Locked in profit before it slipped away", sl:"🛑 Stopped out", time:"⏱ Closed on time", stopped:"Closed"}[why] || "Closed";
+  const msg = {bust:"💥 Busted", tp:"💰 Took profit", near:"💰 Took profit right by the target", hold:"💰 Banked a profit it held for 3 seconds", lock:"🔒 Locked in profit before it slipped away", sl:"🛑 Stopped out", time:"⏱ Closed on time", stopped:"Closed"}[why] || "Closed";
   say(`${msg} on ${p.coin} at ${fmtP(exitPx)}: ${pnl >= 0 ? "+" : "−"}$${Math.abs(pnl).toFixed(2)} (${pnl >= 0 ? "+" : "−"}${Math.abs(pnl / p.stake * 100).toFixed(0)}% of the stake, after the fee). Balance $${BOT.cash.toFixed(2)}.`, pnl >= 0 ? "win" : "loss");
   if(why === "bust"){ $("botCard").classList.add("shake"); setTimeout(() => $("botCard").classList.remove("shake"), 600); }
   BOT.nextAt = Date.now() + BOT.cfg.gap * 1000;
@@ -2149,19 +2151,17 @@ function botCheck(coin, price){
   const p = BOT.pos; if(!BOT.running || !p || p.coin !== coin) return;
   const m = markPx(coin);   // smoothed mark price, not the single trade that just printed
   if(p.dir > 0 ? m <= p.bust : m >= p.bust) return botClose(p.bust, "bust");
-  const pnl = botPnl(p, markOf(p)), c = BOT.cfg;
-  // take profit and stop loss close AT their trigger price, like real orders, not at whatever price came
-  // through after a gap; otherwise wins overshoot (losses are capped at the stake, so that flatters the bot)
-  if(c.tp && pnl >= p.stake * c.tp / 100) botClose(p.entry * (1 + p.dir * c.tp / 100 / p.mult), "tp");
-  else if(c.sl < 100 && pnl <= -p.stake * c.sl / 100) botClose(p.entry * (1 - p.dir * c.sl / 100 / p.mult), "sl");
-  else if(c.tp){
-    const target = p.stake * c.tp / 100;
-    p.best = Math.max(p.best || 0, pnl);
-    if(pnl >= NEAR_TP * target){ p.nearSince = p.nearSince || Date.now();
-      if(Date.now() - p.nearSince >= NEAR_MS) botClose(markOf(p), "near"); }
-    else { p.nearSince = 0;
-      if(p.best >= LOCK_FROM * target && pnl <= LOCK_AT * target && pnl > 0) botClose(markOf(p), "lock"); }
-  }
+  const c = BOT.cfg, live = priceOf(coin) || m, pnl = botPnl(p, live), now = Date.now();
+  if(c.sl < 100 && botPnl(p, m) <= -p.stake * c.sl / 100) return botClose(p.entry * (1 - p.dir * c.sl / 100 / p.mult), "sl");
+  if(!c.tp) return;
+  const target = p.stake * c.tp / 100;
+  // a full take profit closes AT its trigger price (a gap past it isn't extra profit)
+  if(pnl >= target) return botClose(p.entry * (1 + p.dir * c.tp / 100 / p.mult), "tp");
+  if(pnl >= NEAR_TP * target) return botClose(live, "near");
+  p.best = Math.max(p.best || 0, pnl);
+  if(pnl >= HOLD_AT * target){ p.holdSince = p.holdSince || now; if(now - p.holdSince >= HOLD_MS) return botClose(live, "hold"); }
+  else p.holdSince = 0;
+  if(p.best >= HOLD_AT * target && pnl <= p.best * GIVEBACK) return botClose(live, "lock");
 }
 function botTick(){
   if(!BOT.running) return renderBot();
@@ -2245,7 +2245,7 @@ function renderBot(){
 }
 // sanity check: do live wins match what the take-profit / bust distances predict?
 function liveVsExpected(H){
-  const T = H.filter(t => typeof t.pWin === "number" && t.why !== "time" && t.why !== "stopped" && t.why !== "lock");
+  const T = H.filter(t => typeof t.pWin === "number" && t.why !== "time" && t.why !== "stopped");
   if(!T.length) return `<div class="lve">Live vs expected<b>—</b><span>New live trades record their predicted win chance; the comparison appears here.</span></div>`;
   const won = T.filter(t => t.pnl > 0).length, exp = T.reduce((s, t) => s + t.pWin, 0), sd = Math.sqrt(T.reduce((s, t) => s + t.pWin * (1 - t.pWin), 0));
   const z = sd ? (won - exp) / sd : 0, verdict = T.length < 30 ? "too few trades to judge yet (30+ needed)" : Math.abs(z) < 2 ? "in line with the math: the wins are ordinary luck" : z > 0 ? "well above the math: tell Claude, this points to a bug or a strong trend" : "below the math";
@@ -2265,7 +2265,7 @@ function renderHist(){
   const lo = Math.min(0, ...pts.map(p => p.v)), hi = Math.max(0, ...pts.map(p => p.v)), X = i => i / Math.max(1, pts.length - 1) * 600, Y = v => 76 - (v - lo) / ((hi - lo) || 1) * 72;
   $("histChart").innerHTML = `<line x1="0" x2="600" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--faint)" stroke-dasharray="3 4"/>
     <path d="${pts.map((p, i) => `${i ? "L" : "M"}${X(p.i).toFixed(1)},${Y(p.v).toFixed(1)}`).join("")}" fill="none" stroke="${cum >= 0 ? "var(--up)" : "var(--down)"}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
-  const why = {bust:"busted", tp:"take profit", near:"near target", lock:"locked profit", sl:"stop loss", time:"time", stopped:"stopped"};
+  const why = {bust:"busted", tp:"take profit", near:"near target", hold:"held profit", lock:"locked profit", sl:"stop loss", time:"time", stopped:"stopped"};
   $("histRuns").innerHTML = BOT.runs.slice().reverse().slice(0, 12).map(r => { const d = r.end - r.start;
     return `<tr><td>#${r.id}</td><td>${new Date(r.startedAt).toLocaleString([], {month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"})}</td><td>$${r.start.toFixed(0)} → $${r.end.toFixed(2)}</td>
       <td class="${d >= 0 ? "win" : "loss"}">${d >= 0 ? "+" : "−"}$${Math.abs(d).toFixed(2)}</td><td>${r.trades} trades · ${{goal:"🎯 goal", bust:"💥 broke", time:"⏱ time", user:"stopped"}[r.reason] || r.reason}</td></tr>`; }).join("")
@@ -2354,7 +2354,7 @@ function simRun(cfg, data, start, T0){
         bal -= stake;
         pos = {coin:pick.coin, dir:d, entry, stake, mult, fee, until:t + 60000 + cfg.hold * 60000,
           bust:entry * (1 - d / mult),
-          tpPx:cfg.tp ? entry * (1 + d * NEAR_TP * cfg.tp / 100 / mult) : null,
+          tpPx:cfg.tp ? entry * (1 + d * HOLD_AT * cfg.tp / 100 / mult) : null,
           slPx:cfg.sl < 100 ? entry * (1 - d * cfg.sl / 100 / mult) : null};
         t += 60000;   // the fill minute is checked below
       }

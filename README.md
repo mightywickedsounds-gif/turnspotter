@@ -344,6 +344,13 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - Fix: when nothing meets the confidence bar, the bot re-checks on the user's "wait between trades"
   setting instead of a fixed 15 seconds, and the countdown says "No good setup yet".
 
+### Round 19: banks profits sooner
+- The bot now banks a profit that has stayed at 40% or more of the take-profit target for 3 seconds,
+  closes instantly at 85% of the target, and closes a winner that gives back half of its best profit.
+  These checks use the latest live price, so a fast drop can't skip past them (busts still use the
+  smoothed mark price). The odds line and the 100-run replay assume profits are banked at 40% of the
+  target.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
