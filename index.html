@@ -217,6 +217,13 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 
 
 /* bot v2 */
+.bank{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border-radius:12px;border:1px solid color-mix(in srgb,var(--warn) 35%,var(--edge));background:rgba(255,194,75,.05)}
+.bank b{display:block;font:800 22px var(--display)}
+.simBox{margin-top:18px;padding:14px;border-radius:14px;border:1px solid var(--edge);background:rgba(140,155,255,.04)}
+.simBtn{padding:10px 18px;font-size:13px;background:linear-gradient(135deg,var(--accent),var(--cyan))}
+.simViz{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+#simPaths,#simHist{width:100%;height:160px}
+@media (max-width:860px){.simViz{grid-template-columns:1fr}}
 .botTiles{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
 .tile{position:relative;display:grid;gap:2px;text-align:left;padding:10px 10px 30px;border-radius:14px;border:1px solid var(--edge);background:rgba(140,155,255,.04);overflow:hidden;opacity:.5;transition:all .2s;backdrop-filter:none}
 .tile.on{opacity:1;border-color:var(--edge-hi)}
@@ -446,6 +453,8 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <div class="botGrid">
       <div class="botCtl">
         <div id="botPos" class="pos"></div>
+        <div class="bank"><div><span class="eyebrow">Bankroll (carries over between runs)</span><b id="bankVal">$50.00</b><span class="acctSub" id="bankSub"></span></div>
+          <span id="bankResetBox"><button type="button" class="ghost" id="bankReset">Reset bankroll</button></span></div>
         <div class="presets"><span class="acctSub">Presets:</span>
           <button type="button" data-preset="x1000">Trench ×1000 gamble</button><button type="button" data-preset="degen">Degen</button><button type="button" data-preset="steady">Steady</button></div>
         <div class="botCfg">
@@ -458,8 +467,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
           <label class="sl">Wait between trades <b id="cfgGapV">10 s</b><input type="range" id="cfgGap" min="3" max="180" step="1" value="10"></label>
           <label class="sl">Only trade when the AI is at least <b id="cfgConfV">50%</b><input type="range" id="cfgConf" min="50" max="62" step="1" value="50"></label>
           <label>Fee per trade<select id="cfgFee"><option value="0">None</option><option value="0.01">0.01% of position</option><option value="0.02">0.02% of position</option><option value="0.05">0.05% of position</option><option value="0.1">0.1% of position</option></select></label>
-          <label>Start<span class="money"><span>$</span><input type="number" id="botStartAmt" value="50" min="5"></span></label>
-          <label>Goal<span class="money"><span>$</span><input type="number" id="botGoal" value="500" min="10"></span></label>
+          <label>Goal for each run<select id="cfgGoalX"><option value="2">2× the bankroll</option><option value="5">5× the bankroll</option><option value="10" selected>10× the bankroll</option><option value="100">100× the bankroll</option><option value="0">No goal (until time or broke)</option></select></label>
           <label>Time limit<select id="cfgMins"><option value="15">15 min</option><option value="30">30 min</option><option value="60" selected>60 min</option><option value="240">4 hours</option></select></label>
         </div>
         <p class="riskLine" id="botRisk"></p>
@@ -468,6 +476,17 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
         <p class="note" id="botNote"></p>
       </div>
       <div class="botMind"><div class="sub">What the bot is thinking</div><ul class="botLog" id="botLog"></ul></div>
+    </div>
+
+    <div class="simBox">
+      <div class="rowHead"><div><div class="sub" style="margin:0">Reality check</div><p class="acctSub" style="margin:2px 0 0">Replay these exact settings 100 times on the last 2 days of real 1-minute prices, starting from your bankroll.</p></div>
+        <button type="button" class="place simBtn" id="simBtn">Run 100 times</button></div>
+      <div id="simOut" hidden>
+        <div class="histStats" id="simStats"></div>
+        <div class="simViz"><div><div class="sub">50 of the runs, trade by trade (log scale · dashed yellow = goal)</div><svg id="simPaths" viewBox="0 0 600 160" preserveAspectRatio="none" aria-label="Money paths of 50 replayed runs"></svg></div>
+          <div><div class="sub">Where the 100 runs finished</div><svg id="simHist" viewBox="0 0 300 160" aria-label="How many runs finished in each range"></svg></div></div>
+        <p class="note" id="simNote"></p>
+      </div>
     </div>
 
     <div class="botHist">
@@ -1839,7 +1858,10 @@ const PRESETS = {
 };
 const BOT = (() => { try{ const d = JSON.parse(localStorage.getItem(BOT_KEY)); if(d && d.cfg) return d; }catch(e){} return null; })()
   || {running:false, start:50, goal:500, cash:50, pos:null, pending:null, log:[], curve:[], endsAt:0, startedAt:0, follow:true, nextAt:0, done:null,
-      cfg:{...PRESETS.x1000, coins:[...COINS], mins:60}, history:[], runs:[], runId:0};
+      cfg:{...PRESETS.x1000, coins:[...COINS], mins:60, goalX:10}, history:[], runs:[], runId:0};
+// the bankroll carries over between runs, so each run continues from where the last one finished
+if(BOT.bank === undefined){ const last = BOT.runs.at(-1); BOT.bank = last ? +last.end.toFixed(2) : 50; BOT.bankStart = 50; BOT.bankSince = Date.now(); BOT.peak = Math.max(50, BOT.bank); }
+if(BOT.cfg.goalX === undefined) BOT.cfg.goalX = 10;
 S.lastP = S.lastP || {};
 function saveBot(){ try{ localStorage.setItem(BOT_KEY, JSON.stringify(BOT)); }catch(e){} }
 function say(text, cls){ BOT.log.push({t:Date.now(), text, cls}); if(BOT.log.length > 100) BOT.log.shift(); saveBot(); renderBotLog(); }
@@ -1859,14 +1881,14 @@ function readCfg(){
   const c = BOT.cfg;
   Object.assign(c, {dir:$("cfgDir").value, mult:+$("cfgMult").value, stake:+$("cfgStake").value, tp:+$("cfgTp").value, sl:+$("cfgSl").value,
     hold:+$("cfgHold").value, gap:+$("cfgGap").value, conf:+$("cfgConf").value, fee:+$("cfgFee").value, mins:+$("cfgMins").value});
-  BOT.start = Math.max(5, +$("botStartAmt").value || 50); BOT.goal = Math.max(BOT.start * 1.1, +$("botGoal").value || 500);
+  c.goalX = +$("cfgGoalX").value;
   saveBot(); renderBotCfg();
 }
 function writeCfg(){
   const c = BOT.cfg;
   $("cfgDir").value = c.dir; $("cfgMult").value = c.mult; $("cfgStake").value = c.stake; $("cfgTp").value = c.tp; $("cfgSl").value = c.sl;
   $("cfgHold").value = c.hold; $("cfgGap").value = c.gap; $("cfgConf").value = c.conf; $("cfgFee").value = String(c.fee); $("cfgMins").value = String(c.mins);
-  $("botStartAmt").value = BOT.start; $("botGoal").value = BOT.goal; $("botFollow").checked = BOT.follow;
+  $("cfgGoalX").value = String(c.goalX); $("botFollow").checked = BOT.follow;
   renderBotCfg();
 }
 function renderBotCfg(){
@@ -1875,22 +1897,24 @@ function renderBotCfg(){
   $("cfgStakeV").textContent = c.stake + "%"; $("cfgTpV").textContent = c.tp ? `+${c.tp}% of stake` : "off";
   $("cfgSlV").textContent = c.sl >= 100 ? "bust only" : `−${c.sl}% of stake`; $("cfgHoldV").textContent = c.hold + " min";
   $("cfgGapV").textContent = c.gap + " s"; $("cfgConfV").textContent = c.conf <= 50 ? "any lean" : c.conf + "%";
-  const m = c.mult || 50, stake = BOT.start * c.stake / 100, fee = stake * m * c.fee / 100;
+  const m = c.mult || 50, stake = BOT.bank * c.stake / 100, fee = stake * m * c.fee / 100;
   $("botRisk").innerHTML = `${c.mult ? `At ×${c.mult} a <b>${(100 / c.mult).toFixed(2)}%</b> move against you busts the trade.` : "Auto picks the multiplier per coin so the bust is 3× a normal move away."}
     Fee: <b>${c.fee}%</b> of the position${c.mult ? ` = <b>$${fee.toFixed(2)}</b> on a $${stake.toFixed(2)} stake (${(fee / stake * 100).toFixed(0)}% of it)` : ""}.
     ${c.mult && fee >= stake ? '<b class="loss">The fee alone eats the whole stake: lower the multiplier or the fee.</b>' : ""}`;
-  $("botNote").textContent = `Runs while this page is open, with fake money. For any fair gamble, the chance of reaching ${(BOT.goal / BOT.start).toFixed(0)}× before $0 is about 1 in ${(BOT.goal / BOT.start).toFixed(0)}; fees and spread make it lower. Trench doesn't publish its fees, so pick the one you think is right.`;
+  $("botNote").textContent = `Runs while this page is open, with fake money. For any fair gamble, ${c.goalX ? `the chance of reaching ${c.goalX}× before $0 is about 1 in ${c.goalX}` : "the longer you play, the more fees and spread eat into the bankroll"}; fees and spread make it lower. Use "Run 100 times" below to see the odds for your exact settings. Trench doesn't publish its fees, so pick the one you think is right.`;
 }
 
 function botStart(){
   readCfg();
   if(!BOT.cfg.coins.length){ say("No coins switched on. Tap at least one coin tile.", "sys"); return; }
   const c = BOT.cfg;
+  if(BOT.bank < 1){ say("The bankroll is empty. Reset it to start again.", "loss"); return; }
+  BOT.start = BOT.bank; BOT.goal = c.goalX ? BOT.bank * c.goalX : Infinity;
   if(c.mult && BOT.start * c.stake / 100 * c.mult * c.fee / 100 >= BOT.start * c.stake / 100){ say("The fee would eat the whole stake at this multiplier. Lower the multiplier or the fee first.", "loss"); return; }
   BOT.runId = (BOT.runId || 0) + 1;
   Object.assign(BOT, {running:true, cash:BOT.start, pos:null, pending:null, log:[], curve:[{t:Date.now(), v:BOT.start}],
     startedAt:Date.now(), endsAt:Date.now() + c.mins * 60000, nextAt:Date.now() + 2000, done:null});
-  say(`Run #${BOT.runId}: $${BOT.start.toFixed(2)} → goal $${BOT.goal.toFixed(0)} in ${c.mins} minutes. Trading ${c.coins.join(", ")}, ${c.dir === "ai" ? "following the AI" : "always " + c.dir.toUpperCase()}, ${c.mult ? "×" + c.mult : "auto multiplier"}, ${c.stake}% per trade, ${c.fee}% fee.`, "sys");
+  say(`Run #${BOT.runId}: $${BOT.start.toFixed(2)} → ${isFinite(BOT.goal) ? "goal $" + BOT.goal.toFixed(0) : "no goal"} in ${c.mins} minutes. Trading ${c.coins.join(", ")}, ${c.dir === "ai" ? "following the AI" : "always " + c.dir.toUpperCase()}, ${c.mult ? "×" + c.mult : "auto multiplier"}, ${c.stake}% per trade, ${c.fee}% fee.`, "sys");
   renderBot();
 }
 function botStop(reason){
@@ -1899,6 +1923,7 @@ function botStop(reason){
   BOT.running = false; BOT.done = reason;
   const v = botValue(), r = v / BOT.start - 1, runTrades = BOT.history.filter(t => t.run === BOT.runId);
   BOT.runs.push({id:BOT.runId, startedAt:BOT.startedAt, endedAt:Date.now(), start:BOT.start, end:v, trades:runTrades.length, reason});
+  BOT.bank = Math.max(0, +v.toFixed(2)); BOT.peak = Math.max(BOT.peak || 0, BOT.bank);
   if(BOT.runs.length > 60) BOT.runs.shift();
   saveBot();
   if(reason === "goal"){ say(`🎯 Goal hit: $${v.toFixed(2)}. That's ${(r * 100).toFixed(0)}% up. Quitting while ahead.`, "win"); confetti(); }
@@ -1965,9 +1990,11 @@ function botClose(exitPx, why){
 function botCheck(coin, price){
   const p = BOT.pos; if(!BOT.running || !p || p.coin !== coin) return;
   if(p.dir > 0 ? price <= p.bust : price >= p.bust) return botClose(p.bust, "bust");
-  const pnl = botPnl(p, markOf(p)), c = BOT.cfg;
-  if(c.tp && pnl >= p.stake * c.tp / 100) botClose(markOf(p), "tp");
-  else if(c.sl < 100 && pnl <= -p.stake * c.sl / 100) botClose(markOf(p), "sl");
+  const pnl = botPnl(p, markOf(p)), c = BOT.cfg, size = p.stake * p.mult;
+  // take profit and stop loss close AT their trigger price, like real orders, not at whatever price came
+  // through after a gap; otherwise wins overshoot (losses are capped at the stake, so that flatters the bot)
+  if(c.tp && pnl >= p.stake * c.tp / 100) botClose(p.entry * (1 + p.dir * (p.stake * c.tp / 100 + p.fee) / size), "tp");
+  else if(c.sl < 100 && pnl <= -p.stake * c.sl / 100) botClose(p.entry * (1 + p.dir * (p.fee - p.stake * c.sl / 100) / size), "sl");
 }
 function botTick(){
   if(!BOT.running) return renderBot();
@@ -2001,14 +2028,18 @@ function renderTiles(){
       <span class="tSub">${price ? fmtP(price) : "—"} · ${call}</span>${spark}${trading ? '<span class="tLive">bot is in</span>' : ""}</button>`; }).join("");
 }
 function renderBot(){
-  const v = botValue(), r = v / BOT.start - 1, prog = Math.max(0, Math.min(1, Math.log(Math.max(v, .01) / BOT.start) / Math.log(BOT.goal / BOT.start)));
+  if(!BOT.running && !BOT.done){ BOT.start = BOT.bank; BOT.goal = BOT.cfg.goalX ? BOT.bank * BOT.cfg.goalX : Infinity; }
+  const v = botValue(), r = v / BOT.start - 1, hasGoal = isFinite(BOT.goal), prog = hasGoal ? Math.max(0, Math.min(1, Math.log(Math.max(v, .01) / BOT.start) / Math.log(BOT.goal / BOT.start))) : 0;
   $("botVal").textContent = "$" + v.toFixed(2);
   $("botRet").textContent = (r >= 0 ? "▲ " : "▼ ") + Math.abs(r * 100).toFixed(1) + "%"; $("botRet").className = "chg " + (r >= 0 ? "win" : "loss");
   $("botGoalFill").style.width = (prog * 100).toFixed(1) + "%";
-  $("botGoalTxt").textContent = `$${BOT.start.toFixed(0)} → $${BOT.goal.toFixed(0)} · ${(prog * 100).toFixed(0)}% of the way (counted in doublings)`;
+  $("botGoalTxt").textContent = hasGoal ? `This run: $${BOT.start.toFixed(2)} → $${BOT.goal.toFixed(0)} · ${(prog * 100).toFixed(0)}% of the way (counted in doublings)` : `This run: from $${BOT.start.toFixed(2)}, no goal: plays until time runs out or the money's gone`;
   const left = Math.max(0, BOT.endsAt - Date.now());
   $("botClock").textContent = BOT.running ? `${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")}` : BOT.done ? "done" : `${BOT.cfg.mins}:00`;
-  $("botStartBtn").textContent = BOT.running ? "Stop the bot" : BOT.done ? "Run it again" : "Start the bot";
+  $("botStartBtn").textContent = BOT.running ? "Stop the bot" : BOT.bank < 1 ? "Bankroll empty: reset it" : `${BOT.done ? "Keep going" : "Start"} with $${BOT.bank.toFixed(2)}`;
+  $("bankVal").textContent = "$" + (BOT.running ? v : BOT.bank).toFixed(2);
+  $("bankSub").textContent = `started with $${(BOT.bankStart || 50).toFixed(0)} on ${new Date(BOT.bankSince || Date.now()).toLocaleDateString([], {month:"short", day:"numeric"})} · ${((BOT.running ? v : BOT.bank) / (BOT.bankStart || 50)).toFixed(2)}× · peak $${(BOT.peak || BOT.bank).toFixed(2)}`;
+  $("bankReset").disabled = BOT.running;
   $("botStartBtn").classList.toggle("stop", BOT.running);
   document.querySelectorAll(".botCfg input, .botCfg select, .presets button").forEach(el => el.disabled = BOT.running);
   const run = BOT.history.filter(t => t.run === BOT.runId), w = run.filter(t => t.pnl > 0).length;
@@ -2022,9 +2053,9 @@ function renderBot(){
       <div class="posMeta"><span>in at ${fmtP(p.entry)}</span><span>exit now ${fmtP(mark)}</span><span>bust ${fmtP(p.bust)}</span><span>fee $${p.fee.toFixed(2)}</span><span>${toBust < .35 ? "⚠ close to busting" : "safe for now"}</span><span>${Math.max(0, Math.ceil((p.until - Date.now()) / 1000))}s max</span></div>`; }
   else el.innerHTML = `<p class="pend">${BOT.pending ? `Sending ${BOT.pending.coin} ${BOT.pending.dir > 0 ? "UP" : "DOWN"} order…` : BOT.running ? `Between trades, next look in ${Math.max(0, Math.ceil((BOT.nextAt - Date.now()) / 1000))}s…` : "No trade open."}</p>`;
   const c = BOT.curve.length > 1 ? BOT.curve : [{t:0, v:BOT.start}, {t:1, v}];
-  const t0 = c[0].t, t1 = Math.max(c.at(-1).t, t0 + 1), hi = Math.max(BOT.goal, ...c.map(x => x.v));
+  const t0 = c[0].t, t1 = Math.max(c.at(-1).t, t0 + 1), hi = Math.max(hasGoal ? BOT.goal : BOT.start * 1.5, ...c.map(x => x.v));
   const X = t => (t - t0) / (t1 - t0) * 400, Y = val => 96 - val / hi * 92;
-  $("botChart").innerHTML = `<line x1="0" x2="400" y1="${Y(BOT.goal)}" y2="${Y(BOT.goal)}" stroke="var(--warn)" stroke-dasharray="4 4" opacity=".7"/>
+  $("botChart").innerHTML = (hasGoal ? `<line x1="0" x2="400" y1="${Y(BOT.goal)}" y2="${Y(BOT.goal)}" stroke="var(--warn)" stroke-dasharray="4 4" opacity=".7"/>` : "") + `
     <line x1="0" x2="400" y1="${Y(BOT.start)}" y2="${Y(BOT.start)}" stroke="var(--faint)" stroke-dasharray="3 4"/>
     <path d="${c.map((q, i) => `${i ? "L" : "M"}${X(q.t).toFixed(1)},${Y(q.v).toFixed(1)}`).join("")}" fill="none" stroke="${r >= 0 ? "var(--up)" : "var(--down)"}" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`;
   renderTiles();
@@ -2070,6 +2101,15 @@ document.querySelector(".presets").addEventListener("click", e => { const b = e.
 $("botTiles").addEventListener("click", e => { const b = e.target.closest(".tile"); if(!b) return;
   const c = b.dataset.coin, set = new Set(BOT.cfg.coins); set.has(c) ? set.delete(c) : set.add(c);
   BOT.cfg.coins = COINS.filter(x => set.has(x)); saveBot(); renderTiles(); });
+$("bankResetBox").addEventListener("click", e => {
+  const box = $("bankResetBox"), back = () => box.innerHTML = `<button type="button" class="ghost" id="bankReset">Reset bankroll</button>`;
+  if(e.target.id === "bankReset" && !BOT.running) box.innerHTML = `<span class="money" style="display:inline-flex;width:110px"><span>$</span><input type="number" id="bankAmt" value="50" min="5"></span>
+    <button type="button" class="ghost" id="bankYes">Reset</button> <button type="button" class="ghost" id="bankNo">Cancel</button>`;
+  else if(e.target.id === "bankYes"){ const amt = Math.max(5, +$("bankAmt").value || 50);
+    Object.assign(BOT, {bank:amt, bankStart:amt, bankSince:Date.now(), peak:amt, cash:amt, start:amt, done:null, curve:[]}); saveBot(); back(); renderBot(); renderBotCfg();
+    say(`Bankroll reset to $${amt.toFixed(2)}.`, "sys"); }
+  else if(e.target.id === "bankNo") back();
+});
 $("histClearBox").addEventListener("click", e => {
   const box = $("histClearBox");
   if(e.target.id === "histClear") box.innerHTML = `<button type="button" class="ghost" id="histYes">Yes, clear it</button> <button type="button" class="ghost" id="histNo">Keep it</button>`;
@@ -2080,6 +2120,127 @@ $("histClearBox").addEventListener("click", e => {
 setInterval(() => { for(const c of BOT.cfg.coins) if(c !== S.coin) fetchPrice(c); }, 4000);
 setInterval(botTick, 1000);
 writeCfg(); renderBot(); renderBotLog(); renderHist();
+// ───────── reality check: replay the bot's exact settings 100 times on recent 1-minute prices ─────────
+S.min1 = {};
+function leanAtFactory(coin){
+  const C = coin === S.coin ? S.candles : S.hist[coin];
+  if(!C || !C.length) return () => null;
+  const A = analyzeCached(coin, C, horizon(), S.conf), tf = TF[S.tf].min * 60000;
+  return t => {   // AI lean from the last 15-minute candle that had closed by time t
+    let lo = 0, hi = C.length - 1;
+    while(lo < hi){ const mid = (lo + hi + 1) >> 1; if(C[mid].t + tf <= t) lo = mid; else hi = mid - 1; }
+    const p = A.P[lo]; return p && !isNaN(p.exp) && C[lo].t + tf <= t ? p : null;
+  };
+}
+function simRun(cfg, data, start, T0){
+  const half = halfSpread, goal = cfg.goalX ? start * cfg.goalX : Infinity, end = T0 + cfg.mins * 60000;
+  let bal = start, pos = null, next = T0, trades = 0, wins = 0;
+  const path = [[0, bal]];
+  const close = (t, exitPx, why) => {
+    const pnl = why === "bust" ? -pos.stake : Math.max(-pos.stake, pos.stake * pos.mult * pos.dir * (exitPx / pos.entry - 1) - pos.fee);
+    bal += pos.stake + pnl; trades++; if(pnl > 0) wins++;
+    pos = null; next = t + cfg.gap * 1000; path.push([t - T0, bal]);
+  };
+  for(let t = T0; t < end; t += 60000){
+    if(!pos && t >= next){
+      if(bal < 1) return {final:bal, why:"broke", path, trades, wins};
+      let pick = null;
+      for(const coin of cfg.coins){
+        const k = data[coin].map.get(t + 60000), p = data[coin].lean(t);
+        if(!k || !p) continue;
+        const conf = Math.max(p.exp, 1 - p.exp) * 100, dir = cfg.dir === "up" ? 1 : cfg.dir === "down" ? -1 : (p.exp >= .5 ? 1 : -1);
+        if(cfg.dir === "ai" && conf < cfg.conf) continue;
+        const strength = cfg.dir === "ai" ? Math.abs(p.exp - .5) : dir * (p.exp - .5);
+        if(!pick || strength > pick.strength) pick = {coin, dir, strength, move:p.move || .01, k};
+      }
+      if(pick){
+        const moveHold = pick.move * Math.sqrt(cfg.hold / S.look);
+        const mult = cfg.mult || Math.max(1, Math.min(1000, Math.floor(1 / (3 * moveHold))));
+        const stake = Math.max(1, Math.min(bal, bal * cfg.stake / 100));
+        // order fills on the next minute's opening price, at the ask (UP) or bid (DOWN)
+        const entry = pick.k.o * (1 + pick.dir * half), fee = stake * mult * cfg.fee / 100, d = pick.dir, size = stake * mult;
+        bal -= stake;
+        pos = {coin:pick.coin, dir:d, entry, stake, mult, fee, until:t + 60000 + cfg.hold * 60000,
+          bust:entry * (1 - d / mult),
+          tpPx:cfg.tp ? entry * (1 + d * (stake * cfg.tp / 100 + fee) / size) : null,
+          slPx:cfg.sl < 100 ? entry * (1 + d * (fee - stake * cfg.sl / 100) / size) : null};
+        t += 60000;   // the fill minute is checked below
+      }
+    }
+    if(pos){
+      const k = data[pos.coin].map.get(t); if(!k) continue;
+      const d = pos.dir, hitBust = d > 0 ? k.l <= pos.bust : k.h >= pos.bust;
+      const hitSl = pos.slPx !== null && (d > 0 ? k.l <= pos.slPx : k.h >= pos.slPx);
+      const hitTp = pos.tpPx !== null && (d > 0 ? k.h >= pos.tpPx : k.l <= pos.tpPx);
+      let bad = hitSl ? "sl" : hitBust ? "bust" : null;
+      // a 1-minute candle can't say which came first: when both happen in one minute, it's a coin flip
+      if(bad && hitTp && Math.random() < .5) bad = null;
+      if(bad === "bust") close(t, pos.bust, "bust");
+      else if(bad === "sl") close(t, pos.slPx * (1 - d * half), "sl");
+      else if(hitTp) close(t, pos.tpPx * (1 - d * half), "tp");
+      else if(t + 60000 >= pos.until) close(t + 60000, k.c * (1 - d * half), "time");
+      if(bal >= goal && !pos) return {final:bal, why:"goal", path, trades, wins};
+    }
+  }
+  if(pos){ const k = data[pos.coin].map.get(end - 60000) || {c:pos.entry}; close(end, k.c * (1 - pos.dir * half), "time"); }
+  return {final:bal, why:bal >= goal ? "goal" : bal < 1 ? "broke" : "time", path, trades, wins};
+}
+async function runSim(){
+  const btn = $("simBtn"), cfg = {...BOT.cfg};
+  if(!cfg.coins.length){ $("simNote").textContent = "Switch on at least one coin first."; $("simOut").hidden = false; return; }
+  btn.disabled = true; btn.textContent = "Loading 1-minute prices…";
+  try{
+    const data = {};
+    for(const coin of cfg.coins){
+      const cached = S.min1[coin];
+      if(!cached || Date.now() - cached.at > 10 * 60000){
+        const C = await load(S.src, coin, "1m", 2880, false);
+        S.min1[coin] = {at:Date.now(), C};
+      }
+      const C = S.min1[coin].C.slice(0, -1);   // drop the minute still forming
+      data[coin] = {C, map:new Map(C.map(k => [k.t, k])), lean:leanAtFactory(coin)};
+    }
+    const t0 = Math.max(...cfg.coins.map(c => data[c].C[0].t)), t1 = Math.min(...cfg.coins.map(c => data[c].C.at(-1).t)) - cfg.mins * 60000;
+    if(t1 <= t0) throw new Error("not enough history for this time limit");
+    btn.textContent = "Replaying 100 runs…";
+    await new Promise(r => setTimeout(r, 30));
+    const start = Math.max(1, BOT.bank), runs = [];
+    for(let i = 0; i < 100; i++){ const T0 = t0 + Math.floor(Math.random() * ((t1 - t0) / 60000)) * 60000; runs.push(simRun(cfg, data, start, T0)); }
+    showSim(runs, start, cfg, (t1 + cfg.mins * 60000 - t0) / 3600e3);
+  }catch(e){ $("simOut").hidden = false; $("simNote").textContent = "Couldn't run the replay: " + e.message; }
+  btn.disabled = false; btn.textContent = "Run 100 times again";
+}
+function showSim(runs, start, cfg, hours){
+  $("simOut").hidden = false;
+  const f = runs.map(r => r.final).sort((a, b) => a - b), n = runs.length;
+  const goal = runs.filter(r => r.why === "goal").length, broke = runs.filter(r => r.why === "broke" || r.final < 1).length, up = runs.filter(r => r.final > start).length;
+  const avg = f.reduce((s, v) => s + v, 0) / n, med = f[Math.floor(n / 2)], tr = runs.reduce((s, r) => s + r.trades, 0), w = runs.reduce((s, r) => s + r.wins, 0);
+  const money = v => "$" + (v >= 1000 ? Math.round(v).toLocaleString() : v.toFixed(2));
+  $("simStats").innerHTML = `<div>Hit the goal<b class="${goal ? "win" : ""}">${goal} of ${n}</b><span>${cfg.goalX ? `${cfg.goalX}× = ${money(start * cfg.goalX)}` : "no goal set"}</span></div>
+    <div>Went broke<b class="${broke ? "loss" : ""}">${broke} of ${n}</b><span>${n - goal - broke} ran out of time</span></div>
+    <div>Typical finish (median)<b class="${med >= start ? "win" : "loss"}">${money(med)}</b><span>average ${money(avg)} · ${up} of ${n} ended up</span></div>
+    <div>Best / worst<b><span class="win">${money(f[n - 1])}</span> / <span class="loss">${money(f[0])}</span></b><span>${tr} trades, ${tr ? Math.round(100 * w / tr) : 0}% won</span></div>`;
+  // money paths on a log scale, with start and goal lines
+  const lo = Math.log(Math.max(.5, Math.min(...runs.flatMap(r => r.path.map(p => p[1]))))), goalV = cfg.goalX ? start * cfg.goalX : 0;
+  const hi = Math.log(Math.max(start * 1.5, goalV, ...runs.flatMap(r => r.path.map(p => p[1])))), dur = cfg.mins * 60000;
+  const sample = runs.slice(0, 50), maxLen = Math.max(2, ...sample.map(r => r.path.length));
+  const X = i => i / (maxLen - 1) * 600, Y = v => 155 - (Math.log(Math.max(.5, v)) - lo) / ((hi - lo) || 1) * 150;
+  $("simPaths").innerHTML = `<line x1="0" x2="600" y1="${Y(start)}" y2="${Y(start)}" stroke="var(--faint)" stroke-dasharray="3 4"/>` +
+    (goalV ? `<line x1="0" x2="600" y1="${Y(goalV)}" y2="${Y(goalV)}" stroke="var(--warn)" stroke-dasharray="4 4" opacity=".8"/>` : "") +
+    sample.map(r => { const pts = r.path;
+      return `<path d="${pts.map((p, i) => `${i ? "L" : "M"}${X(i).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("")}" fill="none" stroke="${r.final >= start ? "var(--up)" : "var(--down)"}" stroke-width="1.2" opacity=".45" vector-effect="non-scaling-stroke"/>`; }).join("");
+  // where the runs finished
+  const bins = [["broke", v => v < 1], ["lost some", v => v >= 1 && v < start], ["up to 2×", v => v >= start && v < start * 2],
+    ["2–10×", v => v >= start * 2 && v < start * 10], ["10×+", v => v >= start * 10]];
+  const counts = bins.map(([, fn]) => f.filter(fn).length), mx = Math.max(...counts, 1);
+  $("simHist").innerHTML = bins.map(([lbl], i) => { const h = counts[i] / mx * 120, x = 8 + i * 58;
+    return `<rect x="${x}" y="${135 - h}" width="46" height="${h}" rx="4" fill="${i < 2 ? "var(--down)" : "var(--up)"}" opacity="${.35 + .65 * counts[i] / mx}"/>
+      <text x="${x + 23}" y="${130 - h}" text-anchor="middle" fill="var(--ink)" font-size="12" font-family="JetBrains Mono" font-weight="700">${counts[i]}</text>
+      <text x="${x + 23}" y="152" text-anchor="middle" fill="var(--muted)" font-size="9.5" font-family="JetBrains Mono">${lbl}</text>`; }).join("");
+  $("simNote").textContent = `Each run starts at a random moment in the last ${hours.toFixed(0)} hours of real 1-minute prices, with your bankroll (${money(start)}) and these exact settings: fills on the next minute at the ask/bid, your fee, take profit, stop loss and hold time. The AI's lean comes from the 15-minute brain; live buying/selling and the order book aren't available for the past, so they're left out. When a single minute touched both the take-profit and the bust, the replay flips a coin for which came first.`;
+}
+$("simBtn").addEventListener("click", runSim);
+
 
 loadPaper(); setInterval(loadPaper, 60000);
 window.addEventListener("resize", () => S.A && drawChart(S.candles, S.A, S.viewBars, S.disp));

@@ -253,6 +253,17 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - **History:** every bot trade and run is saved on the device: all-time P&L, win rate, busts, best
   and worst trade, fees paid, a cumulative P&L line, and run and trade tables.
 
+### Round 9: reality check, a bankroll that carries over, and a fairer take-profit
+- **Run 100 times:** replays the bot's exact settings 100 times from random moments in the last ~2
+  days of real 1-minute prices, starting from the current bankroll. It shows how many runs hit the
+  goal, went broke or ran out of time, the median/average/best/worst finish, 50 money paths and a
+  finish histogram. With the ×1000 preset, a test gave 7 goals and 93 broke out of 100.
+- **Bankroll:** money now carries over between runs ("Keep going with $X"). Each run's goal is a
+  multiple of the bankroll (2×, 5×, 10×, 100× or none). "Reset bankroll" starts fresh.
+- **Fix:** take profit and stop loss now close at their trigger price. Before, a gap in the live
+  price could push a win far past the target (e.g. +133% with a +50% target) while losses were capped
+  at the stake, which made the live bot look better than it is.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
