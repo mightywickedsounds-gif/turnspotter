@@ -1,7 +1,7 @@
 name: Paper trade
 on:
   schedule:
-    - cron: "*/15 * * * *"   # GitHub fires this late and unevenly, so each run stays awake for ~50 minutes
+    - cron: "*/15 * * * *"   # GitHub fires this late and unevenly, so each run stays awake for ~5h40m
   workflow_dispatch:
   push:
     branches: [main]
@@ -14,16 +14,16 @@ concurrency:
 jobs:
   trade:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: "20"}
-      - name: Trade every 5 minutes for ~50 minutes
+      - name: Trade every 5 minutes for ~5h40m
         run: |
           git config user.name "turnspotter-bot"
           git config user.email "turnspotter-bot@users.noreply.github.com"
-          end=$((SECONDS + 3000)); saved=-900   # save on the first pass too
+          end=$((SECONDS + 20400)); saved=-900   # save on the first pass too
           while true; do
             out=$(node paper/trader.mjs 2>&1) || true; echo "$out"
             # save when a trade opens or closes, otherwise at most every 15 minutes (keeps the commit history sane)

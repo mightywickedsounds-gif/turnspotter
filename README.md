@@ -417,6 +417,8 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - Same calls, same 10% stakes, same multiplier and bust rules: nothing about how it trades changed, only
   how often it looks, so no new backtest was needed. Entries now come closer to when a call is made,
   which is nearer to how the calls were tested (entry one candle late).
+- Follow-up: the 50-minute jobs left gaps of up to ~50 minutes when GitHub was slow to start the next
+  one, so each job now stays awake for about 5h40m (GitHub's limit is 6 hours).
 
 ## Files
 
