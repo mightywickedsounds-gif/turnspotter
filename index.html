@@ -226,21 +226,20 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 /* the table */
 .council{position:relative;padding:12px;border-radius:14px;border:1px solid var(--edge);background:radial-gradient(120% 90% at 50% 120%,rgba(139,123,255,.16),transparent 60%),rgba(140,155,255,.04);overflow:hidden}
 .cHead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
-.cRow{display:grid;grid-template-columns:52px 1fr 52px;gap:10px;align-items:center;min-height:132px}
-.seat{display:grid;justify-items:center;gap:4px;font:700 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);transition:transform .3s}
-.seat svg{width:44px;height:44px;fill:none;stroke-width:2.2;stroke-linecap:round;border-radius:50%;padding:2px;transition:box-shadow .3s,filter .3s}
-.seat.trader svg{stroke:var(--up)} .seat.critic svg{stroke:var(--accent)}
-.seat.talking{transform:translateY(-3px);color:var(--ink)}
-.seat.trader.talking svg{box-shadow:0 0 0 2px var(--up),0 0 22px var(--up)} .seat.critic.talking svg{box-shadow:0 0 0 2px var(--accent),0 0 22px var(--accent)}
-.cTalk{display:grid;gap:6px;align-content:end;min-width:0}
-.bubble{max-width:92%;font:500 12.5px/1.35 var(--body);padding:7px 10px;border-radius:12px;animation:rise .3s both}
-.bubble.trader{justify-self:start;background:color-mix(in srgb,var(--up) 13%,transparent);border:1px solid color-mix(in srgb,var(--up) 40%,transparent);border-bottom-left-radius:3px}
-.bubble.critic{justify-self:end;background:color-mix(in srgb,var(--accent) 15%,transparent);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-bottom-right-radius:3px}
-.bubble.idle{justify-self:center;color:var(--muted);background:none}
-.bubble.typing{display:flex;gap:4px;padding:10px 12px}
-.bubble.typing i{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.5;animation:blink 1s infinite}
-.bubble.typing i:nth-child(2){animation-delay:.15s} .bubble.typing i:nth-child(3){animation-delay:.3s}
-.cFoot{display:flex;justify-content:center;min-height:30px;margin-top:6px}
+.cStage{position:relative;height:310px;border-radius:12px;overflow:hidden;background:radial-gradient(90% 70% at 50% 80%,rgba(69,212,255,.13),transparent 70%),linear-gradient(#080b18,#04060c)}
+.cStage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cBub{position:absolute;z-index:2;max-width:min(66%,290px);font:500 12.5px/1.35 var(--body);color:var(--ink);padding:6px 10px 8px;border-radius:12px;background:rgba(9,12,26,.84);border:1px solid var(--c);box-shadow:0 0 22px -8px var(--c);opacity:0;pointer-events:none;transition:opacity .25s}
+.cBub::after{content:"";position:absolute;left:var(--tail,50%);bottom:-6px;width:10px;height:10px;background:rgb(9,12,26);border-right:1px solid var(--c);border-bottom:1px solid var(--c);transform:translateX(-50%) rotate(45deg)}
+.cBub b{display:block;font:700 9.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--c);margin-bottom:1px}
+.cBub.show{opacity:1} .cBub.old{opacity:.3} .cBub.gone{opacity:0}
+.cBub[data-who=trader]{--c:#3ee6a2;left:8px;bottom:44px} .cBub[data-who=critic]{--c:#a78bfa;right:8px;bottom:44px} .cBub[data-who=boss]{--c:#ffc24b;left:50%;top:10px;translate:-50% 0}
+.live3d .cBub{left:0;top:0;right:auto;bottom:auto;translate:none}
+.cBub.typing span{display:inline-flex;gap:4px;padding:4px 0}
+.cBub.typing i{width:6px;height:6px;border-radius:50%;background:var(--c);opacity:.6;animation:blink 1s infinite}
+.cBub.typing i:nth-child(2){animation-delay:.15s} .cBub.typing i:nth-child(3){animation-delay:.3s}
+.cStage .stamp{position:absolute;z-index:3;left:50%;bottom:10px;translate:-50% 0;background:rgba(6,8,15,.75);font-size:11.5px}
+.flat .cStage{height:auto;min-height:220px} .flat .cStage canvas{display:none}
+@media (max-width:520px){.cStage{height:270px}.cBub{font-size:12px}}
 .stamp{font:800 13px var(--display);letter-spacing:.14em;text-transform:uppercase;padding:5px 14px;border-radius:8px;border:2px solid transparent;opacity:0;transform:scale(1.6) rotate(-8deg)}
 .stamp.show{opacity:1;transform:scale(1) rotate(-4deg);transition:all .35s cubic-bezier(.2,1.6,.4,1)}
 .stamp.approve{color:var(--up);border-color:var(--up);box-shadow:0 0 18px -4px var(--up)}
@@ -509,14 +508,15 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
           <button type="button" class="place" id="botStartBtn">Start the bot</button>
         </div>
         <div class="botMind">
-          <div class="council" aria-live="polite">
+          <div class="council" id="council" aria-live="polite">
             <div class="cHead"><span class="sub" style="margin:0">The table</span><span class="acctSub" id="cTally"></span></div>
-            <div class="cRow">
-              <div class="seat trader"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="12" width="24" height="20" rx="7"/><circle cx="16" cy="22" r="2.6"/><circle cx="24" cy="22" r="2.6"/><path d="M20 6v6M16 28h8"/></svg><span>Trader</span></div>
-              <div class="cTalk" id="cTalk"><div class="bubble idle">Waiting for the next idea…</div></div>
-              <div class="seat critic"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="12" width="24" height="20" rx="7"/><circle cx="16" cy="22" r="2.6"/><circle cx="24" cy="22" r="4.2"/><path d="M14 17l5 2M30 26l3 6M16 28h6"/></svg><span>Critic</span></div>
+            <div class="cStage" id="cStage"><canvas id="cCanvas" aria-label="Trader, Critic and Boss robots around a table, debating each trade"></canvas>
+              <div class="cBub" data-who="trader"><b>Trader</b><span></span></div>
+              <div class="cBub" data-who="critic"><b>Critic</b><span></span></div>
+              <div class="cBub" data-who="boss"><b>Boss</b><span></span></div>
+              <span class="stamp" id="cVerdict"></span>
             </div>
-            <div class="cFoot"><span class="stamp" id="cVerdict"></span></div>
+          </div>
           </div>
           <details class="moreOpts"><summary>What the bot is thinking</summary><ul class="botLog" id="botLog"></ul></details>
         </div>
@@ -2021,41 +2021,374 @@ function councilRules(p, dir, coin){
   const verdict = obj.some(o => o.veto) || obj.length >= 2 ? "veto" : obj.length ? "half" : "approve";
   return {verdict, obj};
 }
-const COUNCIL = {timer:null};
-function councilScript(pick, dir, rule){
-  const lines = [{who:"trader", text:`${pick.coin} ${dir > 0 ? "▲ UP" : "▼ DOWN"}. ${pick.why.join(", ")}.`}];
-  if(!rule.obj.length){ lines.push({who:"critic", text:"Checked the last candle, the volatility and the lean. Nothing against it."}, {who:"trader", text:"Sending it."}); }
-  else {
-    lines.push({who:"critic", text:rule.obj[0].say});
-    if(rule.obj[1]) lines.push({who:"critic", text:rule.obj[1].say});
-    lines.push({who:"trader", text:rule.verdict === "veto" ? "…fair. I'll sit this one out." : "Fair. Half size, then."});
-  }
-  return lines;
+// ───────── the Boss: runs the numbers on every trade before any money moves ─────────
+// It agrees with the Critic's tested objections, then checks where the run stands: once a run has been up 20%,
+// no single trade may risk more than half of the best profit so far (README round 22 has the replay results).
+const BOSS = {keepFrom:1.2, keep:.5};
+function bossRules(x){   // x: {c, bal, start, peak, stake, mult, rule}
+  const want = x.stake * {approve:1, half:.5, veto:0}[x.rule.verdict];
+  const floor = x.peak >= x.start * BOSS.keepFrom ? x.start + BOSS.keep * (x.peak - x.start) : 0;
+  let stake = want, capped = false;
+  if(floor && want){ const room = (x.bal - floor) / (1 + feeOf(1, x.mult, x.c)); if(room < want){ stake = room; capped = true; } }
+  const verdict = stake < 1 ? "veto" : stake < x.stake * .999 ? "half" : "approve";
+  return {verdict, stake:verdict === "veto" ? 0 : stake, floor, capped};
 }
-function playCouncil(lines, verdict, done){
-  clearTimeout(COUNCIL.timer);
-  const talk = $("cTalk"), stamp = $("cVerdict");
-  talk.innerHTML = ""; stamp.className = "stamp"; stamp.textContent = "";
-  document.querySelectorAll(".seat").forEach(s => s.classList.remove("talking"));
-  let i = 0;
-  const next = () => {
-    if(i >= lines.length){
-      document.querySelectorAll(".seat").forEach(s => s.classList.remove("talking"));
-      stamp.textContent = {approve:"Approved", half:"Half size", veto:"Vetoed"}[verdict];
-      stamp.className = "stamp show " + verdict;
-      return done && done();
-    }
-    const l = lines[i++], seat = document.querySelector(`.seat.${l.who}`);
-    document.querySelectorAll(".seat").forEach(s => s.classList.toggle("talking", s === seat));
-    const b = document.createElement("div"); b.className = `bubble ${l.who} typing`; b.innerHTML = "<i></i><i></i><i></i>";
-    talk.appendChild(b); while(talk.children.length > 3) talk.firstChild.remove();
-    COUNCIL.timer = setTimeout(() => { b.className = `bubble ${l.who}`; b.textContent = l.text; COUNCIL.timer = setTimeout(next, reduceMotion ? 200 : 650); }, reduceMotion ? 50 : 380);
-  };
-  next();
+// The Boss's math, for the table: play the trade out 300 times as a random walk with the coin's normal
+// volatility (nudged by the AI's lean) until it reaches the bank line or the bust line.
+const gauss = () => { let u = 0; while(!u) u = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * Math.random()); };
+function bossMath(c, stake, mult, dir, p, n = 300){
+  const move = (p && p.move) || .01, total = move * Math.sqrt(c.hold / S.look);
+  const up = c.tp ? HOLD_AT * c.tp / 100 / mult : Infinity, dn = c.sl < 100 ? c.sl / 100 / mult : 1 / mult;
+  // steps small next to the bust line; between steps, the chance the price touched a line and came back is added in
+  const steps = Math.round(Math.max(100, Math.min(3000, (3 * total / dn) ** 2))), sd = total / Math.sqrt(steps), v2 = 2 / (sd * sd);
+  const drift = (p ? (p.exp - .5) * 2.5066 : 0) * dir * move * (c.hold / S.look) / steps;   // the lean as a slight push (z ≈ (p − ½)·√(2π))
+  let bank = 0, bust = 0, rest = 0; const paths = [];
+  for(let i = 0; i < n; i++){
+    let x = 0, end = "time"; const pts = i < 48 ? [0] : null;
+    for(let s = 0; s < steps; s++){ const x0 = x; x += drift + sd * gauss(); if(pts && pts.length < 400) pts.push(x);
+      if(x >= up || Math.random() < Math.exp(-v2 * (up - x0) * (up - x))){ end = "bank"; break; }
+      if(x <= -dn || Math.random() < Math.exp(-v2 * (x0 + dn) * (x + dn))){ end = "bust"; break; } }
+    if(end === "bank") bank++; else if(end === "bust") bust++; else rest += Math.max(-1, mult * x);
+    if(pts) paths.push({pts, end});
+  }
+  const fee = feeOf(stake, mult, c), win = c.tp ? stake * HOLD_AT * c.tp / 100 : 0, loss = c.sl < 100 ? stake * c.sl / 100 : stake;
+  const pBank = bank / n, pBust = bust / n, ev = pBank * win - pBust * loss + stake * rest / n - fee;
+  return {pBank, pBust, win, loss, fee, ev, paths, up, dn, span:Math.max(10, ...paths.map(q => q.pts.length))};
+}
+function recentRecord(){
+  const T = BOT.history.filter(t => t.why !== "stopped" && typeof t.pWin === "number").slice(-10);
+  return {n:T.length, won:T.filter(t => t.pnl > 0).length, exp:T.reduce((s, t) => s + t.pWin, 0)};
+}
+const money2 = v => (v < 0 ? "−$" : "$") + Math.abs(v).toFixed(2);
+function councilScript(pick, dir, rule, boss, m, ctx){
+  const D = dir > 0 ? "UP" : "DOWN", L = [];
+  L.push({who:"trader", to:"boss", holo:"pitch", text:`${pick.coin} ${dir > 0 ? "▲" : "▼"} ${D}. ${pick.why.slice(0, 2).join(", ")}. I want ${money2(ctx.stake)} at ×${ctx.mult}.`});
+  if(!rule.obj.length) L.push({who:"critic", to:"trader", text:"I checked the last candle, the volatility and the lean. Nothing against it."});
+  else {
+    L.push({who:"critic", to:"trader", text:rule.obj[0].say});
+    if(rule.obj[1]) L.push({who:"critic", to:"boss", text:rule.obj[1].say});
+    L.push({who:"trader", to:"critic", text:rule.verdict === "veto" ? `The AI still says ${Math.round(Math.max(pick.exp, 1 - pick.exp) * 100)}% ${D}.` : "Fair, but the lean is still on our side."});
+  }
+  L.push({who:"boss", to:"all", holo:"sim", text:`I ran it 300 times. Banks ${Math.round(m.pBank * 100)}% (+${money2(m.win)}), busts ${Math.round(m.pBust * 100)}% (−${money2(m.loss)}). After the ${money2(m.fee)} fee we expect ${m.ev >= 0 ? "+" : ""}${money2(m.ev)} a trade.`});
+  const rec = ctx.rec, runUp = ctx.bal - ctx.start;
+  if(boss.capped) L.push({who:"boss", to:"trader", text:`We've been up ${money2(ctx.peak - ctx.start)} this run. I'm keeping half of that, so ${money2(Math.max(0, boss.stake))} is the most we risk.`});
+  else if(rec.n >= 5) L.push({who:"boss", to:"critic", text:`Last ${rec.n} trades: ${rec.won} won, the math expected ${Math.round(rec.exp)}. ${rec.won + 1 < rec.exp ? "Worse than the math says." : "About what the math says."}${runUp > 0 ? ` We're up ${money2(runUp)} this run.` : ""}`});
+  L.push({who:"boss", to:rule.obj.length ? "critic" : "trader", holo:"verdict", text: boss.verdict === "veto" ? (boss.capped ? "No room left without giving back our profit. We sit this one out." : "The Critic's right. We sit this one out.")
+    : boss.verdict === "half" ? (boss.capped ? `Approved at ${money2(boss.stake)}. Not a cent more.` : "Critic has a point. Half size.") : "Approved. Send it."});
+  return L;
 }
 function renderTally(){
   const t = BOT.tally || {approve:0, half:0, veto:0};
-  $("cTally").textContent = `${t.approve} approved · ${t.half} half size · ${t.veto} vetoed`;
+  $("cTally").textContent = `${t.approve} approved · ${t.half} cut · ${t.veto} vetoed`;
+}
+
+// ───────── the table in 3D: Trader, Critic and Boss argue it out (three.js, loaded when the bot page opens) ─────────
+const TBL = {state:"off", lines:[], timer:null, speaker:null, to:null, holo:{mode:"idle", t:0}, flash:0, flashCol:"#45d4ff", slam:-1, wave:-1, visible:true, last:0};
+const SEATS = {trader:{a:-1.38, col:"#3ee6a2", name:"Trader"}, critic:{a:1.38, col:"#a78bfa", name:"Critic"}, boss:{a:Math.PI, col:"#ffc24b", name:"Boss"}};
+const VERDICT_COL = {approve:"#3ee6a2", half:"#ffc24b", veto:"#ff5d73"};
+function playCouncil(lines, verdict, extra, done){
+  clearTimeout(TBL.timer);
+  TBL.lines = lines; TBL.verdict = verdict; TBL.extra = extra; TBL.state = "talk";
+  const stamp = $("cVerdict"); stamp.className = "stamp"; stamp.textContent = "";
+  document.querySelectorAll(".cBub").forEach(b => b.classList.remove("show", "old", "gone"));
+  let i = 0;
+  const next = () => {
+    if(i >= lines.length){
+      TBL.speaker = TBL.to = null; TBL.state = "done";
+      stamp.textContent = verdict === "half" && extra && extra.capped ? `Cut to ${money2(extra.stake)}` : {approve:"Approved", half:"Half size", veto:"Vetoed"}[verdict];
+      stamp.className = "stamp show " + verdict;
+      return done && done();
+    }
+    const l = lines[i++], bub = document.querySelector(`.cBub[data-who="${l.who}"]`);
+    TBL.speaker = l.who; TBL.to = l.to;
+    if(l.holo) TBL.holo = {mode:l.holo, t:performance.now(), extra};
+    if(l.holo === "verdict"){ TBL.slam = performance.now(); TBL.flashCol = VERDICT_COL[verdict]; }
+    document.querySelectorAll(".cBub").forEach(b => { b.classList.toggle("gone", b.classList.contains("old")); if(b !== bub && b.classList.contains("show")) b.classList.add("old"); });
+    bub.classList.remove("old", "show", "gone"); bub.querySelector("span").innerHTML = "<i></i><i></i><i></i>"; bub.classList.add("show", "typing");
+    TBL.timer = setTimeout(() => { bub.classList.remove("typing"); bub.querySelector("span").textContent = l.text;
+      TBL.timer = setTimeout(next, reduceMotion ? 400 : 650 + Math.min(900, l.text.length * 9)); }, reduceMotion ? 50 : 360);
+  };
+  next();
+  tableInit();
+}
+function councilMs(lines){ return lines.reduce((s, l) => s + 360 + 650 + Math.min(900, l.text.length * 9), 0) + 300; }
+
+const at = (o, x, y, z) => { o.position.set(x, y, z); return o; };
+async function tableInit(){
+  if(TBL.loading) return;
+  TBL.loading = true;
+  let T;
+  try{ T = await import("https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js"); }catch(e){ $("council").classList.add("flat"); return; }
+  const stage = $("cStage"), cv = $("cCanvas");
+  let R;
+  try{ R = new T.WebGLRenderer({canvas:cv, antialias:true, alpha:true, powerPreference:"low-power"}); }catch(e){ $("council").classList.add("flat"); return; }
+  TBL.T = T;
+  R.setPixelRatio(Math.min(1.75, devicePixelRatio || 1)); R.outputColorSpace = T.SRGBColorSpace;
+  R.toneMapping = T.ACESFilmicToneMapping; R.toneMappingExposure = 1.15;
+  const scene = new T.Scene(); scene.fog = new T.Fog(0x06080f, 6, 11);
+  const cam = new T.PerspectiveCamera(34, 2, .1, 40);
+  const AT = new T.Vector3(0, 1.4, -.45);
+  scene.add(new T.HemisphereLight(0xb8c4ff, 0x141830, 1.6));
+  const key = new T.DirectionalLight(0xffffff, 1.6); key.position.set(2, 5, 3); scene.add(key);
+  const under = new T.PointLight(0x45d4ff, 6, 4, 1.6); under.position.set(0, 1.25, 0); scene.add(under);
+
+  // soft glow texture for fake bloom
+  const glowTex = (() => { const c = document.createElement("canvas"); c.width = c.height = 64; const g = c.getContext("2d");
+    const r = g.createRadialGradient(32, 32, 0, 32, 32, 32); r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(.25, "rgba(255,255,255,.45)"); r.addColorStop(1, "rgba(255,255,255,0)");
+    g.fillStyle = r; g.fillRect(0, 0, 64, 64); return new T.CanvasTexture(c); })();
+  const glow = (hex, size) => { const s = new T.Sprite(new T.SpriteMaterial({map:glowTex, color:hex, blending:T.AdditiveBlending, transparent:true, depthWrite:false})); s.scale.set(size, size, 1); return s; };
+
+  // floor: a pool of light under the table
+  { const c = document.createElement("canvas"); c.width = c.height = 256; const g = c.getContext("2d");
+    const r = g.createRadialGradient(128, 128, 0, 128, 128, 128); r.addColorStop(0, "rgba(69,212,255,.22)"); r.addColorStop(.5, "rgba(139,123,255,.08)"); r.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = r; g.fillRect(0, 0, 256, 256);
+    const f = new T.Mesh(new T.CircleGeometry(4.5, 64), new T.MeshBasicMaterial({map:new T.CanvasTexture(c), transparent:true, depthWrite:false}));
+    f.rotation.x = -Math.PI / 2; scene.add(f); }
+
+  // the table: dark glass, a glowing grid and a neon rim
+  const TOP = .82, table = new T.Group(); scene.add(table);
+  const metal = new T.MeshStandardMaterial({color:0x1b2242, metalness:.85, roughness:.3});
+  table.add(at(new T.Mesh(new T.CylinderGeometry(.22, .42, TOP, 32), metal), 0, TOP / 2, 0));
+  table.add(at(new T.Mesh(new T.CylinderGeometry(1.32, 1.28, .07, 72), new T.MeshStandardMaterial({color:0x0a0f22, metalness:.7, roughness:.12})), 0, TOP, 0));
+  { const c = document.createElement("canvas"); c.width = c.height = 512; const g = c.getContext("2d");
+    g.strokeStyle = "rgba(69,212,255,.55)"; g.lineWidth = 1.2;
+    for(let r = 60; r < 256; r += 48){ g.beginPath(); g.arc(256, 256, r, 0, Math.PI * 2); g.stroke(); }
+    for(let a = 0; a < 24; a++){ g.globalAlpha = .45; g.beginPath(); g.moveTo(256 + 60 * Math.cos(a / 24 * Math.PI * 2), 256 + 60 * Math.sin(a / 24 * Math.PI * 2)); g.lineTo(256 + 252 * Math.cos(a / 24 * Math.PI * 2), 256 + 252 * Math.sin(a / 24 * Math.PI * 2)); g.stroke(); }
+    const top = new T.Mesh(new T.CircleGeometry(1.29, 72), new T.MeshBasicMaterial({map:new T.CanvasTexture(c), transparent:true, opacity:.35, blending:T.AdditiveBlending, depthWrite:false}));
+    top.rotation.x = -Math.PI / 2; top.position.y = TOP + .037; table.add(top); TBL.grid = top; }
+  const rimMat = new T.MeshBasicMaterial({color:0x45d4ff});
+  const rim = new T.Mesh(new T.TorusGeometry(1.31, .022, 10, 120), rimMat); rim.rotation.x = Math.PI / 2; rim.position.y = TOP + .035; table.add(rim);
+  const rimGlowMat = new T.MeshBasicMaterial({color:0x45d4ff, transparent:true, opacity:.22, blending:T.AdditiveBlending, depthWrite:false});
+  const rimGlow = new T.Mesh(new T.TorusGeometry(1.31, .075, 10, 120), rimGlowMat); rimGlow.rotation.x = Math.PI / 2; rimGlow.position.y = TOP + .035; table.add(rimGlow);
+  const waveMat = new T.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0, blending:T.AdditiveBlending, depthWrite:false, side:T.DoubleSide});
+  const wave = new T.Mesh(new T.RingGeometry(.92, 1, 72), waveMat); wave.rotation.x = -Math.PI / 2; wave.position.y = TOP + .045; table.add(wave);
+
+  // hologram: a projector, a cone of light and a floating screen the Boss does its math on
+  const proj = new T.Mesh(new T.CylinderGeometry(.13, .16, .04, 32), new T.MeshBasicMaterial({color:0x45d4ff})); proj.position.y = TOP + .055; table.add(proj);
+  const cone = new T.Mesh(new T.CylinderGeometry(.75, .12, .22, 40, 1, true), new T.MeshBasicMaterial({color:0x45d4ff, transparent:true, opacity:.07, blending:T.AdditiveBlending, depthWrite:false, side:T.DoubleSide}));
+  cone.position.y = TOP + .14; table.add(cone);
+  const hc = document.createElement("canvas"); hc.width = 640; hc.height = 400;
+  const holoTex = new T.CanvasTexture(hc); holoTex.colorSpace = T.SRGBColorSpace;
+  const holo = new T.Mesh(new T.PlaneGeometry(1.7, 1.06), new T.MeshBasicMaterial({map:holoTex, transparent:true, blending:T.AdditiveBlending, depthWrite:false, side:T.DoubleSide}));
+  holo.position.set(0, TOP + .38, .15); holo.rotation.x = -.55; scene.add(holo);
+  table.add(at(glow(0x45d4ff, .4), 0, TOP + .06, 0));
+
+  // the three robots
+  const bots = {};
+  for(const [who, s] of Object.entries(SEATS)){
+    const b = makeBot(T, who, s.col, glow), R0 = who === "boss" ? 2.05 : 1.8;
+    b.g.position.set(R0 * Math.sin(s.a), 0, R0 * Math.cos(s.a)); b.g.rotation.y = s.a + Math.PI;
+    scene.add(b.g); bots[who] = b;
+  }
+  const headPos = who => bots[who].head.getWorldPosition(new T.Vector3());
+
+  // the argument beam: an arc of light from whoever is talking to whoever they're talking to
+  const beamMat = new T.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0, blending:T.AdditiveBlending, depthWrite:false});
+  let beam = null, beamKey = "", beamCurve = null; const spark = glow(0xffffff, .28); scene.add(spark);
+  const setBeam = (from, to) => {
+    const k = from + ">" + to; if(k === beamKey) return; beamKey = k;
+    if(beam){ scene.remove(beam); beam.geometry.dispose(); beam = null; } beamCurve = null;
+    if(!from || !to || to === "all") return;
+    const a = headPos(from), b = headPos(to), mid = a.clone().add(b).multiplyScalar(.5); mid.y += .55;
+    beamCurve = new T.QuadraticBezierCurve3(a, mid, b);
+    beam = new T.Mesh(new T.TubeGeometry(beamCurve, 48, .009, 6), beamMat); beamMat.color.set(SEATS[from].col); spark.material.color.set(SEATS[from].col);
+    scene.add(beam);
+  };
+
+  const resize = () => { const w = stage.clientWidth, h = stage.clientHeight; if(!w || !h) return;
+    R.setSize(w, h, false); cam.aspect = w / h;
+    cam.fov = w < 420 ? 46 : 36; cam.updateProjectionMatrix(); };
+  new ResizeObserver(resize).observe(stage); resize();
+  new IntersectionObserver(es => { TBL.visible = es[0].isIntersecting; }).observe(stage);
+
+  const bubs = {}; document.querySelectorAll(".cBub").forEach(b => bubs[b.dataset.who] = b);
+  const tmp = new T.Vector3(), col = new T.Color(), base = new T.Color(0x45d4ff);
+  function frame(ts){
+    const t = ts / 1000, w = stage.clientWidth, h = stage.clientHeight;
+    cam.position.set(Math.sin(t * .13) * (reduceMotion ? 0 : .45), 3.1, 4.9); cam.lookAt(AT);
+    // who looks where: everyone turns to the speaker; the speaker turns to whoever they're answering
+    for(const [who, b] of Object.entries(bots)){
+      const talking = TBL.speaker === who, look = talking ? (TBL.to && TBL.to !== "all" ? TBL.to : null) : TBL.speaker;
+      let yaw = 0;
+      if(look && look !== who){ const me = b.g.position, o = bots[look].g.position;
+        yaw = Math.atan2(o.x - me.x, o.z - me.z) - b.g.rotation.y; yaw = Math.atan2(Math.sin(yaw), Math.cos(yaw)); yaw = Math.max(-1.1, Math.min(1.1, yaw)); }
+      else if(!TBL.speaker) yaw = Math.sin(t * .4 + b.seed) * .25;
+      b.head.rotation.y += (yaw - b.head.rotation.y) * .12;
+      b.head.rotation.z = talking ? Math.sin(t * 7) * .05 : Math.sin(t * .7 + b.seed) * .02;
+      b.head.position.y = b.headY + (talking ? Math.abs(Math.sin(t * 9)) * .025 : Math.sin(t * 1.6 + b.seed) * .008);
+      b.body.position.y = b.bodyY + Math.sin(t * 1.6 + b.seed) * .006;
+      b.mouth.forEach((m, i) => m.scale.y = talking ? .4 + Math.abs(Math.sin(t * 18 + i * 1.7)) * 1.6 : .35);
+      const blink = (t + b.seed) % 4.2 < .12 ? .1 : 1;
+      b.eyes.forEach(e => e.scale.y = blink);
+      b.lightI += ((talking ? 5 : 1.2) - b.lightI) * .1; b.light.intensity = b.lightI;
+      b.tipGlow.material.opacity = talking ? .7 + .3 * Math.sin(t * 12) : .45;
+      if(b.scan) b.scan.position.x = Math.sin(t * (talking ? 4 : 1.4)) * .12;
+    }
+    // the Boss's gavel
+    const gv = bots.boss.gavel;
+    if(TBL.slam > 0){ const k = (ts - TBL.slam) / 1000;
+      gv.rotation.x = k < .25 ? -.7 - k * 4 : k < .38 ? -1.7 + (k - .25) / .13 * 2.35 : k < 1 ? .65 - (k - .38) * 1.6 : -.35;
+      if(k >= .38 && TBL.wave < TBL.slam){ TBL.wave = ts; TBL.flash = 1; }
+      if(k > 1.2) TBL.slam = -1; }
+    else gv.rotation.x = -.35 + Math.sin(t * 1.2) * .03;
+    // table rim colour: flashes the verdict, then settles back to cyan
+    TBL.flash = Math.max(0, TBL.flash - .012);
+    col.set(TBL.flashCol); const mix = TBL.state === "done" ? Math.max(.55, TBL.flash) : TBL.flash;
+    rimMat.color.copy(base).lerp(col, mix); rimGlowMat.color.copy(rimMat.color); rimGlowMat.opacity = .22 + .5 * TBL.flash + .06 * Math.sin(t * 2);
+    under.color.copy(rimMat.color);
+    if(TBL.wave > 0){ const k = (ts - TBL.wave) / 900; wave.scale.setScalar(.15 + k * 1.25); waveMat.opacity = Math.max(0, .9 * (1 - k)); waveMat.color.copy(col); if(k > 1) TBL.wave = -1; }
+    TBL.grid.rotation.z = t * .05;
+    // the beam between whoever is arguing
+    setBeam(TBL.speaker, TBL.to);
+    beamMat.opacity = beam ? .55 + .25 * Math.sin(t * 10) : 0;
+    if(beamCurve){ spark.visible = true; spark.position.copy(beamCurve.getPoint((t * .9) % 1)); } else spark.visible = false;
+    // hologram faces the camera and floats
+    holo.position.y = TOP + .38 + Math.sin(t * 1.3) * .015;
+    drawHolo(hc, ts); holoTex.needsUpdate = true;
+    R.render(scene, cam);
+    // speech bubbles sit over the speakers' heads
+    for(const [who, b] of Object.entries(bubs)){
+      if(!b.classList.contains("show")) continue;
+      tmp.copy(headPos(who)); tmp.y += who === "boss" ? .5 : .42; tmp.project(cam);
+      const x = (tmp.x * .5 + .5) * w, y = (-tmp.y * .5 + .5) * h, bw = b.offsetWidth, bh = b.offsetHeight;
+      const left = Math.max(6, Math.min(w - bw - 6, x - bw * (who === "trader" ? .25 : who === "critic" ? .75 : .5)));
+      b.style.transform = `translate(${left.toFixed(0)}px,${Math.max(6, y - bh).toFixed(0)}px)`;
+      b.style.setProperty("--tail", `${Math.max(14, Math.min(bw - 14, x - left)).toFixed(0)}px`);
+    }
+  }
+  (function loop(ts){
+    requestAnimationFrame(loop);
+    if(!TBL.visible || document.hidden || !stage.clientWidth) return;
+    if(ts - TBL.last < (reduceMotion ? 250 : 33)) return; TBL.last = ts;
+    frame(ts);
+  })(0);
+  $("council").classList.add("live3d");
+}
+
+function makeBot(T, who, hex, glow){
+  const s = who === "boss" ? 1.22 : 1, g = new T.Group(), body = new T.Group(), head = new T.Group(); g.scale.setScalar(s);
+  const shell = new T.MeshStandardMaterial({color:0x5a6796, metalness:.35, roughness:.32});
+  const trim = new T.MeshStandardMaterial({color:hex, metalness:.5, roughness:.3, emissive:hex, emissiveIntensity:.35});
+  const lit = new T.MeshBasicMaterial({color:hex});
+  const visorMat = new T.MeshStandardMaterial({color:0x03050b, metalness:.95, roughness:.06});
+  const add = (parent, geo, mat, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); parent.add(m); return m; };
+  g.add(body); g.add(head);
+  // body and arms resting on the table
+  add(body, new T.CapsuleGeometry(.3, .32, 8, 24), shell, 0, .66, 0);
+  add(body, new T.TorusGeometry(.302, .022, 8, 48), trim, 0, .58, 0, Math.PI / 2);
+  add(body, new T.CircleGeometry(.07, 28), lit, 0, .76, .3);
+  body.add(at(glow(hex, .32), 0, .76, .33));
+  for(const sx of [-1, 1]){
+    add(body, new T.SphereGeometry(.1, 20, 14), shell, sx * .36, .9, 0);
+    if(!(who === "boss" && sx > 0)) { add(body, new T.CapsuleGeometry(.06, .34, 6, 12), shell, sx * .4, .82, .2, -1.15, 0, sx * .18);
+      add(body, new T.SphereGeometry(.075, 16, 12), trim, sx * .44, .74, .42); }
+  }
+  // neck and head
+  add(body, new T.CylinderGeometry(.07, .09, .12, 16), shell, 0, 1.08, 0);
+  head.position.y = 1.32;
+  if(who === "trader"){
+    const sk = add(head, new T.SphereGeometry(.27, 36, 28), shell); sk.scale.set(1.15, .9, 1);
+    add(head, new T.CylinderGeometry(.006, .006, .16, 8), shell, 0, .3, 0);
+    const tip = add(head, new T.SphereGeometry(.035, 16, 12), lit, 0, .4, 0);
+  } else if(who === "critic"){
+    add(head, new T.BoxGeometry(.5, .38, .42), shell);
+    add(head, new T.BoxGeometry(.52, .05, .44), trim, 0, .2, 0);
+    add(head, new T.CylinderGeometry(.006, .006, .2, 8), shell, .12, .29, 0, 0, 0, -.35);
+    add(head, new T.SphereGeometry(.035, 16, 12), lit, .155, .39, 0);
+  } else {
+    add(head, new T.CylinderGeometry(.29, .27, .36, 36), shell);
+    const dome = add(head, new T.SphereGeometry(.29, 36, 18, 0, Math.PI * 2, 0, Math.PI / 2), shell, 0, .18, 0);
+    for(let i = 0; i < 5; i++){ const a = (i - 2) * .5; add(head, new T.ConeGeometry(.045, .14, 12), trim, Math.sin(a) * .2, .44 - Math.abs(i - 2) * .03, Math.cos(a) * .2 - .05, 0, 0, -Math.sin(a) * .5); }
+  }
+  // visor, eyes and a talking mouth
+  const vz = who === "critic" ? .215 : who === "boss" ? .27 : .25;
+  const visor = add(head, new T.CapsuleGeometry(.085, .28, 6, 20), visorMat, 0, .02, vz, 0, 0, Math.PI / 2); visor.scale.z = .35;
+  const eyes = [];
+  let scan = null;
+  if(who === "boss"){ add(head, new T.BoxGeometry(.32, .028, .01), new T.MeshBasicMaterial({color:hex, transparent:true, opacity:.35}), 0, .02, vz + .035);
+    scan = add(head, new T.BoxGeometry(.07, .034, .012), lit, 0, .02, vz + .04); eyes.push(scan); scan.add(glow(hex, .3)); }
+  else for(const ex of [-.09, .09]){
+    const e = add(head, new T.CapsuleGeometry(.024, who === "critic" ? .02 : .04, 4, 10), lit, ex, .025, vz + .035, 0, 0, who === "critic" ? Math.PI / 2 : 0); eyes.push(e);
+    e.add(glow(hex, .22));
+  }
+  if(who === "critic"){ add(head, new T.TorusGeometry(.055, .01, 8, 28), new T.MeshStandardMaterial({color:0xffc24b, metalness:.9, roughness:.2}), .09, .025, vz + .04);
+    add(head, new T.BoxGeometry(.11, .02, .02), trim, -.09, .1, vz + .02, 0, 0, -.3); add(head, new T.BoxGeometry(.11, .02, .02), trim, .09, .11, vz + .02, 0, 0, .15); }
+  const mouth = [];
+  for(let i = 0; i < 5; i++) mouth.push(add(head, new T.BoxGeometry(.022, .04, .01), lit, (i - 2) * .035, -.11, vz - (who === "critic" ? 0 : .02)));
+  // ears
+  for(const sx of [-1, 1]) add(head, new T.CylinderGeometry(.06, .06, .05, 20), trim, sx * (who === "critic" ? .27 : .31), 0, 0, 0, 0, Math.PI / 2);
+  const tipGlow = glow(hex, .5); tipGlow.position.set(who === "critic" ? .155 : 0, who === "boss" ? .3 : who === "critic" ? .39 : .4, who === "boss" ? .1 : 0); head.add(tipGlow);
+  // the Boss: a tall chair and a gavel
+  let gavel = new T.Group();
+  if(who === "boss"){
+    add(g, new T.BoxGeometry(.9, 1.5, .08), shell, 0, .95, -.42);
+    add(g, new T.BoxGeometry(.92, .035, .1), lit, 0, 1.71, -.42);
+    gavel.position.set(.4, .9, .08); g.add(gavel);
+    add(gavel, new T.CapsuleGeometry(.06, .3, 6, 12), shell, 0, 0, .18, Math.PI / 2);
+    add(gavel, new T.CylinderGeometry(.014, .014, .34, 10), new T.MeshStandardMaterial({color:0x6b4a2b, roughness:.6}), 0, .02, .42, Math.PI / 2);
+    add(gavel, new T.CylinderGeometry(.055, .055, .17, 20), trim, 0, .02, .6, 0, 0, Math.PI / 2);
+  }
+  const light = new T.PointLight(hex, 1.2, 2.2, 1.8); light.position.set(0, 1.35, .55); g.add(light);
+  return {g, body, head, eyes, mouth, scan, gavel, light, lightI:1.2, tipGlow, headY:head.position.y, bodyY:0, seed:Math.random() * 10};
+}
+
+// the hologram above the table: the pitch, the Boss's 300 simulated trades, then the verdict
+function drawHolo(cv, ts){
+  const g = cv.getContext("2d"), W = cv.width, H = cv.height, h = TBL.holo, k = (ts - h.t) / 1000, ex = h.extra || {};
+  g.clearRect(0, 0, W, H);
+  const cyan = "#45d4ff";
+  g.textAlign = "center"; g.textBaseline = "middle";
+  // frame corners
+  g.strokeStyle = "rgba(69,212,255,.55)"; g.lineWidth = 3;
+  for(const [x, y, dx, dy] of [[14, 14, 1, 1], [W - 14, 14, -1, 1], [14, H - 14, 1, -1], [W - 14, H - 14, -1, -1]]){ g.beginPath(); g.moveTo(x + dx * 34, y); g.lineTo(x, y); g.lineTo(x, y + dy * 34); g.stroke(); }
+  // scanlines
+  g.fillStyle = "rgba(69,212,255,.05)"; for(let y = (ts / 40) % 6; y < H; y += 6) g.fillRect(0, y, W, 2);
+  if(h.mode === "idle" || !ex.coin){
+    g.strokeStyle = cyan; g.lineWidth = 3; g.setLineDash([14, 10]); g.lineDashOffset = -ts / 30;
+    g.beginPath(); g.arc(W / 2, H / 2 - 20, 70, 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
+    g.fillStyle = cyan; g.font = "800 40px Unbounded, sans-serif"; g.fillText("THE TABLE", W / 2, H / 2 - 20);
+    g.font = "600 28px 'JetBrains Mono', monospace"; g.fillStyle = "rgba(234,240,255,.75)"; g.fillText(BOT.running ? "waiting for the next idea" : "start the bot to open the meeting", W / 2, H - 60);
+    return;
+  }
+  const dirCol = ex.dir > 0 ? "#3ee6a2" : "#ff5d73";
+  if(h.mode === "pitch"){
+    const a = Math.min(1, k * 3);
+    g.globalAlpha = a; g.fillStyle = "#eaf0ff"; g.font = "800 104px Unbounded, sans-serif"; g.fillText(ex.coin, W / 2, H / 2 - 60);
+    g.fillStyle = dirCol; g.font = "800 76px Unbounded, sans-serif"; g.fillText(`${ex.dir > 0 ? "▲ UP" : "▼ DOWN"}`, W / 2, H / 2 + 50 + Math.sin(ts / 200) * 4);
+    g.font = "700 34px 'JetBrains Mono', monospace"; g.fillStyle = "rgba(234,240,255,.8)"; g.fillText(`${money2(ex.want)} × ${ex.mult}`, W / 2, H - 38);
+    g.globalAlpha = 1; return;
+  }
+  const m = ex.m;
+  if(h.mode === "sim" && m){
+    // 48 of the 300 simulated trades fan out from the entry, ending at the bank line or the bust line
+    const x0 = 40, x1 = W - 40, yMid = 140, span = 100, scale = span / Math.max(m.dn, m.up === Infinity ? 0 : m.up);
+    const yUp = yMid - Math.min(span, m.up * scale), yDn = yMid + m.dn * scale, prog = Math.min(1, k / 1.4);
+    g.setLineDash([8, 8]); g.lineWidth = 2;
+    g.strokeStyle = "rgba(62,230,162,.8)"; g.beginPath(); g.moveTo(x0, yUp); g.lineTo(x1, yUp); g.stroke();
+    g.strokeStyle = "rgba(255,93,115,.8)"; g.beginPath(); g.moveTo(x0, yDn); g.lineTo(x1, yDn); g.stroke(); g.setLineDash([]);
+    g.font = "700 24px 'JetBrains Mono', monospace"; g.textAlign = "right"; g.fillStyle = "#3ee6a2"; g.fillText("BANK", x1, yUp - 14); g.fillStyle = "#ff5d73"; g.fillText("BUST", x1, yDn + 16);
+    const n = Math.floor(m.paths.length * prog);
+    g.lineWidth = 1.6;
+    for(let i = 0; i < n; i++){ const p = m.paths[i];
+      g.strokeStyle = p.end === "bank" ? "rgba(62,230,162,.55)" : p.end === "bust" ? "rgba(255,93,115,.75)" : "rgba(139,149,189,.5)";
+      g.beginPath(); p.pts.forEach((v, j) => { const x = x0 + j / m.span * (x1 - x0), y = yMid - Math.max(-m.dn, Math.min(m.up, v)) * scale; j ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke(); }
+    g.textAlign = "center";
+    const a = Math.max(0, Math.min(1, (k - 1.1) * 3)); g.globalAlpha = a;
+    g.font = "700 36px 'JetBrains Mono', monospace";
+    g.fillStyle = "#3ee6a2"; g.fillText(`${Math.round(m.pBank * 100)}% +${money2(m.win)}`, W * .27, H - 82);
+    g.fillStyle = "#ff5d73"; g.fillText(`${Math.round(m.pBust * 100)}% −${money2(m.loss)}`, W * .73, H - 82);
+    g.fillStyle = m.ev >= 0 ? "#3ee6a2" : "#ffc24b"; g.font = "800 34px Unbounded, sans-serif"; g.fillText(`EXPECTED ${m.ev >= 0 ? "+" : ""}${money2(m.ev)}`, W / 2, H - 30);
+    g.globalAlpha = 1; return;
+  }
+  if(h.mode === "verdict"){
+    const v = TBL.verdict, c = VERDICT_COL[v], a = Math.min(1, k * 4), sc = 1 + Math.max(0, .5 - k * 2);
+    g.save(); g.translate(W / 2, H / 2 - 10); g.scale(sc, sc); g.rotate(-.06); g.globalAlpha = a;
+    g.strokeStyle = c; g.lineWidth = 7; g.strokeRect(-230, -62, 460, 124);
+    g.fillStyle = c; g.font = "800 56px Unbounded, sans-serif";
+    g.fillText(v === "approve" ? "APPROVED" : v === "veto" ? "VETOED" : ex.capped ? "CAPPED" : "HALF SIZE", 0, 4); g.restore();
+    g.globalAlpha = a; g.font = "700 32px 'JetBrains Mono', monospace"; g.fillStyle = "rgba(234,240,255,.85)";
+    g.fillText(v === "veto" ? "no trade" : `${ex.coin} ${ex.dir > 0 ? "▲" : "▼"} ${money2(ex.stake)} × ${ex.mult}`, W / 2, H - 38); g.globalAlpha = 1;
+  }
 }
 
 // ───────── live AI bot: trades fake money on screen toward a goal, with the user's own settings ─────────
@@ -2152,7 +2485,7 @@ function botStart(){
   if(feeOf(BOT.start * c.stake / 100, c.mult || 50, c) >= BOT.start * c.stake / 100){ say("The fee would eat the whole stake at this multiplier. Lower the multiplier or the fee first.", "loss"); return; }
   BOT.runId = (BOT.runId || 0) + 1;
   Object.assign(BOT, {running:true, cash:BOT.start, pos:null, pending:null, log:[], curve:[{t:Date.now(), v:BOT.start}],
-    startedAt:Date.now(), endsAt:Date.now() + c.mins * 60000, nextAt:Date.now() + 2000, done:null, protecting:false});
+    startedAt:Date.now(), endsAt:Date.now() + c.mins * 60000, nextAt:Date.now() + 2000, done:null, protecting:false, runPeak:BOT.start});
   say(`Run #${BOT.runId}: $${BOT.start.toFixed(2)} → ${isFinite(BOT.goal) ? "goal $" + BOT.goal.toFixed(0) : "no goal"} in ${c.mins} minutes. Trading ${c.coins.join(", ")}, ${c.dir === "ai" ? "following the AI" : "always " + c.dir.toUpperCase()}, ${c.mult ? "×" + c.mult : "auto multiplier"}, ${c.stake}% per trade, ${feeLabel(c)} fee.`, "sys");
   renderBot();
 }
@@ -2167,6 +2500,7 @@ function botStop(reason){
   saveBot();
   if(reason === "goal"){ say(`🎯 Goal hit: $${v.toFixed(2)}. That's ${(r * 100).toFixed(0)}% up. Quitting while ahead.`, "win"); confetti(); }
   else if(reason === "bust") say(`💥 Out of money at $${v.toFixed(2)}.`, "loss");
+  else if(reason === "locked") say(`🔒 Run over: profit locked in at $${v.toFixed(2)} (${r >= 0 ? "+" : ""}${(r * 100).toFixed(1)}%).`, "win");
   else if(reason === "time") say(`⏱ Time's up. Finished at $${v.toFixed(2)} (${r >= 0 ? "+" : ""}${(r * 100).toFixed(1)}%).`, r >= 0 ? "win" : "loss");
   else say(`Stopped at $${v.toFixed(2)} (${r >= 0 ? "+" : ""}${(r * 100).toFixed(1)}%).`, "sys");
   renderBot(); renderHist();
@@ -2202,19 +2536,24 @@ function botDecide(){
   const stake = Math.max(1, Math.min(BOT.cash * pct / 100, BOT.cash / (1 + feeOf(1, mult, c))));
   if(stake < 1 || BOT.cash < 1){ return botStop("bust"); }
   BOT.noSetup = false;
-  // the table: the Critic reviews the idea before any money moves
-  const rule = councilRules(pick.p, dir, pick.coin), lines = councilScript(pick, dir, rule), talkMs = lines.length * 1030 + 300;
-  BOT.tally = BOT.tally || {approve:0, half:0, veto:0}; BOT.tally[rule.verdict]++;
-  playCouncil(lines, rule.verdict); renderTally();
-  if(rule.verdict === "veto"){
-    say(`🛑 The table vetoed ${pick.coin} ${dir > 0 ? "UP" : "DOWN"}: ${rule.obj.find(o => o.veto) ? rule.obj.find(o => o.veto).say : "two warning signs at once."}`, "sys");
+  // the table: the Critic checks the idea, the Boss runs the numbers and has the final say
+  const peak = Math.max(BOT.runPeak || BOT.start, BOT.cash), rule = councilRules(pick.p, dir, pick.coin);
+  const boss = bossRules({c, bal:BOT.cash, start:BOT.start, peak, stake, mult, rule});
+  const m = bossMath(c, boss.stake || stake, mult, dir, pick.p);
+  const lines = councilScript(pick, dir, rule, boss, m, {stake, mult, bal:BOT.cash, start:BOT.start, peak, rec:recentRecord()}), talkMs = councilMs(lines);
+  BOT.tally = BOT.tally || {approve:0, half:0, veto:0}; BOT.tally[boss.verdict]++;
+  playCouncil(lines, boss.verdict, {coin:pick.coin, dir, want:stake, mult, stake:boss.stake, m, capped:boss.capped}); renderTally();
+  if(boss.verdict === "veto"){
+    if(boss.capped){ say(`🔒 The Boss locked it in: any trade now would risk more than half of the run's best profit. Keeping $${BOT.cash.toFixed(2)}.`, "win");
+      BOT.nextAt = Infinity; setTimeout(() => { if(BOT.running) botStop("locked"); }, talkMs); saveBot(); renderBot(); return; }
+    say(`🛑 The table vetoed ${pick.coin} ${dir > 0 ? "UP" : "DOWN"}: ${(rule.obj.find(o => o.veto) || {say:"two warning signs at once."}).say}`, "sys");
     BOT.nextAt = Date.now() + talkMs + Math.max(3, c.gap) * 1000; saveBot(); renderBot(); return;
   }
-  const finalStake = rule.verdict === "half" ? Math.max(1, stake / 2) : stake;
+  const finalStake = boss.stake;
   BOT.cash -= finalStake;
-  BOT.pending = {coin:pick.coin, dir, stake:finalStake, mult, at:Date.now() + talkMs + 1000};
+  BOT.pending = {coin:pick.coin, dir, stake:finalStake, mult, at:Date.now() + talkMs};
   const strength = Math.abs(pick.score) > .8 ? "Strong read" : Math.abs(pick.score) > .35 ? "Decent read" : "Weak read";
-  say(`${strength} on ${pick.coin}: ${pick.why.join(", ")}. ${rule.verdict === "half" ? "The table cut it to half size: " : "The table approved: "}${dir > 0 ? "▲ UP" : "▼ DOWN"} $${finalStake.toFixed(2)} × ${mult}. Bust is ${(100 / mult).toFixed(2)}% away; a normal ${c.hold} min moves about ${(moveHold * 100).toFixed(2)}%.`, dir > 0 ? "up" : "down");
+  say(`${strength} on ${pick.coin}: ${pick.why.join(", ")}. ${boss.verdict === "half" ? (boss.capped ? "The Boss capped it to protect the run's profit: " : "The table cut it to half size: ") : "The table approved: "}${dir > 0 ? "▲ UP" : "▼ DOWN"} $${finalStake.toFixed(2)} × ${mult}. Bust is ${(100 / mult).toFixed(2)}% away; a normal ${c.hold} min moves about ${(moveHold * 100).toFixed(2)}%.`, dir > 0 ? "up" : "down");
   if(BOT.follow && pick.coin !== S.coin){ S.coin = $("coin").value = pick.coin; save(); loadHistory(); }
   saveBot(); renderBot();
 }
@@ -2233,6 +2572,7 @@ function botClose(exitPx, why){
   BOT.cash += p.stake + gross; BOT.pos = null;
   const rec = {...p, exit:exitPx, pnl, gross, why, closedAt:Date.now()};
   BOT.history.push(rec); if(BOT.history.length > 600) BOT.history.shift();
+  BOT.runPeak = Math.max(BOT.runPeak || BOT.start, BOT.cash);
   BOT.curve.push({t:Date.now(), v:BOT.cash});
   const msg = {bust:"💥 Busted", tp:"💰 Took profit", near:"💰 Took profit right by the target", hold:"💰 Banked a profit it held for 3 seconds", lock:"🔒 Locked in profit before it slipped away", sl:"🛑 Stopped out", time:"⏱ Closed on time", stopped:"Closed"}[why] || "Closed";
   say(`${msg} on ${p.coin} at ${fmtP(exitPx)}: ${pnl >= 0 ? "+" : "−"}$${Math.abs(pnl).toFixed(2)} (${pnl >= 0 ? "+" : "−"}${Math.abs(pnl / p.stake * 100).toFixed(0)}% of the stake, after the fee). Balance $${BOT.cash.toFixed(2)}.`, pnl >= 0 ? "win" : "loss");
@@ -2420,11 +2760,11 @@ function leanAtFactory(coin){
 }
 function simRun(cfg, data, start, T0){
   const half = halfSpread, goal = cfg.goalX ? start * cfg.goalX : Infinity, end = T0 + cfg.mins * 60000;
-  let bal = start, pos = null, next = T0, trades = 0, wins = 0;
+  let bal = start, pos = null, next = T0, trades = 0, wins = 0, peak = start;
   const path = [[0, bal]];
   const close = (t, exitPx, why) => {
     const pnl = (why === "bust" ? -pos.stake : Math.max(-pos.stake, pos.stake * pos.mult * pos.dir * (exitPx / pos.entry - 1))) - pos.fee;
-    bal += pos.stake + pnl; trades++; if(pnl > 0) wins++;
+    bal += pos.stake + pnl; trades++; if(pnl > 0) wins++; peak = Math.max(peak, bal);
     pos = null; next = t + cfg.gap * 1000; path.push([t - T0, bal]);
   };
   for(let t = T0; t < end; t += 60000){
@@ -2442,9 +2782,11 @@ function simRun(cfg, data, start, T0){
       if(pick){
         const moveHold = pick.move * Math.sqrt(cfg.hold / S.look);
         const mult = cfg.mult || Math.max(1, Math.min(1000, Math.floor(1 / (3 * moveHold))));
-        const rule = councilRules(pick.p, pick.dir);   // the same table as the live bot (no live-feed check in the past)
-        if(rule.verdict === "veto"){ next = t + cfg.gap * 1000; continue; }
-        const stake = Math.max(1, Math.min(bal, bal * effStake(cfg, bal, start) / 100 * (rule.verdict === "half" ? .5 : 1)));
+        // the same table as the live bot (no live-feed check in the past)
+        const want = Math.max(1, Math.min(bal * effStake(cfg, bal, start) / 100, bal / (1 + feeOf(1, mult, cfg))));
+        const boss = bossRules({c:cfg, bal, start, peak, stake:want, mult, rule:councilRules(pick.p, pick.dir)});
+        if(boss.verdict === "veto"){ if(boss.capped) return {final:bal, why:"locked", path, trades, wins}; next = t + cfg.gap * 1000; continue; }
+        const stake = boss.stake;
         // order fills on the next minute's opening price; the fee is counted against the trade
         const entry = pick.k.o * (1 + pick.dir * half), fee = feeOf(stake, mult, cfg), d = pick.dir, size = stake * mult;
         bal -= stake;
@@ -2539,6 +2881,7 @@ function showPage(name){
   document.querySelectorAll("#pages button").forEach(b => { if(b.dataset.page === name) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
   try{ localStorage.setItem("turnspotter-page", name); }catch(e){}
   if(name === "practice" && !$("pane-whatif").hidden) runWhatIf();
+  if(name === "bot") tableInit();
   window.scrollTo({top:0, behavior:reduceMotion ? "auto" : "smooth"});
 }
 $("pages").addEventListener("click", e => { const b = e.target.closest("button[data-page]"); if(b) showPage(b.dataset.page); });

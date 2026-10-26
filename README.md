@@ -372,12 +372,46 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - Shorter text for the bot's stats, goal, bankroll, odds line and open trade, and for the practice
   cash line. The bot's thinking log moved into a fold under the table.
 
+### Round 22: the Boss joins the table (3D)
+- The table is now a 3D scene (three.js, loaded only when the AI bot page opens): the Trader, the Critic
+  and a bigger gold Boss sit around a glowing table. Whoever talks lights up and the others turn to look;
+  an arc of light shows who is answering whom; a hologram in the middle shows the pitch, the Boss's
+  simulated trades and the verdict; the Boss bangs a gavel and the table rim flashes the result.
+- The Boss runs the numbers on every trade: it plays the trade out 300 times as a random walk with the
+  coin's normal volatility (nudged by the AI's lean) and says the chance to bank, the chance to bust and
+  what we'd expect to make after the fee. It also reads the last 10 trades against what the math expected.
+  This is shown, not used to decide: at Trench-style settings the expected value is about minus the fee.
+- What the Boss decides: it keeps the Critic's tested objections, and once a run has been up 20% it never
+  lets one trade risk more than half of the best profit so far. When there's no room left, it ends the run
+  and keeps the money ("profit locked in").
+- Replayed on 44 days of real 1-minute prices for all five coins (1,500 random one-hour runs each, same
+  start times for every version, $50 start, 1% fee; `research/data/*_1m.csv.gz`):
+
+  | Style | Version | Average finish | Typical (median) | Runs ending up | Went broke |
+  |---|---|---|---|---|---|
+  | Trench ×1000 | no table | $21.02 | $0.00 | 18.9% | 65.9% |
+  | Trench ×1000 | Critic only (round 20) | $27.22 | $14.31 | 24.7% | 35.0% |
+  | Trench ×1000 | Critic + Boss | $36.92 | $54.09 | 50.9% | 24.0% |
+  | ×1000, take profit 20% | Critic only | $13.72 | $5.37 | 6.1% | 39.9% |
+  | ×1000, take profit 20% | Critic + Boss | $16.06 | $6.72 | 11.8% | 37.6% |
+  | Degen | Critic only | $44.45 | $47.31 | 44.0% | 4.7% |
+  | Degen | Critic + Boss | $45.59 | $50.48 | 50.9% | 4.3% |
+  | Careful | all versions | $49.90 | $50.00 | 40.5% | 0% |
+
+  Keeping 30% or 70% of the best profit instead of half scored about the same; starting the protection
+  at +50% instead of +20% was clearly worse. The 10× goal was almost never reached in an hour by any
+  version.
+- Honest result: the Boss is the biggest improvement the bot has had, because it stops the "double up,
+  then bust it all" pattern. Every style still loses money on average in this replay, and the replay
+  won about 42% of ×1000 trades where the random-walk math says about 71%: one-minute candles on
+  Binance US have deep wicks, so the replay is harsher than live trading on the smoothed mark price.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
 - `tradingview/TrenchAI_Direction.pine`: the indicator (paste into TradingView)
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)
 - `research/experiments*.py`: tests of candidate upgrades; `research/train.py`: trains the Experience brain
-- `research/data/`: 2023–2026 candles for all five coins (refreshed weekly)
+- `research/data/`: 2023–2026 candles for all five coins, plus the last 45 days of 1-minute candles (refreshed weekly)
 - `paper/`: the paper trader and its ledger
 - `research/btc_1h_2011_2017.csv`: the hourly BTC data used for testing
