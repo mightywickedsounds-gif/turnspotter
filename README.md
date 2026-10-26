@@ -264,6 +264,16 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   price could push a win far past the target (e.g. +133% with a +50% target) while losses were capped
   at the stake, which made the live bot look better than it is.
 
+### Round 10: why the bot "wins everything"
+- The bot's risk line now shows the odds for the chosen settings: how far the take-profit and the
+  bust are, the expected win rate, the break-even win rate, the average result per trade and the
+  chance of reaching the goal. With ×1000 and a +50% take-profit, the bot wins about 53% of trades
+  but needs 67% to break even, because a loss costs 2× a win.
+- The replay now settles same-minute take-profit/bust ties with distance-based odds instead of a
+  fair coin.
+- Bot history has a "live vs expected" check: each live trade stores its predicted win chance, so
+  real live wins can be compared with the math over 30+ trades.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

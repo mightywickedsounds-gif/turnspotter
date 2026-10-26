@@ -249,6 +249,7 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .riskLine b{color:var(--ink);font-family:var(--mono)} .riskLine b.loss{color:var(--down);font-family:var(--body)}
 .botHist{margin-top:18px;padding-top:14px;border-top:1px solid var(--edge)}
 .histStats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0}
+.histStats .lve{grid-column:1/-1;border:1px dashed var(--edge-hi)}
 .histStats div{padding:10px 12px;border-radius:10px;background:rgba(140,155,255,.05);font:500 11.5px var(--body);color:var(--muted);display:grid;gap:2px}
 .histStats b{font:700 18px var(--mono);color:var(--ink)}
 .histChart{width:100%;height:80px}
@@ -1891,6 +1892,29 @@ function writeCfg(){
   $("cfgGoalX").value = String(c.goalX); $("botFollow").checked = BOT.follow;
   renderBotCfg();
 }
+// Why it "wins all the time": with a nearby take profit and a far-away bust, price usually touches the
+// take profit first, but each loss costs more than each win. For a random price path, the chance of
+// hitting the take profit first is (distance to loss) / (distance to win + distance to loss).
+function winChance(c, stake, mult){
+  if(!c.tp || !mult) return null;
+  const size = stake * mult, fee = size * c.fee / 100, winD = (stake * c.tp / 100 + fee) / size + 2 * halfSpread;
+  const lossD = Math.max(1e-6, (c.sl < 100 ? (stake * c.sl / 100 - fee) / size : 1 / mult) - halfSpread);
+  return lossD / (winD + lossD);
+}
+function odds(c, stake){
+  if(!c.mult || !c.tp || stake <= 0) return "";
+  const size = stake * c.mult, fee = size * c.fee / 100;
+  const winD = (stake * c.tp / 100 + fee) / size + 2 * halfSpread;
+  const lossAmt = c.sl < 100 ? stake * c.sl / 100 : stake;
+  const lossD = Math.max(1e-6, (c.sl < 100 ? (stake * c.sl / 100 - fee) / size : 1 / c.mult) - halfSpread);
+  const pWin = lossD / (winD + lossD), winAmt = stake * c.tp / 100, breakEven = lossAmt / (winAmt + lossAmt);
+  const ev = pWin * winAmt - (1 - pWin) * lossAmt;
+  const streak = c.goalX ? Math.ceil(Math.log(c.goalX) / Math.log(1 + c.tp / 100 * c.stake / 100)) : 0;
+  return `<br>Take profit is <b>${(winD * 100).toFixed(3)}%</b> away and the ${c.sl < 100 ? "stop" : "bust"} <b>${(lossD * 100).toFixed(3)}%</b> away, so expect to win about <b>${Math.round(pWin * 100)}%</b> of trades.
+    But a loss costs ${(lossAmt / winAmt).toFixed(1)}× a win, so breaking even needs <b>${Math.round(breakEven * 100)}%</b>.
+    Average result per trade: <b class="${ev >= 0 ? "win" : "loss"}">${ev >= 0 ? "+" : "−"}${Math.abs(ev / stake * 100).toFixed(1)}% of the stake</b>.
+    ${streak && c.stake >= 100 ? `Reaching ${c.goalX}× needs about <b>${streak} wins in a row</b>: roughly a <b>${Math.max(.1, 100 * Math.pow(pWin, streak)).toFixed(1)}%</b> chance per run.` : ""}`;
+}
 function renderBotCfg(){
   const c = BOT.cfg;
   $("cfgMultV").textContent = c.mult ? "×" + c.mult : "auto (bust 3× a normal move)";
@@ -1900,7 +1924,8 @@ function renderBotCfg(){
   const m = c.mult || 50, stake = BOT.bank * c.stake / 100, fee = stake * m * c.fee / 100;
   $("botRisk").innerHTML = `${c.mult ? `At ×${c.mult} a <b>${(100 / c.mult).toFixed(2)}%</b> move against you busts the trade.` : "Auto picks the multiplier per coin so the bust is 3× a normal move away."}
     Fee: <b>${c.fee}%</b> of the position${c.mult ? ` = <b>$${fee.toFixed(2)}</b> on a $${stake.toFixed(2)} stake (${(fee / stake * 100).toFixed(0)}% of it)` : ""}.
-    ${c.mult && fee >= stake ? '<b class="loss">The fee alone eats the whole stake: lower the multiplier or the fee.</b>' : ""}`;
+    ${c.mult && fee >= stake ? '<b class="loss">The fee alone eats the whole stake: lower the multiplier or the fee.</b>' : ""}
+    ${odds(c, stake)}`;
   $("botNote").textContent = `Runs while this page is open, with fake money. For any fair gamble, ${c.goalX ? `the chance of reaching ${c.goalX}× before $0 is about 1 in ${c.goalX}` : "the longer you play, the more fees and spread eat into the bankroll"}; fees and spread make it lower. Use "Run 100 times" below to see the odds for your exact settings. Trench doesn't publish its fees, so pick the one you think is right.`;
 }
 
@@ -1970,7 +1995,7 @@ function botFill(){
   const entry = quote(o.coin, o.dir), fee = o.stake * o.mult * BOT.cfg.fee / 100;
   BOT.pending = null;
   BOT.pos = {coin:o.coin, dir:o.dir, entry, stake:o.stake, mult:o.mult, fee, bust:entry * (1 - o.dir / o.mult), openedAt:Date.now(),
-    until:Date.now() + BOT.cfg.hold * 60000, run:BOT.runId};
+    until:Date.now() + BOT.cfg.hold * 60000, run:BOT.runId, pWin:winChance(BOT.cfg, o.stake, o.mult)};
   say(`Filled at ${fmtP(entry)} (the ${o.dir > 0 ? "ask" : "bid"}). Fee $${fee.toFixed(2)}. Bust at ${fmtP(BOT.pos.bust)}.`, "sys");
 }
 function botClose(exitPx, why){
@@ -2060,6 +2085,14 @@ function renderBot(){
     <path d="${c.map((q, i) => `${i ? "L" : "M"}${X(q.t).toFixed(1)},${Y(q.v).toFixed(1)}`).join("")}" fill="none" stroke="${r >= 0 ? "var(--up)" : "var(--down)"}" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`;
   renderTiles();
 }
+// sanity check: do live wins match what the take-profit / bust distances predict?
+function liveVsExpected(H){
+  const T = H.filter(t => typeof t.pWin === "number" && t.why !== "time" && t.why !== "stopped");
+  if(!T.length) return `<div class="lve">Live vs expected<b>—</b><span>New live trades record their predicted win chance; the comparison appears here.</span></div>`;
+  const won = T.filter(t => t.pnl > 0).length, exp = T.reduce((s, t) => s + t.pWin, 0), sd = Math.sqrt(T.reduce((s, t) => s + t.pWin * (1 - t.pWin), 0));
+  const z = sd ? (won - exp) / sd : 0, verdict = T.length < 30 ? "too few trades to judge yet (30+ needed)" : Math.abs(z) < 2 ? "in line with the math: the wins are ordinary luck" : z > 0 ? "well above the math: tell Claude, this points to a bug or a strong trend" : "below the math";
+  return `<div class="lve">Live vs expected<b>${won} won vs ~${exp.toFixed(1)} expected</b><span>${T.length} trades · ${verdict}</span></div>`;
+}
 function renderHist(){
   const H = BOT.history, tot = H.reduce((s, t) => s + t.pnl, 0), w = H.filter(t => t.pnl > 0).length;
   const fees = H.reduce((s, t) => s + (t.fee || 0), 0), best = H.length ? Math.max(...H.map(t => t.pnl)) : 0, worst = H.length ? Math.min(...H.map(t => t.pnl)) : 0;
@@ -2067,7 +2100,8 @@ function renderHist(){
   $("histStats").innerHTML = `<div>All-time profit / loss<b class="${runsNet >= 0 ? "win" : "loss"}">${runsNet >= 0 ? "+" : "−"}$${Math.abs(runsNet).toFixed(2)}</b><span>over ${BOT.runs.length} finished run${BOT.runs.length === 1 ? "" : "s"}</span></div>
     <div>Trades<b>${H.length}</b><span>${H.length ? Math.round(100 * w / H.length) : 0}% won · ${H.filter(t => t.why === "bust").length} busted</span></div>
     <div>Best / worst trade<b>${[best, worst].map(v => `<span class="${v >= 0 ? "win" : "loss"}">${v >= 0 ? "+" : "−"}$${Math.abs(v).toFixed(2)}</span>`).join(" / ")}</b><span>trade P&L total ${tot >= 0 ? "+" : "−"}$${Math.abs(tot).toFixed(2)}</span></div>
-    <div>Fees paid<b>$${fees.toFixed(2)}</b><span>${H.length ? "$" + (fees / H.length).toFixed(2) + " per trade" : "—"}</span></div>`;
+    <div>Fees paid<b>$${fees.toFixed(2)}</b><span>${H.length ? "$" + (fees / H.length).toFixed(2) + " per trade" : "—"}</span></div>
+    ${liveVsExpected(H)}`;
   // cumulative trade P&L, trade by trade
   let cum = 0; const pts = [{i:0, v:0}, ...H.map((t, i) => ({i:i + 1, v:(cum += t.pnl)}))];
   const lo = Math.min(0, ...pts.map(p => p.v)), hi = Math.max(0, ...pts.map(p => p.v)), X = i => i / Math.max(1, pts.length - 1) * 600, Y = v => 76 - (v - lo) / ((hi - lo) || 1) * 72;
@@ -2174,7 +2208,8 @@ function simRun(cfg, data, start, T0){
       const hitTp = pos.tpPx !== null && (d > 0 ? k.h >= pos.tpPx : k.l <= pos.tpPx);
       let bad = hitSl ? "sl" : hitBust ? "bust" : null;
       // a 1-minute candle can't say which came first: when both happen in one minute, it's a coin flip
-      if(bad && hitTp && Math.random() < .5) bad = null;
+      if(bad && hitTp){ const lossPx = bad === "sl" ? pos.slPx : pos.bust, dW = Math.abs(pos.tpPx - k.o), dL = Math.abs(k.o - lossPx);
+        if(Math.random() < dL / ((dW + dL) || 1)) bad = null; }
       if(bad === "bust") close(t, pos.bust, "bust");
       else if(bad === "sl") close(t, pos.slPx * (1 - d * half), "sl");
       else if(hitTp) close(t, pos.tpPx * (1 - d * half), "tp");
@@ -2237,7 +2272,7 @@ function showSim(runs, start, cfg, hours){
     return `<rect x="${x}" y="${135 - h}" width="46" height="${h}" rx="4" fill="${i < 2 ? "var(--down)" : "var(--up)"}" opacity="${.35 + .65 * counts[i] / mx}"/>
       <text x="${x + 23}" y="${130 - h}" text-anchor="middle" fill="var(--ink)" font-size="12" font-family="JetBrains Mono" font-weight="700">${counts[i]}</text>
       <text x="${x + 23}" y="152" text-anchor="middle" fill="var(--muted)" font-size="9.5" font-family="JetBrains Mono">${lbl}</text>`; }).join("");
-  $("simNote").textContent = `Each run starts at a random moment in the last ${hours.toFixed(0)} hours of real 1-minute prices, with your bankroll (${money(start)}) and these exact settings: fills on the next minute at the ask/bid, your fee, take profit, stop loss and hold time. The AI's lean comes from the 15-minute brain; live buying/selling and the order book aren't available for the past, so they're left out. When a single minute touched both the take-profit and the bust, the replay flips a coin for which came first.`;
+  $("simNote").textContent = `Each run starts at a random moment in the last ${hours.toFixed(0)} hours of real 1-minute prices, with your bankroll (${money(start)}) and these exact settings: fills on the next minute at the ask/bid, your fee, take profit, stop loss and hold time. The AI's lean comes from the 15-minute brain; live buying/selling and the order book aren't available for the past, so they're left out. When a single minute touched both the take-profit and the bust, the replay picks which came first with odds based on how far each was from that minute's opening price (the closer one usually wins).`;
 }
 $("simBtn").addEventListener("click", runSim);
 
