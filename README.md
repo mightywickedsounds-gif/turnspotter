@@ -457,7 +457,16 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - **New: the Trend bot** (`paper/trend.mjs`, ledger `paper/trend.json`): $50 of fake money, plain buying,
   no leverage. Once a day after 00:00 UTC it holds each coin above its 50-day average (a fifth of the money
   each) and keeps the rest in cash, paying the live spread plus a 0.1% fee. It runs in the same GitHub
-  loop, and both bots show on the Practice → Bot tab.
+  loop, and both bots show on the 24/7 bots tab.
+
+### Round 25: the site, ordered by importance
+- Four tabs: **Market** (the call, chart, live buys & sells, waiting orders), **AI bot**, **24/7 bots** (new tab:
+  the Trend bot first, then the AI calls bot) and **Practice** (Trade, What if?). Order flow is no longer a
+  separate tab; its two cards sit under the chart.
+- On the Market card the big UP/DOWN call now comes first, above the price-move boxes and the multiplier slider.
+- Removed the old "Stretch checklist" from How the AI works, shortened the 24/7 bot notes, and added the
+  honest bottom line to How the AI works: the calls' edge is smaller than trading costs, so treat them as a lean.
+- Nothing was deleted that a feature needs: settings, history, replay, practice and alerts all still work.
 
 ## Files
 
