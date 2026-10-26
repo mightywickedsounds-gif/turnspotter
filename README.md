@@ -333,6 +333,14 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   auto-follow are under "More options". "What if?" moves strictness and time window under "More options".
 - The Market page's folded sections are now called "Prediction settings" and "How the AI works".
 
+### Round 18: automatic profit protection
+- **Grab profit that's close enough:** if a trade sits within 15% of its take-profit for 2 seconds, the
+  bot closes it instead of waiting for the last few cents. If a trade gets 60% of the way to the target
+  and slips back to 30%, it locks in what's left.
+- **Stop going all-in when ahead:** once a run is up 10%, any stake above 55% is cut to 55% while the
+  run stays in profit; back at the starting balance, the normal stake returns.
+- No new settings. The odds line and the 100-run replay follow the same rules.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
