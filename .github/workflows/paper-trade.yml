@@ -1,7 +1,7 @@
 name: Paper trade
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/15 * * * *"   # GitHub fires this late and unevenly, so each run stays awake for ~50 minutes
   workflow_dispatch:
   push:
     branches: [main]
@@ -10,20 +10,30 @@ permissions:
   contents: write
 concurrency:
   group: paper-trade
-  cancel-in-progress: false
+  cancel-in-progress: false   # the next run waits its turn, so there's almost always one awake
 jobs:
   trade:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: "20"}
-      - run: node paper/trader.mjs
-      - name: Save the ledger
+      - name: Trade every 5 minutes for ~50 minutes
         run: |
           git config user.name "turnspotter-bot"
           git config user.email "turnspotter-bot@users.noreply.github.com"
-          git add paper/ledger.json
-          git commit -m "Paper trading update" || exit 0
-          for i in 1 2 3; do git pull --rebase origin main && git push && break; sleep 5; done
+          end=$((SECONDS + 3000)); saved=0
+          while true; do
+            out=$(node paper/trader.mjs 2>&1) || true; echo "$out"
+            # save when a trade opens or closes, otherwise at most every 15 minutes (keeps the commit history sane)
+            if echo "$out" | grep -q TRADES_CHANGED || [ $((SECONDS - saved)) -ge 900 ] || [ $SECONDS -ge $end ]; then
+              git add paper/ledger.json
+              if git commit -qm "Paper trading update"; then
+                for i in 1 2 3; do git pull -q --rebase origin main && git push -q && break; sleep 5; done
+              fi
+              saved=$SECONDS
+            fi
+            [ $SECONDS -ge $end ] && break
+            sleep 300
+          done

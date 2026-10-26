@@ -195,7 +195,7 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 ### Round 4: other changes
 - **Live motion:** price refreshes every 3 seconds, the chart glides, the glow breathes. The page
   also has load, call-change and chart draw-in animations (off for people who ask for reduced motion).
-- **Paper trading:** `paper/trader.mjs` runs every 15 minutes on GitHub with $50 of fake money.
+- **Paper trading:** `paper/trader.mjs` runs every 5 minutes on GitHub with $50 of fake money.
   It follows the site's calls, Trench-style (assumed rules in the file), and shows the P&L on the site.
 
 ### Round 5: things to do, not just watch
@@ -405,6 +405,15 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   then bust it all" pattern. Every style still loses money on average in this replay, and the replay
   won about 42% of ×1000 trades where the random-walk math says about 71%: one-minute candles on
   Binance US have deep wicks, so the replay is harsher than live trading on the smoothed mark price.
+
+### Round 23: the paper bot checks every 5 minutes
+- GitHub's 15-minute timer actually fired every 40–90 minutes, so the 24/7 paper bot missed calls that
+  came and went between its turns. Each GitHub run now stays awake for about 50 minutes and checks every
+  5 minutes; the next run queues behind it, so there's almost always one awake.
+- It saves the ledger right away when a trade opens or closes, otherwise at most every 15 minutes.
+- Same calls, same 10% stakes, same multiplier and bust rules: nothing about how it trades changed, only
+  how often it looks, so no new backtest was needed. Entries now come closer to when a call is made,
+  which is nearer to how the calls were tested (entry one candle late).
 
 ## Files
 

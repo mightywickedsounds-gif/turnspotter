@@ -1,6 +1,6 @@
 // Turn Spotter paper trader: simulates Trench.io-style up/down trades with fake money,
-// using the exact model code from index.html. Runs every 15 minutes on GitHub's servers
-// (.github/workflows/paper-trade.yml) and saves its ledger to paper/ledger.json.
+// using the exact model code from index.html. Runs every 5 minutes on GitHub's servers
+// (.github/workflows/paper-trade.yml keeps one job awake and calls this in a loop) and saves its ledger to paper/ledger.json.
 //
 // Trench doesn't publish its formulas, so this uses the standard model for these apps:
 //   profit = stake x multiplier x price move (in the called direction), minus a fee
@@ -55,7 +55,7 @@ async function candles(coin){
 
 const L = fs.existsSync(LEDGER) ? JSON.parse(fs.readFileSync(LEDGER, "utf8"))
   : {start: CFG.start, balance: CFG.start, startedAt: Date.now(), trades: [], equity: [], config: CFG};
-const now = Date.now();
+const now = Date.now(), before = L.trades.map(t => t.status).join();
 L.status = {};   // per-coin snapshot: why it is or isn't trading right now
 
 for(const coin of CFG.coins){
@@ -110,5 +110,6 @@ L.equity.push({t: now, value: +(L.balance + openStake).toFixed(2)});
 if(L.equity.length > 3000) L.equity.splice(0, L.equity.length - 3000);
 L.lastRun = now;
 fs.writeFileSync(LEDGER, JSON.stringify(L, null, 1));
+if(L.trades.map(t => t.status).join() !== before) console.log("TRADES_CHANGED");   // the workflow saves right away when a trade opens or closes
 const closed = L.trades.filter(t => t.status !== "open");
 console.log(`balance $${L.balance.toFixed(2)} + $${openStake.toFixed(2)} in open trades | ${closed.length} closed, ${closed.filter(t => t.pnl > 0).length} won`);
