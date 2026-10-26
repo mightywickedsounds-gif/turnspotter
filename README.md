@@ -480,6 +480,31 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - AI bot on phones: the five coin tiles are one compact row; the empty "No trade open" box is hidden; the coin
   strip at the top is hidden on the AI bot and 24/7 bots pages, where it isn't used.
 
+### Round 27: the Instagram reel's breakout strategy (research only)
+- The reel: mark a tight range on TradingView, wait for price to break out, then take a Trench x1000 trade
+  in that direction with a large stake (~$9,000) and cash out within 30-60 seconds at +20-33% of the stake.
+  It shows only the winners (+$2,978 on BTC in 26 s, +$1,640 on gold in 57 s).
+- `research/experiments9.py` tests it on 45 days of 1-minute candles for all five coins: a range is the last
+  30 minutes' high/low when it's under 0.3% wide; enter at the next minute's open; win if price moves the
+  take-profit distance before the 0.1% bust, within 5 minutes. Compared with the same trades in a random
+  direction and with fading the break.
+- Result, before any Trench fee (% of the stake per trade):
+
+  | Take profit | Coin | Breakout | Random direction | Fade |
+  |---|---|---|---|---|
+  | +20% | BTC | −10.0% | −10.3% | −9.3% |
+  | +20% | ETH | −10.5% | −9.9% | −11.9% |
+  | +20% | SOL | −12.6% | −15.4% | −17.7% |
+  | +20% | XRP | −5.5% | −13.7% | −20.4% |
+  | +20% | DOGE | −8.7% | −11.8% | −15.7% |
+  | +33% | BTC | −7.4% | −6.9% | −6.3% |
+  | +33% | XRP | −1.5% | −8.9% | −18.4% |
+
+  Trading the breakout direction is a little better than random on SOL, XRP and DOGE (a small, real
+  follow-through after a break) but no better on BTC or ETH, and every version loses money before fees.
+  At x1000 you must win 75-83% of the time just to break even; these trades won 28-50%.
+- Not added to the site.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
