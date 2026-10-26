@@ -292,6 +292,17 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - The same fee applies to the practice ticket, the "What if?" replay and the 100-run check. The 24/7
   GitHub bot now pays 1% of the stake instead of 0.1% of the position.
 
+### Round 13: a cleaner site, and trades that start at $0.00
+- **Four pages instead of one long scroll:** Market (the call, the % changes, the chart), AI bot,
+  Practice and Order flow (live buys/sells and the order book), switched from a sticky tab bar. The
+  coin strip stays on every page.
+- **Bot tabs:** Run (balance, coin tiles, current trade, bankroll, start button, the bot's thinking),
+  Settings, Reality check and History, instead of one giant card.
+- Less clutter: the Trench lens is one line, shorter notes, a dimmer particle background, no sheen.
+- **Trades start at $0.00:** like real platforms, trades are valued at the market (mark) price and the
+  fee comes out of the balance once when the trade opens. History shows each trade's result after its
+  fee. With ×1000 and a +100% take-profit, each trade is now a 50/50 coin flip minus the fee.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

@@ -25,6 +25,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0;min-height:100%}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);overflow-x:hidden;
   padding-block:max(14px,env(safe-area-inset-top,0px)) 48px;
@@ -153,8 +154,17 @@ ul.check li .v{font:400 11.5px var(--mono);color:var(--muted)}
 @media (max-width:860px){.hero,.cols{grid-template-columns:1fr}}
 @media (max-width:640px){.facts{grid-template-columns:1fr}canvas{height:250px}.brain{grid-template-columns:96px 1fr 44px}.card{padding:15px;border-radius:16px}}
 
+/* pages */
+.pages{position:sticky;top:env(safe-area-inset-top,0px);z-index:12;display:flex;gap:4px;padding:5px;border-radius:14px;background:color-mix(in srgb,var(--bg) 82%,transparent);border:1px solid var(--edge);backdrop-filter:blur(14px);overflow-x:auto;scrollbar-width:none}
+.pages::-webkit-scrollbar{display:none}
+.pages button{flex:1;border:0;background:none;padding:10px 14px;border-radius:10px;font:700 13.5px var(--body);color:var(--muted);white-space:nowrap;backdrop-filter:none}
+.pages button[aria-current="page"]{background:var(--panel-solid);color:var(--ink);box-shadow:0 0 0 1px var(--edge-hi)}
+.bpane{margin-top:6px}
+#botTabs{margin-left:auto}
+#botCard .rowHead{flex-wrap:wrap;gap:10px}
+#botOddsMini{margin:0}
 /* round 6: richer visuals */
-.fx{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.55}
+.fx{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.22}
 h2{display:flex;align-items:center;gap:9px}
 h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px rgba(69,212,255,.5))}
 .moves{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:14px}
@@ -168,7 +178,8 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .mv svg{position:absolute;inset:auto 0 0 0;width:100%;height:46%;opacity:.5;pointer-events:none}
 .mv.u{background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--up) 10%,transparent))} .mv.d{background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--down) 10%,transparent))}
 .mv.u .raw,.mv.u .lev{color:var(--up)} .mv.d .raw,.mv.d .lev{color:var(--down)}
-.lens{display:grid;gap:4px;margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(0,0,0,.18);border:1px dashed var(--edge)}
+.lens{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:12px;margin-top:10px}
+.lens .sl{display:block;white-space:nowrap}
 .lensTxt{margin:0;font:500 13px/1.45 var(--body);color:var(--muted)} .lensTxt b{color:var(--ink);font-family:var(--mono)}
 .seg{display:flex;gap:4px;background:rgba(140,155,255,.07);padding:3px;border-radius:10px}
 .seg button{border:0;background:none;padding:5px 10px;font:700 12px var(--mono);color:var(--muted);border-radius:8px;backdrop-filter:none}
@@ -366,9 +377,6 @@ body:not([data-mood]) .call, body[data-mood="warn"] .call{animation:breathe 3.6s
 .call .arrow{display:inline-block;animation:bob 1.6s ease-in-out infinite}
 body[data-mood="down"] .call .arrow{animation-name:bobDown}
 @keyframes bob{50%{transform:translateY(-8%)}} @keyframes bobDown{50%{transform:translateY(8%)}}
-.main::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-  background:linear-gradient(110deg,transparent 35%,color-mix(in srgb,var(--mood) 10%,transparent) 50%,transparent 65%);background-size:250% 100%;
-  animation:sheen 6s linear infinite}
 @keyframes sheen{from{background-position:150% 0}to{background-position:-100% 0}}
 .cbar{height:4px;border-radius:999px;background:rgba(140,155,255,.12);overflow:hidden;margin-top:8px;max-width:340px}
 .cbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mood),var(--cyan));transition:width 1s linear;box-shadow:0 0 10px var(--mood)}
@@ -422,26 +430,31 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <span class="live off" id="live"><i></i><span id="liveTxt">Connecting</span></span>
   </header>
 
+  <nav class="pages" id="pages" aria-label="Sections">
+    <button type="button" data-page="market" aria-current="page">Market</button><button type="button" data-page="bot">AI bot</button><button type="button" data-page="practice">Practice</button><button type="button" data-page="flow">Order flow</button>
+  </nav>
+
   <nav class="watch" id="watch" aria-label="Pick a coin"></nav>
 
-  <section class="card main">
+  <section class="card main" data-page="market">
     <div class="mainTop">
       <div><div class="coinName" id="coinName">Bitcoin</div><span class="price" id="pNow">—</span> <span class="chg" id="pChg"></span></div>
       <button id="alerts" class="alert" type="button">🔔 Alert me</button>
     </div>
     <div class="moves" id="moves" role="group" aria-label="Price change over different time windows"></div>
     <div class="lens">
-      <label class="sl" for="lens">Trench lens: what these moves look like at your multiplier <b id="lensV">×25</b></label>
+      <label class="sl" for="lens">Show moves at a Trench multiplier of <b id="lensV">×25</b></label>
       <input type="range" id="lens" min="1" max="1000" step="1" value="25" aria-label="Trench multiplier">
-      <p class="lensTxt" id="lensTxt"></p>
+      <p class="lensTxt" id="lensTxt" hidden></p>
     </div>
     <div class="call" id="bigCall">…</div>
     <p class="callSub" id="bigSub">Reading today's market…</p>
     <div id="countLine" hidden><p class="countLine">This call gets checked in <b id="fCount">—</b></p><div class="cbar"><i id="cbarFill"></i></div></div>
   </section>
 
-  <section class="card" id="botCard">
-    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 16h6"/></svg>AI bot · live run</h2>
+  <section class="card" id="botCard" data-page="bot" hidden>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 16h6"/></svg>AI bot</h2>
+      <div class="seg" id="botTabs" role="tablist"><button type="button" data-bpane="run" aria-pressed="true">Run</button><button type="button" data-bpane="settings">Settings</button><button type="button" data-bpane="sim">Reality check</button><button type="button" data-bpane="hist">History</button></div>
       <span class="botClockWrap">⏱ <b id="botClock">60:00</b></span></div>
     <div class="botTop">
       <div><div class="coinName">Bot's fake money</div><span class="price" id="botVal">$50.00</span> <span class="chg" id="botRet"></span>
@@ -450,14 +463,21 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </div>
     <div class="goal"><div class="goalBar"><i id="botGoalFill"></i></div><span class="acctSub" id="botGoalTxt"></span></div>
 
-    <div class="sub">Coins the bot may trade · tap to switch on/off · arrows are the AI's current lean</div>
-    <div class="botTiles" id="botTiles"></div>
+    <div class="bpane" data-bpane="run">
+      <div class="botTiles" id="botTiles"></div>
+      <div class="botGrid">
+        <div class="botCtl">
+          <div id="botPos" class="pos"></div>
+          <div class="bank"><div><span class="eyebrow">Bankroll · carries over between runs</span><b id="bankVal">$50.00</b><span class="acctSub" id="bankSub"></span></div>
+            <span id="bankResetBox"><button type="button" class="ghost" id="bankReset">Reset</button></span></div>
+          <p class="acctSub" id="botOddsMini"></p>
+          <button type="button" class="place" id="botStartBtn">Start the bot</button>
+        </div>
+        <div class="botMind"><div class="sub">What the bot is thinking</div><ul class="botLog" id="botLog"></ul></div>
+      </div>
+    </div>
 
-    <div class="botGrid">
-      <div class="botCtl">
-        <div id="botPos" class="pos"></div>
-        <div class="bank"><div><span class="eyebrow">Bankroll (carries over between runs)</span><b id="bankVal">$50.00</b><span class="acctSub" id="bankSub"></span></div>
-          <span id="bankResetBox"><button type="button" class="ghost" id="bankReset">Reset bankroll</button></span></div>
+    <div class="bpane" data-bpane="settings" hidden>
         <div class="presets"><span class="acctSub">Presets:</span>
           <button type="button" data-preset="x1000">Trench ×1000 gamble</button><button type="button" data-preset="degen">Degen</button><button type="button" data-preset="steady">Steady</button></div>
         <div class="botCfg">
@@ -474,14 +494,11 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
           <label>Time limit<select id="cfgMins"><option value="15">15 min</option><option value="30">30 min</option><option value="60" selected>60 min</option><option value="240">4 hours</option></select></label>
         </div>
         <p class="riskLine" id="botRisk"></p>
-        <label class="auto"><input type="checkbox" id="botFollow" checked> <span>Switch the screen to the coin the bot is trading (its live trades then check busts instantly)</span></label>
-        <button type="button" class="place" id="botStartBtn">Start the bot</button>
+        <label class="auto"><input type="checkbox" id="botFollow" checked> <span>Switch the screen to the coin the bot is trading</span></label>
         <p class="note" id="botNote"></p>
-      </div>
-      <div class="botMind"><div class="sub">What the bot is thinking</div><ul class="botLog" id="botLog"></ul></div>
     </div>
 
-    <div class="simBox">
+    <div class="bpane simBox" data-bpane="sim" hidden>
       <div class="rowHead"><div><div class="sub" style="margin:0">Reality check</div><p class="acctSub" style="margin:2px 0 0">Replay these exact settings 100 times on the last 2 days of real 1-minute prices, starting from your bankroll.</p></div>
         <button type="button" class="place simBtn" id="simBtn">Run 100 times</button></div>
       <div id="simOut" hidden>
@@ -492,7 +509,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
       </div>
     </div>
 
-    <div class="botHist">
+    <div class="bpane botHist" data-bpane="hist" hidden>
       <div class="rowHead"><div class="sub" style="margin:0">Bot history · every run, saved on this device</div><span id="histClearBox"><button type="button" class="ghost" id="histClear">Clear history</button></span></div>
       <div class="histStats" id="histStats"></div>
       <svg class="histChart" id="histChart" viewBox="0 0 600 80" preserveAspectRatio="none" aria-label="All-time bot profit and loss, trade by trade"></svg>
@@ -501,9 +518,10 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
         <div><div class="sub">Trades</div><div class="tablewrap"><table><tbody id="histTrades"></tbody></table></div></div>
       </div>
     </div>
+    </div>
   </section>
 
-  <section class="card">
+  <section class="card" data-page="market">
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 4 8-9"/><path d="M3 21h18"/></svg>Chart</h2>
       <div class="seg" id="range" role="group" aria-label="Chart range"><button type="button" data-bars="24">6h</button><button type="button" data-bars="48">12h</button><button type="button" data-bars="96" aria-pressed="true">24h</button><button type="button" data-bars="288">3d</button></div></div>
     <div class="chartWrap"><canvas id="chart" aria-label="Price chart with the calls the AI made. Hover for details, drag to measure a move."></canvas><span class="pulse" id="pulse" hidden></span></div>
@@ -511,7 +529,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <div class="tablewrap"><table><tbody id="log"></tbody></table></div>
   </section>
 
-  <section class="card" id="flowCard">
+  <section class="card" id="flowCard" data-page="flow" hidden>
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M7 4v16M3 8l4-4 4 4"/><path d="M17 20V4M13 16l4 4 4-4"/></svg>Live buys &amp; sells</h2><span class="record" id="flowMeta">connecting…</span></div>
     <div class="tug">
       <div class="tugLbl"><span class="win">Buyers <b id="tugBuyPct">50%</b></span><span id="tugWho">last minute</span><span class="loss"><b id="tugSellPct">50%</b> Sellers</span></div>
@@ -527,10 +545,10 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
         <ul class="tape" id="tape"><li class="pend">Waiting for trades…</li></ul>
       </div>
     </div>
-    <p class="note">Every real trade on the exchange, live. Green = someone bought at the asking price (pushing up); red = someone sold into the bids (pushing down). 🐋 marks unusually big trades.</p>
+    <p class="note">Green = someone bought (pushing price up) · red = someone sold (pushing it down) · 🐋 = unusually big trade.</p>
   </section>
 
-  <section class="card" id="bookCard">
+  <section class="card" id="bookCard" data-page="flow" hidden>
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M3 20V12h4v8M10 20V6h4v14M17 20v-9h4v9"/></svg>Waiting orders</h2>
       <div class="seg" id="bookRange" role="group" aria-label="How far from the price"><button type="button" data-r="0.005">±0.5%</button><button type="button" data-r="0.01" aria-pressed="true">±1%</button><button type="button" data-r="0.02">±2%</button></div></div>
     <div class="bookStats">
@@ -539,10 +557,10 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
       <div class="r"><span class="eyebrow">Sellers waiting</span><b class="loss" id="bkAsk">—</b><span class="acctSub" id="bkAskWall"></span></div>
     </div>
     <div class="chartWrap"><canvas id="bookChart" aria-label="Order book depth: buy orders left, sell orders right"></canvas></div>
-    <p class="note">The order book: buy orders (green, left) and sell orders (red, right) that people have placed but nobody has filled yet. A tall step is a "wall" that can slow price down. Walls can also vanish in a second. <span id="bookMeta"></span></p>
+    <p class="note">Orders waiting to be filled: buyers below the price (green), sellers above (red). Tall steps are "walls". <span id="bookMeta"></span></p>
   </section>
 
-  <section class="card" id="practice">
+  <section class="card" id="practice" data-page="practice" hidden>
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M16 12.5h2M3 9h18"/></svg>Practice trading</h2>
       <div class="tabs" role="tablist">
         <button type="button" role="tab" class="tab" data-tab="trade" aria-selected="true">Trade</button>
@@ -613,7 +631,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   </section>
   <div class="toasts" id="toasts" aria-live="polite"></div>
 
-  <details class="card fold" id="settings">
+  <details class="card fold" id="settings" data-page="market">
     <summary>Settings</summary>
     <div class="controls">
       <label>How far ahead<select id="look">
@@ -628,7 +646,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <p class="note">Set "How far ahead" to how long your Trench trade stays open.</p>
   </details>
 
-  <details class="card fold" id="more">
+  <details class="card fold" id="more" data-page="market">
     <summary>Details</summary>
     <div class="moreGrid">
       <div>
@@ -1418,15 +1436,18 @@ const PR = (() => { try{ const d = JSON.parse(localStorage.getItem(PR_KEY)); if(
 const TK = {dir:1, mins:60, touched:false};
 function savePractice(){ try{ localStorage.setItem(PR_KEY, JSON.stringify(PR)); }catch(e){} }
 function priceOf(coin){ return S.prices[coin]; }
-function pnlOf(p, price){ return Math.max(-p.stake, p.stake * p.mult * p.dir * (price / p.entry - 1) - p.fee); }
+// Like real platforms: a trade is valued at the market (mark) price, so its P&L starts at $0.00; the fee comes
+// out of the balance once, when the trade opens, and the history shows each trade's result after its fee.
+function pnlOf(p, price){ return Math.max(-p.stake, p.stake * p.mult * p.dir * (price / p.entry - 1)); }
 function equityNow(){ return PR.cash + PR.positions.reduce((s, p) => s + p.stake + (priceOf(p.coin) ? pnlOf(p, priceOf(p.coin)) : 0), 0); }
 function toast(msg, cls){ const el = document.createElement("div"); el.className = "toast " + (cls || ""); el.textContent = msg;
   $("toasts").appendChild(el); setTimeout(() => el.remove(), 5000); }
 function openPosition(coin, dir, stake, mult, mins, auto){
   const price = priceOf(coin);
   stake = Math.round(stake * 100) / 100;
-  if(!(price > 0) || stake < 1 || stake > PR.cash + 1e-9) return false;
-  PR.cash -= stake;
+  const fee = feeOf(stake, mult);
+  if(!(price > 0) || stake < 1 || stake + fee > PR.cash + 1e-9) return false;
+  PR.cash -= stake + fee;
   PR.positions.push({id:Date.now() + coin, coin, dir, entry:price, stake, mult, fee:feeOf(stake, mult),
     bust:price * (1 - dir / mult), openedAt:Date.now(), expiresAt:Date.now() + mins * 60000, auto:!!auto});
   savePractice(); renderPractice();
@@ -1435,9 +1456,10 @@ function openPosition(coin, dir, stake, mult, mins, auto){
 }
 function closePosition(p, price, status){
   p.exit = price; p.closedAt = Date.now();
-  p.pnl = status === "busted" ? -p.stake : pnlOf(p, price);
+  const gross = status === "busted" ? -p.stake : pnlOf(p, price);
+  PR.cash += p.stake + gross;
+  p.pnl = gross - (p.fee || 0);   // the trade's result after its fee
   p.status = status || (p.pnl > 0 ? "won" : "lost");
-  PR.cash += p.stake + p.pnl;
   PR.positions = PR.positions.filter(x => x !== p);
   PR.history.push(p); if(PR.history.length > 200) PR.history.shift();
   savePractice(); renderPractice();
@@ -1497,11 +1519,11 @@ function renderTicket(){
   const stake = +st.value, mult = +$("tkMult").value;
   $("tkStakeV").textContent = "$" + stake.toFixed(2); $("tkMultV").textContent = "×" + mult;
   const bustPct = 100 / mult, move = p && !isNaN(p.move) ? p.move * Math.sqrt(TK.mins / S.look) * 100 : NaN;
-  const ratio = bustPct / move, fee = feeOf(stake, mult), win1 = stake * mult * .01 - fee;
+  const ratio = bustPct / move, fee = feeOf(stake, mult), win1 = stake * mult * .01;
   const call = p ? (p.modelUp ? "UP" : p.modelDown ? "DOWN" : "WAIT") : "…";
   $("tkRisk").innerHTML = `Busts if price moves <b>${bustPct.toFixed(2)}%</b> against you (at ${price ? fmtP(price * (1 - TK.dir / mult)) : "—"}).
     ${isNaN(move) ? "" : `A normal ${TK.mins === 60 ? "hour" : "4 hours"} moves about <b>±${move.toFixed(2)}%</b>, so this is <b class="${ratio < 1.5 ? "danger" : ratio < 3 ? "" : "ok"}">${ratio.toFixed(1)}×</b> a normal move${ratio < 1.5 ? ": likely to bust from noise alone" : ratio < 3 ? ": risky" : ": comfortable"}.`}
-    <br>A 1% move your way pays <b>+$${win1.toFixed(2)}</b>. Fee: $${fee.toFixed(2)} (${feeLabel()}, set in the bot's fee box). The AI says <b>${call}</b> right now.`;
+    <br>A 1% move your way pays <b>+$${win1.toFixed(2)}</b>. Fee: <b>$${fee.toFixed(2)}</b>, taken when you open (${feeLabel()}). The AI says <b>${call}</b> right now.`;
   const btn = $("tkPlace");
   btn.textContent = `Place ${TK.dir > 0 ? "▲ UP" : "▼ DOWN"} · $${stake.toFixed(2)} × ${mult}`;
   btn.className = "place" + (TK.dir < 0 ? " down" : "");
@@ -1854,7 +1876,7 @@ if(!reduceMotion){
 }
 
 // ───────── live AI bot: trades fake money on screen toward a goal, with the user's own settings ─────────
-// Realism: orders fill 1 second after the decision, at the ask when buying and the bid when selling
+// Realism: orders fill 1 second after the decision at the market price, the fee is taken when the trade opens
 // (from the live order book when it's fresh, otherwise an assumed 0.01% half-spread), a fee is
 // charged on the position size, and bust / stop / take-profit are checked on every live trade.
 const BOT_KEY = "turnspotter-livebot2";
@@ -1878,17 +1900,12 @@ if(BOT.cfg.goalX === undefined) BOT.cfg.goalX = 10;
 S.lastP = S.lastP || {};
 function saveBot(){ try{ localStorage.setItem(BOT_KEY, JSON.stringify(BOT)); }catch(e){} }
 function say(text, cls){ BOT.log.push({t:Date.now(), text, cls}); if(BOT.log.length > 100) BOT.log.shift(); saveBot(); renderBotLog(); }
-const halfSpread = .0001;
-// the price you'd actually get: buying pays the ask, selling gets the bid
-function quote(coin, side){
-  if(coin === S.coin && BOOK.coin === coin && BOOK.bids.length && Date.now() - BOOK.at < 15000){
-    const mid = priceOf(coin), sp = (BOOK.asks[0][0] - BOOK.bids[0][0]) / 2 / BOOK.mid;
-    return mid * (1 + side * Math.max(sp, 1e-6));
-  }
-  return priceOf(coin) * (1 + side * halfSpread);
-}
-const botPnl = (p, exitPx) => Math.max(-p.stake, p.stake * p.mult * p.dir * (exitPx / p.entry - 1) - p.fee);
-const markOf = p => quote(p.coin, -p.dir);   // closing a long sells at the bid; closing a short buys at the ask
+// Trades open and close at the market (mark) price, like Trench-style apps, so P&L starts at $0.00.
+// The fee is taken from the balance once, when the trade opens.
+const halfSpread = 0;
+function quote(coin){ return priceOf(coin); }
+const botPnl = (p, exitPx) => Math.max(-p.stake, p.stake * p.mult * p.dir * (exitPx / p.entry - 1));
+const markOf = p => quote(p.coin);
 function botValue(){ const p = BOT.pos; return BOT.cash + (BOT.pending ? BOT.pending.stake : 0) + (p ? p.stake + (priceOf(p.coin) ? botPnl(p, markOf(p)) : 0) : 0); }
 function readCfg(){
   const c = BOT.cfg;
@@ -1909,26 +1926,24 @@ function writeCfg(){
 // hitting the take profit first is (distance to loss) / (distance to win + distance to loss).
 function winChance(c, stake, mult){
   if(!c.tp || !mult) return null;
-  const size = stake * mult, fee = feeOf(stake, mult, c), winD = (stake * c.tp / 100 + fee) / size + 2 * halfSpread;
-  const lossD = Math.max(1e-6, (c.sl < 100 ? (stake * c.sl / 100 - fee) / size : 1 / mult) - halfSpread);
+  const winD = c.tp / 100 / mult, lossD = c.sl < 100 ? c.sl / 100 / mult : 1 / mult;
   return lossD / (winD + lossD);
 }
 function odds(c, stake){
   if(!c.mult || !c.tp || stake <= 0) return "";
-  const size = stake * c.mult, fee = feeOf(stake, c.mult, c);
-  const winD = (stake * c.tp / 100 + fee) / size + 2 * halfSpread;
-  const lossAmt = c.sl < 100 ? stake * c.sl / 100 : stake;
-  const lossD = Math.max(1e-6, (c.sl < 100 ? (stake * c.sl / 100 - fee) / size : 1 / c.mult) - halfSpread);
-  const pWin = lossD / (winD + lossD), winAmt = stake * c.tp / 100, breakEven = lossAmt / (winAmt + lossAmt);
-  const ev = pWin * winAmt - (1 - pWin) * lossAmt;
+  const fee = feeOf(stake, c.mult, c), winD = c.tp / 100 / c.mult;
+  const lossAmt = c.sl < 100 ? stake * c.sl / 100 : stake, lossD = c.sl < 100 ? c.sl / 100 / c.mult : 1 / c.mult;
+  const pWin = lossD / (winD + lossD), winAmt = stake * c.tp / 100, breakEven = (lossAmt + fee) / (winAmt + lossAmt);
+  const ev = pWin * winAmt - (1 - pWin) * lossAmt - fee;
   const streak = c.goalX ? Math.ceil(Math.log(c.goalX) / Math.log(1 + c.tp / 100 * c.stake / 100)) : 0;
   return `<br>Take profit is <b>${(winD * 100).toFixed(3)}%</b> away and the ${c.sl < 100 ? "stop" : "bust"} <b>${(lossD * 100).toFixed(3)}%</b> away, so expect to win about <b>${Math.round(pWin * 100)}%</b> of trades.
-    But a loss costs ${(lossAmt / winAmt).toFixed(1)}× a win, so breaking even needs <b>${Math.round(breakEven * 100)}%</b>.
+    A loss costs ${(lossAmt / winAmt).toFixed(1)}× a win and every trade pays the $${fee.toFixed(2)} fee, so breaking even needs <b>${Math.round(breakEven * 100)}%</b>.
     Average result per trade: <b class="${ev >= 0 ? "win" : "loss"}">${ev >= 0 ? "+" : "−"}${Math.abs(ev / stake * 100).toFixed(1)}% of the stake</b>.
     ${streak && c.stake >= 100 ? `Reaching ${c.goalX}× needs about <b>${streak} wins in a row</b>: roughly a <b>${Math.max(.1, 100 * Math.pow(pWin, streak)).toFixed(1)}%</b> chance per run.` : ""}`;
 }
 function renderBotCfg(){
-  const c = BOT.cfg;
+  const c = BOT.cfg, pw = winChance(c, 1, c.mult);
+  $("botOddsMini").innerHTML = `${c.dir === "ai" ? "Follows the AI" : "Always " + c.dir.toUpperCase()} · ${c.mult ? "×" + c.mult : "auto multiplier"} · ${c.stake}% stake · take profit ${c.tp ? "+" + c.tp + "%" : "off"} · fee ${feeLabel(c)}${pw ? ` · wins about ${Math.round(pw * 100)}% of trades` : ""}. Change it under <b>Settings</b>.`;
   $("cfgMultV").textContent = c.mult ? "×" + c.mult : "auto (bust 3× a normal move)";
   $("cfgStakeV").textContent = c.stake + "%"; $("cfgTpV").textContent = c.tp ? `+${c.tp}% of stake` : "off";
   $("cfgSlV").textContent = c.sl >= 100 ? "bust only" : `−${c.sl}% of stake`; $("cfgHoldV").textContent = c.hold + " min";
@@ -2005,21 +2020,21 @@ function botDecide(){
 function botFill(){
   const o = BOT.pending; if(!o || Date.now() < o.at || !priceOf(o.coin)) return;
   if(Date.now() - (S.priceT[o.coin] || 0) > 5000){ fetchPrice(o.coin); return; }   // never fill on a stale price
-  const entry = quote(o.coin, o.dir), fee = feeOf(o.stake, o.mult);
-  BOT.pending = null;
+  const entry = quote(o.coin), fee = Math.min(BOT.cash, feeOf(o.stake, o.mult));
+  BOT.pending = null; BOT.cash -= fee;   // fee comes out of the balance now; the trade itself starts at $0.00
   BOT.pos = {coin:o.coin, dir:o.dir, entry, stake:o.stake, mult:o.mult, fee, bust:entry * (1 - o.dir / o.mult), openedAt:Date.now(),
     until:Date.now() + BOT.cfg.hold * 60000, run:BOT.runId, pWin:winChance(BOT.cfg, o.stake, o.mult)};
-  say(`Filled at ${fmtP(entry)} (the ${o.dir > 0 ? "ask" : "bid"}). Fee $${fee.toFixed(2)}. Bust at ${fmtP(BOT.pos.bust)}.`, "sys");
+  say(`Filled at ${fmtP(entry)}. Fee $${fee.toFixed(2)} paid. Bust at ${fmtP(BOT.pos.bust)}.`, "sys");
 }
 function botClose(exitPx, why){
   const p = BOT.pos; if(!p) return;
-  const pnl = why === "bust" ? -p.stake : botPnl(p, exitPx);
-  BOT.cash += p.stake + pnl; BOT.pos = null;
-  const rec = {...p, exit:exitPx, pnl, why, closedAt:Date.now()};
+  const gross = why === "bust" ? -p.stake : botPnl(p, exitPx), pnl = gross - p.fee;   // pnl = result after the fee
+  BOT.cash += p.stake + gross; BOT.pos = null;
+  const rec = {...p, exit:exitPx, pnl, gross, why, closedAt:Date.now()};
   BOT.history.push(rec); if(BOT.history.length > 600) BOT.history.shift();
   BOT.curve.push({t:Date.now(), v:BOT.cash});
   const msg = {bust:"💥 Busted", tp:"💰 Took profit", sl:"🛑 Stopped out", time:"⏱ Closed on time", stopped:"Closed"}[why] || "Closed";
-  say(`${msg} on ${p.coin} at ${fmtP(exitPx)}: ${pnl >= 0 ? "+" : "−"}$${Math.abs(pnl).toFixed(2)} (${pnl >= 0 ? "+" : "−"}${Math.abs(pnl / p.stake * 100).toFixed(0)}% of the stake). Balance $${BOT.cash.toFixed(2)}.`, pnl >= 0 ? "win" : "loss");
+  say(`${msg} on ${p.coin} at ${fmtP(exitPx)}: ${pnl >= 0 ? "+" : "−"}$${Math.abs(pnl).toFixed(2)} (${pnl >= 0 ? "+" : "−"}${Math.abs(pnl / p.stake * 100).toFixed(0)}% of the stake, after the fee). Balance $${BOT.cash.toFixed(2)}.`, pnl >= 0 ? "win" : "loss");
   if(why === "bust"){ $("botCard").classList.add("shake"); setTimeout(() => $("botCard").classList.remove("shake"), 600); }
   BOT.nextAt = Date.now() + BOT.cfg.gap * 1000;
   saveBot(); renderHist();
@@ -2028,11 +2043,11 @@ function botClose(exitPx, why){
 function botCheck(coin, price){
   const p = BOT.pos; if(!BOT.running || !p || p.coin !== coin) return;
   if(p.dir > 0 ? price <= p.bust : price >= p.bust) return botClose(p.bust, "bust");
-  const pnl = botPnl(p, markOf(p)), c = BOT.cfg, size = p.stake * p.mult;
+  const pnl = botPnl(p, markOf(p)), c = BOT.cfg;
   // take profit and stop loss close AT their trigger price, like real orders, not at whatever price came
   // through after a gap; otherwise wins overshoot (losses are capped at the stake, so that flatters the bot)
-  if(c.tp && pnl >= p.stake * c.tp / 100) botClose(p.entry * (1 + p.dir * (p.stake * c.tp / 100 + p.fee) / size), "tp");
-  else if(c.sl < 100 && pnl <= -p.stake * c.sl / 100) botClose(p.entry * (1 + p.dir * (p.fee - p.stake * c.sl / 100) / size), "sl");
+  if(c.tp && pnl >= p.stake * c.tp / 100) botClose(p.entry * (1 + p.dir * c.tp / 100 / p.mult), "tp");
+  else if(c.sl < 100 && pnl <= -p.stake * c.sl / 100) botClose(p.entry * (1 - p.dir * c.sl / 100 / p.mult), "sl");
 }
 function botTick(){
   if(!BOT.running) return renderBot();
@@ -2088,7 +2103,7 @@ function renderBot(){
     el.innerHTML = `<div class="posTop"><span><b>${p.coin}</b> <span class="pill ${p.dir > 0 ? "up" : "down"}">${p.dir > 0 ? "▲ UP" : "▼ DOWN"}</span> <span class="pill" style="color:var(--muted)">$${p.stake.toFixed(2)} × ${p.mult}</span></span>
       <span class="pnl ${pnl >= 0 ? "win" : "loss"}">${pnl >= 0 ? "+" : "−"}$${Math.abs(pnl).toFixed(2)}</span></div>
       <div class="tpBar"><i class="lossSide" style="width:${(Math.min(1, Math.max(0, -pnl) / p.stake) * 50).toFixed(1)}%"></i><i class="winSide" style="width:${(Math.min(1, Math.max(0, pnl) / tpAt) * 50).toFixed(1)}%"></i><span>bust</span><span>entry</span><span>${BOT.cfg.tp ? "take profit" : "+100%"}</span></div>
-      <div class="posMeta"><span>in at ${fmtP(p.entry)}</span><span>exit now ${fmtP(mark)}</span><span>bust ${fmtP(p.bust)}</span><span>fee $${p.fee.toFixed(2)}</span><span>${toBust < .35 ? "⚠ close to busting" : "safe for now"}</span><span>${Math.max(0, Math.ceil((p.until - Date.now()) / 1000))}s max</span></div>`; }
+      <div class="posMeta"><span>in at ${fmtP(p.entry)}</span><span>now ${fmtP(mark)}</span><span>bust ${fmtP(p.bust)}</span><span>fee $${p.fee.toFixed(2)} paid</span><span>${toBust < .35 ? "⚠ close to busting" : "safe for now"}</span><span>${Math.max(0, Math.ceil((p.until - Date.now()) / 1000))}s max</span></div>`; }
   else el.innerHTML = `<p class="pend">${BOT.pending ? `Sending ${BOT.pending.coin} ${BOT.pending.dir > 0 ? "UP" : "DOWN"} order…` : BOT.running ? `Between trades, next look in ${Math.max(0, Math.ceil((BOT.nextAt - Date.now()) / 1000))}s…` : "No trade open."}</p>`;
   const c = BOT.curve.length > 1 ? BOT.curve : [{t:0, v:BOT.start}, {t:1, v}];
   const t0 = c[0].t, t1 = Math.max(c.at(-1).t, t0 + 1), hi = Math.max(hasGoal ? BOT.goal : BOT.start * 1.5, ...c.map(x => x.v));
@@ -2184,7 +2199,7 @@ function simRun(cfg, data, start, T0){
   let bal = start, pos = null, next = T0, trades = 0, wins = 0;
   const path = [[0, bal]];
   const close = (t, exitPx, why) => {
-    const pnl = why === "bust" ? -pos.stake : Math.max(-pos.stake, pos.stake * pos.mult * pos.dir * (exitPx / pos.entry - 1) - pos.fee);
+    const pnl = (why === "bust" ? -pos.stake : Math.max(-pos.stake, pos.stake * pos.mult * pos.dir * (exitPx / pos.entry - 1))) - pos.fee;
     bal += pos.stake + pnl; trades++; if(pnl > 0) wins++;
     pos = null; next = t + cfg.gap * 1000; path.push([t - T0, bal]);
   };
@@ -2204,13 +2219,13 @@ function simRun(cfg, data, start, T0){
         const moveHold = pick.move * Math.sqrt(cfg.hold / S.look);
         const mult = cfg.mult || Math.max(1, Math.min(1000, Math.floor(1 / (3 * moveHold))));
         const stake = Math.max(1, Math.min(bal, bal * cfg.stake / 100));
-        // order fills on the next minute's opening price, at the ask (UP) or bid (DOWN)
+        // order fills on the next minute's opening price; the fee is counted against the trade
         const entry = pick.k.o * (1 + pick.dir * half), fee = feeOf(stake, mult, cfg), d = pick.dir, size = stake * mult;
         bal -= stake;
         pos = {coin:pick.coin, dir:d, entry, stake, mult, fee, until:t + 60000 + cfg.hold * 60000,
           bust:entry * (1 - d / mult),
-          tpPx:cfg.tp ? entry * (1 + d * (stake * cfg.tp / 100 + fee) / size) : null,
-          slPx:cfg.sl < 100 ? entry * (1 + d * (fee - stake * cfg.sl / 100) / size) : null};
+          tpPx:cfg.tp ? entry * (1 + d * cfg.tp / 100 / mult) : null,
+          slPx:cfg.sl < 100 ? entry * (1 - d * cfg.sl / 100 / mult) : null};
         t += 60000;   // the fill minute is checked below
       }
     }
@@ -2285,13 +2300,26 @@ function showSim(runs, start, cfg, hours){
     return `<rect x="${x}" y="${135 - h}" width="46" height="${h}" rx="4" fill="${i < 2 ? "var(--down)" : "var(--up)"}" opacity="${.35 + .65 * counts[i] / mx}"/>
       <text x="${x + 23}" y="${130 - h}" text-anchor="middle" fill="var(--ink)" font-size="12" font-family="JetBrains Mono" font-weight="700">${counts[i]}</text>
       <text x="${x + 23}" y="152" text-anchor="middle" fill="var(--muted)" font-size="9.5" font-family="JetBrains Mono">${lbl}</text>`; }).join("");
-  $("simNote").textContent = `Each run starts at a random moment in the last ${hours.toFixed(0)} hours of real 1-minute prices, with your bankroll (${money(start)}) and these exact settings: fills on the next minute at the ask/bid, your fee, take profit, stop loss and hold time. The AI's lean comes from the 15-minute brain; live buying/selling and the order book aren't available for the past, so they're left out. When a single minute touched both the take-profit and the bust, the replay picks which came first with odds based on how far each was from that minute's opening price (the closer one usually wins).`;
+  $("simNote").textContent = `Each run starts at a random moment in the last ${hours.toFixed(0)} hours of real 1-minute prices, with your bankroll (${money(start)}) and these exact settings: fills on the next minute at the market price, your fee, take profit, stop loss and hold time. The AI's lean comes from the 15-minute brain; live buying/selling and the order book aren't available for the past, so they're left out. When a single minute touched both the take-profit and the bust, the replay picks which came first with odds based on how far each was from that minute's opening price (the closer one usually wins).`;
 }
 $("simBtn").addEventListener("click", runSim);
 
 
 loadPaper(); setInterval(loadPaper, 60000);
 window.addEventListener("resize", () => S.A && drawChart(S.candles, S.A, S.viewBars, S.disp));
+// ───────── pages: one section of the site at a time ─────────
+function showPage(name){
+  document.querySelectorAll("[data-page]").forEach(el => { if(el.tagName !== "BUTTON") el.hidden = el.dataset.page !== name; });
+  document.querySelectorAll("#pages button").forEach(b => { if(b.dataset.page === name) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  try{ localStorage.setItem("turnspotter-page", name); }catch(e){}
+  if(name === "practice" && !$("pane-whatif").hidden) runWhatIf();
+  window.scrollTo({top:0, behavior:reduceMotion ? "auto" : "smooth"});
+}
+$("pages").addEventListener("click", e => { const b = e.target.closest("button[data-page]"); if(b) showPage(b.dataset.page); });
+$("botTabs").addEventListener("click", e => { const b = e.target.closest("button[data-bpane]"); if(!b) return;
+  document.querySelectorAll("#botCard .bpane").forEach(p => p.hidden = p.dataset.bpane !== b.dataset.bpane);
+  $("botTabs").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); });
+try{ const pg = localStorage.getItem("turnspotter-page"); if(pg && pg !== "market") showPage(pg); }catch(e){}
 renderWatch();
 loadHistory();
 </script>
