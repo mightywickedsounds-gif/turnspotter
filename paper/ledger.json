@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 44.4415,
+ "balance": 49.77,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -360,7 +360,10 @@
    "expiresAt": 1793103444937,
    "experience": 0.477,
    "source": "Binance US",
-   "status": "open"
+   "status": "lost",
+   "exitPrice": 0.07731,
+   "pnl": -0.1615,
+   "closedAt": 1793103444937
   },
   {
    "id": "XRP-1793100762813",
@@ -955,6 +958,18 @@
   {
    "t": 1793102595185,
    "value": 54.87
+  },
+  {
+   "t": 1793102903957,
+   "value": 54.87
+  },
+  {
+   "t": 1793103208612,
+   "value": 54.87
+  },
+  {
+   "t": 1793103513221,
+   "value": 54.71
   }
  ],
  "config": {
@@ -981,9 +996,9 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 79909.87,
-   "experience": 0.496,
-   "liveLearner": 0.459,
+   "price": 79906.69,
+   "experience": 0.493,
+   "liveLearner": 0.433,
    "record": 0.67,
    "call": "WAIT",
    "last400": {
@@ -998,9 +1013,9 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2316.65,
-   "experience": 0.491,
-   "liveLearner": 0.477,
+   "price": 2314.13,
+   "experience": 0.509,
+   "liveLearner": 0.514,
    "record": 0.65,
    "call": "WAIT",
    "last400": {
@@ -1009,15 +1024,15 @@
    },
    "backtest": {
     "calls": 162,
-    "right": 0.549
+    "right": 0.556
    }
   },
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 100.16,
-   "experience": 0.493,
-   "liveLearner": 0.431,
+   "price": 100.04,
+   "experience": 0.509,
+   "liveLearner": 0.476,
    "record": 0.59,
    "call": "WAIT",
    "last400": {
@@ -1028,7 +1043,24 @@
     "calls": 162,
     "right": 0.531
    }
+  },
+  "DOGE": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 0.07717,
+   "experience": 0.526,
+   "liveLearner": 0.628,
+   "record": 0.54,
+   "call": "WAIT",
+   "last400": {
+    "call": 0.27,
+    "bounceOrRollover": 0.003
+   },
+   "backtest": {
+    "calls": 160,
+    "right": 0.537
+   }
   }
  },
- "lastRun": 1793102595185
+ "lastRun": 1793103513221
 }
