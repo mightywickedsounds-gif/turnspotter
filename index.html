@@ -246,6 +246,37 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .stamp.approve{color:var(--up);border-color:var(--up);box-shadow:0 0 18px -4px var(--up)}
 .stamp.half{color:var(--warn);border-color:var(--warn);box-shadow:0 0 18px -4px var(--warn)}
 .stamp.veto{color:var(--down);border-color:var(--down);box-shadow:0 0 18px -4px var(--down)}
+/* live */
+#liveCard .rowHead{display:flex;justify-content:space-between;align-items:center}
+.lvTop{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.lvPrice{font:700 clamp(40px,9vw,76px)/1 var(--mono);letter-spacing:-.02em;transition:color .3s}
+.lvPrice.up{color:var(--up)} .lvPrice.down{color:var(--down)}
+.lvState{display:grid;justify-items:end;gap:2px;text-align:right}
+.lvState b{font:800 clamp(22px,5vw,40px)/1.05 var(--display);letter-spacing:-.01em}
+.lvState span{font:500 12.5px var(--mono);color:var(--muted)}
+.lvState.u b{color:var(--up);text-shadow:0 0 26px color-mix(in srgb,var(--up) 60%,transparent)} .lvState.d b{color:var(--down);text-shadow:0 0 26px color-mix(in srgb,var(--down) 60%,transparent)}
+.lvState.lu b{color:color-mix(in srgb,var(--up) 70%,var(--ink))} .lvState.ld b{color:color-mix(in srgb,var(--down) 70%,var(--ink))} .lvState.n b{color:var(--muted)}
+.lvMeter{margin:16px 0 10px}
+.lvTrack{position:relative;height:10px;border-radius:99px;background:linear-gradient(90deg,var(--down),rgba(140,155,255,.14) 30%,rgba(140,155,255,.14) 70%,var(--up))}
+.lvMid{position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;background:var(--faint)}
+#lvNeedle{position:absolute;top:50%;left:50%;width:18px;height:18px;border-radius:50%;background:var(--ink);box-shadow:0 0 14px rgba(234,240,255,.7);transform:translate(-50%,-50%);transition:left .25s}
+.lvScale{display:flex;justify-content:space-between;font:600 10.5px var(--mono);color:var(--faint);margin-top:6px;text-transform:uppercase;letter-spacing:.08em}
+.lvChartWrap{position:relative}
+#lvChart{width:100%;height:clamp(200px,38vh,420px);display:block}
+.lvRing{position:absolute;left:10px;top:10px;width:64px;height:64px;display:grid;place-items:center}
+.lvRing svg{position:absolute;inset:0;transform:rotate(-90deg)} .lvRing circle{fill:none;stroke:rgba(140,155,255,.15);stroke-width:4}
+#lvRingArc{stroke:var(--warn);stroke-linecap:round;stroke-dasharray:119.4;transition:stroke-dashoffset .25s linear}
+.lvRing b{font:700 18px var(--mono)}
+.lvCalc{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px;font:600 12.5px var(--body);color:var(--muted)}
+.lvCalc label{display:flex;gap:6px;align-items:center}
+.lvCalc input,.lvCalc select{width:auto;min-width:84px;max-width:110px;padding:6px 8px;font:600 13px var(--mono)}
+.lvIf{font:600 13px var(--mono);color:var(--ink)}
+.lvScore{margin:10px 0 0;font:500 12.5px var(--body);color:var(--muted)}
+#liveCard.tv{position:fixed;inset:0;z-index:50;border-radius:0;overflow:auto;background:var(--bg);padding:3vw}
+#liveCard:fullscreen{background:var(--bg);padding:3vw;overflow:auto}
+#liveCard.tv #lvChart,#liveCard:fullscreen #lvChart{height:52vh}
+#liveCard.tv .lvPrice,#liveCard:fullscreen .lvPrice{font-size:clamp(56px,10vw,140px)}
+#liveCard.tv .lvState b,#liveCard:fullscreen .lvState b{font-size:clamp(30px,6vw,84px)}
 /* bot v2 */
 .styleCards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
 .styleCards button{display:grid;gap:4px;text-align:left;padding:12px;border-radius:12px;backdrop-filter:none}
@@ -470,10 +501,29 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   </header>
 
   <nav class="pages" id="pages" aria-label="Sections">
-    <button type="button" data-page="market" aria-current="page">Market</button><button type="button" data-page="bot">AI bot</button><button type="button" data-page="auto">24/7 bots</button><button type="button" data-page="practice">Practice</button>
+    <button type="button" data-page="live">Live</button><button type="button" data-page="market" aria-current="page">Market</button><button type="button" data-page="bot">AI bot</button><button type="button" data-page="auto">24/7</button><button type="button" data-page="practice">Practice</button>
   </nav>
 
   <nav class="watch" id="watch" aria-label="Pick a coin"></nav>
+
+  <section class="card" id="liveCard" data-page="live" hidden>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"/></svg>Live</h2>
+      <button type="button" class="ghost" id="tvBtn">⛶ TV mode</button></div>
+    <div class="lvTop">
+      <div><div class="coinName" id="lvCoin">Bitcoin</div><div class="lvPrice" id="lvPrice">—</div></div>
+      <div class="lvState n" id="lvState"><b id="lvWord">Reading…</b><span id="lvSub"></span></div>
+    </div>
+    <div class="lvMeter" aria-hidden="true"><div class="lvTrack"><i class="lvMid"></i><i id="lvNeedle"></i></div>
+      <div class="lvScale"><span>Strong down</span><span>Choppy</span><span>Strong up</span></div></div>
+    <div class="lvChartWrap"><canvas id="lvChart" aria-label="Live price over the last 3 minutes"></canvas>
+      <div class="lvRing" id="lvRing" hidden><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19"/><circle id="lvRingArc" cx="22" cy="22" r="19"/></svg><b id="lvCount">60</b></div></div>
+    <div class="lvCalc">
+      <label>Stake $<input type="number" id="lvStake" value="10" min="1" step="1" inputmode="decimal"></label>
+      <label>Multiplier <select id="lvMult"><option>50</option><option>100</option><option>250</option><option>500</option><option selected>1000</option></select></label>
+      <span class="lvIf" id="lvIf"></span>
+    </div>
+    <p class="lvScore" id="lvScore"></p>
+  </section>
 
   <section class="card main" data-page="market">
     <div class="mainTop">
@@ -1210,7 +1260,7 @@ function setLivePrice(price){
   else if(price !== S.target){ pe.classList.remove("flash-up","flash-down"); void pe.offsetWidth;
     pe.classList.add(price > S.target ? "flash-up" : "flash-down"); clearTimeout(S.flashT); S.flashT = setTimeout(() => pe.classList.remove("flash-up","flash-down"), 900); }
   S.target = price;
-  S.ticks.push({t:Date.now(), p:price});
+  S.ticks.push({t:Date.now(), p:price}); if(!FLOW.trades.length) liveTick(price);
   if(S.ticks.length > 20000 || (S.ticks.length && S.ticks[0].t < Date.now() - 2 * 3600e3)) S.ticks.splice(0, Math.max(1, S.ticks.length - 15000));
 }
 async function fetchTicker(){
@@ -1431,6 +1481,7 @@ function addTrade(t, samePrices){
   // bot fake "wins": it bought at one exchange's price and cashed out on the other's.
   if(samePrices){ S.prices[S.coin] = t.p; S.priceT[S.coin] = Date.now(); markPush(S.coin, t.p);
     if(BOT.running) botCheck(S.coin, t.p); }   // bust / stop / take-profit on every single live trade
+  liveTick(t.p, t.t);
   FLOW.trades.push(t); if(FLOW.trades.length > 600) FLOW.trades.splice(0, 200);
   const sec = Math.floor(t.t / 1000), b = FLOW.secs.get(sec) || {buy:0, sell:0};
   if(t.buy) b.buy += t.v; else b.sell += t.v;
@@ -2413,6 +2464,124 @@ function drawHolo(cv, ts){
   }
 }
 
+// ───────── Live: watch the market and catch the swing ─────────
+// Momentum = the move over the last 3 minutes divided by a normal 3-minute move (the spread of 1-minute moves
+// over the last 4 hours, times √3). Above 2 is a strong move. Research (README round 28): after strong 3-minute
+// moves the next minute kept going slightly more often than it reversed on all five coins, but only by about
+// 0.002–0.01% on average, so this page also keeps score live, tick by tick, on this device.
+const LV = {ticks:[], coin:null, sd:NaN, sdAt:0, sdCoin:null, m1:null, sig:null, last:0, lastP:0, stats:{}};
+const LV_KEY = "turnspotter-live";
+try{ LV.stats = JSON.parse(localStorage.getItem(LV_KEY)) || {}; }catch(e){}
+const lvMoney = v => (v < 0 ? "−$" : "+$") + Math.abs(v).toFixed(2);
+const lvPx = x => x >= 1000 ? x.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) : x >= 1 ? x.toFixed(4) : x.toPrecision(5);
+function liveTick(p, t = Date.now()){
+  if(!(p > 0)) return;
+  if(LV.coin !== S.coin){ LV.coin = S.coin; LV.ticks = []; LV.sig = null; LV.m1 = null; LV.sdCoin = null; }
+  LV.ticks.push({t, p});
+  if(LV.ticks.length > 400 && LV.ticks[0].t < t - 6 * 60e3) LV.ticks = LV.ticks.filter(k => k.t >= t - 6 * 60e3);
+}
+async function liveSd(){
+  if(!S.src || (LV.sdCoin === S.coin && Date.now() - LV.sdAt < 60e3)) return;
+  LV.sdCoin = S.coin; LV.sdAt = Date.now();
+  try{
+    const coin = S.coin, C = await load(S.src, coin, "1m", 241, true); if(coin !== S.coin || C.length < 30) return;
+    const r = []; for(let i = 1; i < C.length; i++) r.push(Math.log(C[i].c / C[i - 1].c));
+    const m = r.reduce((a, b) => a + b, 0) / r.length;
+    LV.sd = Math.sqrt(r.reduce((a, b) => a + (b - m) ** 2, 0) / (r.length - 1)); LV.m1 = C;
+  }catch(e){ LV.sdAt = Date.now() - 45e3; }   // try again in ~15 s
+}
+function livePriceAt(t){
+  const T = LV.ticks;
+  if(T.length && T[0].t <= t){ let lo = 0, hi = T.length - 1;
+    while(lo < hi){ const mid = (lo + hi + 1) >> 1; if(T[mid].t <= t) lo = mid; else hi = mid - 1; }
+    return T[lo].p; }
+  if(LV.m1) for(let i = LV.m1.length - 1; i >= 0; i--){ const k = LV.m1[i]; if(k.t <= t) return k.t + 60e3 <= t ? k.c : k.o; }
+  return NaN;
+}
+function liveScore(sig, now){
+  const st = LV.stats[sig.coin] = LV.stats[sig.coin] || {n:0, kept:0, sum:0};
+  const mv = sig.dir * (now / sig.p - 1);
+  st.n++; if(mv > 0) st.kept++; st.sum += mv;
+  try{ localStorage.setItem(LV_KEY, JSON.stringify(LV.stats)); }catch(e){}
+}
+function liveUpdate(){
+  if(LV.coin !== S.coin) liveTick(priceOf(S.coin));
+  liveSd();
+  const now = LV.ticks.length ? LV.ticks.at(-1).p : priceOf(S.coin), then = livePriceAt(Date.now() - 180e3);
+  const z = Math.log(now / then) / (LV.sd * Math.sqrt(3)), ok = now > 0 && isFinite(z);
+  // a strong move starts a 60-second watch (one at a time, at most one a minute); it's scored when the minute is up
+  if(ok && !LV.sig && Math.abs(z) > 2 && Date.now() - LV.last > 60e3){ LV.sig = {dir:Math.sign(z), p:now, t:Date.now(), coin:S.coin}; LV.last = Date.now(); }
+  if(LV.sig && (LV.sig.coin !== S.coin)) LV.sig = null;
+  if(LV.sig && Date.now() - LV.sig.t >= 60e3){ liveScore(LV.sig, now); LV.sig = null; }
+  if(document.body.dataset.on !== "live" || document.hidden) return;
+  // the board
+  const NAMES = {BTC:"Bitcoin", ETH:"Ethereum", SOL:"Solana", XRP:"XRP", DOGE:"Dogecoin"};
+  $("lvCoin").textContent = NAMES[S.coin] || S.coin;
+  if(now > 0){ const pe = $("lvPrice"); pe.textContent = lvPx(now);
+    if(LV.lastP && now !== LV.lastP) pe.className = "lvPrice " + (now > LV.lastP ? "up" : "down"); LV.lastP = now; }
+  const st = $("lvState");
+  if(!ok){ st.className = "lvState n"; $("lvWord").textContent = "Reading…"; $("lvSub").textContent = "";
+  } else {
+    const a = Math.abs(z), up = z > 0;
+    st.className = "lvState " + (a > 2 ? (up ? "u" : "d") : a > 1 ? (up ? "lu" : "ld") : "n");
+    $("lvWord").textContent = a > 2 ? (up ? "MOVING UP ▲" : "MOVING DOWN ▼") : a > 1 ? (up ? "Leaning up" : "Leaning down") : "Choppy";
+    $("lvSub").textContent = `${(Math.abs(Math.log(now / then)) * 100).toFixed(3)}% in 3 min · ${a.toFixed(1)}× normal`;
+    $("lvNeedle").style.left = (50 + Math.max(-4, Math.min(4, z)) / 4 * 46) + "%";
+  }
+  // Trench helper: what a trade from the signal would show now, and how far the bust is
+  const stake = Math.max(1, +$("lvStake").value || 10), mult = +$("lvMult").value, bustPct = 100 / mult;
+  if(LV.sig){ const mv = LV.sig.dir * (now / LV.sig.p - 1), pnl = Math.max(-stake, stake * mult * mv), left = Math.max(0, 60 - (Date.now() - LV.sig.t) / 1000);
+    $("lvRing").hidden = false; $("lvCount").textContent = Math.ceil(left); $("lvRingArc").style.strokeDashoffset = (119.4 * (1 - left / 60)).toFixed(1);
+    $("lvIf").innerHTML = `In ${LV.sig.dir > 0 ? "UP" : "DOWN"} at the signal: <b class="${pnl >= 0 ? "win" : "loss"}">${lvMoney(pnl)}</b>${mv <= -1 / mult ? " · busted" : ""}`;
+  } else {
+    $("lvRing").hidden = true;
+    const norm = LV.sd > 0 ? bustPct / (LV.sd * 100) : NaN;
+    $("lvIf").innerHTML = `Bust ${bustPct.toFixed(2)}% away${isFinite(norm) ? ` · <span class="${norm < 1 ? "loss" : norm < 3 ? "" : "win"}">${norm.toFixed(1)}× a normal minute</span>` : ""}`;
+  }
+  const s = LV.stats[S.coin];
+  $("lvScore").textContent = s && s.n ? `Strong moves on ${S.coin} seen here: ${s.n} · kept going a minute later: ${s.kept} (${Math.round(100 * s.kept / s.n)}%) · average ${(s.sum / s.n * 100 >= 0 ? "+" : "")}${(s.sum / s.n * 100).toFixed(3)}%`
+    : "Keeps score here: how often strong moves keep going for the next minute.";
+  liveDraw(now);
+}
+function liveDraw(now){
+  const cv = $("lvChart"), dpr = Math.min(2, devicePixelRatio || 1), W = cv.clientWidth, Hh = cv.clientHeight; if(!W || !Hh) return;
+  if(cv.width !== Math.round(W * dpr)){ cv.width = Math.round(W * dpr); cv.height = Math.round(Hh * dpr); }
+  const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, Hh);
+  const t1 = Date.now(), t0 = t1 - 180e3;
+  let pts = LV.ticks.filter(k => k.t >= t0);
+  if(LV.m1 && (!pts.length || pts[0].t > t0 + 20e3)){ const first = pts.length ? pts[0].t : t1;
+    pts = LV.m1.filter(k => k.t >= t0 - 60e3 && k.t + 60e3 < first).map(k => ({t:k.t + 60e3, p:k.c})).concat(pts); }
+  if(pts.length < 2) return;
+  let lo = Math.min(...pts.map(k => k.p)), hi = Math.max(...pts.map(k => k.p));
+  if(LV.sig){ lo = Math.min(lo, LV.sig.p); hi = Math.max(hi, LV.sig.p); }
+  const pad = (hi - lo) * .15 || now * 1e-4; lo -= pad; hi += pad;
+  const X = t => (t - t0) / 180e3 * (W - 70), Y = p => 10 + (hi - p) / (hi - lo) * (Hh - 30);
+  const up = pts.at(-1).p >= pts[0].p, col = up ? css("--up") : css("--down");
+  // grid + time labels
+  g.strokeStyle = "rgba(140,155,255,.08)"; g.lineWidth = 1; g.font = "600 10.5px JetBrains Mono, monospace"; g.fillStyle = css("--faint");
+  for(let m = 0; m <= 3; m++){ const x = X(t0 + m * 60e3); g.beginPath(); g.moveTo(x, 6); g.lineTo(x, Hh - 18); g.stroke(); g.fillText(m === 3 ? "now" : `-${3 - m}m`, Math.max(2, x - 10), Hh - 4); }
+  // area + line
+  const grad = g.createLinearGradient(0, 0, 0, Hh); grad.addColorStop(0, col + "55"); grad.addColorStop(1, col + "00");
+  g.beginPath(); pts.forEach((k, i) => i ? g.lineTo(X(k.t), Y(k.p)) : g.moveTo(X(k.t), Y(k.p)));
+  g.lineTo(X(pts.at(-1).t), Hh - 18); g.lineTo(X(pts[0].t), Hh - 18); g.closePath(); g.fillStyle = grad; g.fill();
+  g.beginPath(); pts.forEach((k, i) => i ? g.lineTo(X(k.t), Y(k.p)) : g.moveTo(X(k.t), Y(k.p)));
+  g.strokeStyle = col; g.lineWidth = 2.4; g.shadowColor = col; g.shadowBlur = 10; g.stroke(); g.shadowBlur = 0;
+  // the signal: entry line and dot
+  if(LV.sig){ const y = Y(LV.sig.p), x = X(LV.sig.t), sc = LV.sig.dir > 0 ? css("--up") : css("--down");
+    g.setLineDash([5, 5]); g.strokeStyle = sc; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x, y); g.lineTo(W - 70, y); g.stroke(); g.setLineDash([]);
+    g.fillStyle = sc; g.beginPath(); g.arc(x, y, 5, 0, Math.PI * 2); g.fill(); }
+  // price tag
+  const y = Y(pts.at(-1).p); g.fillStyle = col; g.fillRect(W - 68, y - 10, 68, 20);
+  g.fillStyle = "#06080f"; g.font = "700 11px JetBrains Mono, monospace"; g.fillText(lvPx(pts.at(-1).p), W - 64, y + 4);
+  g.beginPath(); g.arc(X(pts.at(-1).t), y, 4 + 2 * Math.sin(Date.now() / 150), 0, Math.PI * 2); g.fill();
+}
+setInterval(liveUpdate, 250);
+$("tvBtn").addEventListener("click", () => {
+  const c = $("liveCard");
+  if(document.fullscreenElement) return document.exitFullscreen();
+  if(c.requestFullscreen) c.requestFullscreen().catch(() => c.classList.toggle("tv")); else c.classList.toggle("tv");
+});
+document.addEventListener("keydown", e => { if(e.key === "Escape") $("liveCard").classList.remove("tv"); });
 // ───────── live AI bot: trades fake money on screen toward a goal, with the user's own settings ─────────
 // Realism: orders fill 1 second after the decision at the market price, the fee is taken from the balance
 // when the trade opens, and bust / stop / take-profit are checked on every live trade.
@@ -2910,7 +3079,7 @@ $("pages").addEventListener("click", e => { const b = e.target.closest("button[d
 $("botTabs").addEventListener("click", e => { const b = e.target.closest("button[data-bpane]"); if(!b) return;
   document.querySelectorAll("#botCard .bpane").forEach(p => p.hidden = p.dataset.bpane !== b.dataset.bpane);
   $("botTabs").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); });
-try{ const pg = localStorage.getItem("turnspotter-page"); if(pg && pg !== "market" && document.querySelector(`#pages button[data-page="${pg}"]`)) showPage(pg); }catch(e){}   // "flow" is now part of Market
+try{ const pg = localStorage.getItem("turnspotter-page") || "live"; if(pg !== "market" && document.querySelector(`#pages button[data-page="${pg}"]`)) showPage(pg); }catch(e){ showPage("live"); }   // "flow" is now part of Market
 renderWatch();
 loadHistory();
 </script>

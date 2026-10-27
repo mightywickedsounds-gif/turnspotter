@@ -507,6 +507,22 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   At x1000 you must win 75-83% of the time just to break even; these trades won 28-50%.
 - Not added to the site.
 
+### Round 28: a Live page for watching the swing
+- The idea from Trench players: watch the live market, and when price starts moving one way, get in and cash
+  out within a minute. `research/experiments10.py` checks it on 45 days of 1-minute candles for all five coins:
+  after the last 1–3 minutes moved more than 1–3× a normal move, the next minute (entering at its open) kept
+  going on average on every coin, by +0.14 to +1.3 bp (0.0014–0.013%). That's a small, real follow-through.
+- As 1-minute Trench trades (bust inside the minute, 1% fee): at x100 trading the move's direction lost
+  −0.3% to −0.8% of the stake per trade vs −1.0% for a coin flip, so the edge is smaller than the fee.
+  At x500/x1000, 1-minute candles can't judge it: even random directions came out positive, because a candle
+  hides the tiny wiggles inside a minute that would bust a x1000 trade. Second-by-second data is needed.
+- New **Live** tab (first tab, opens by default): a big live price from the exchange's trade stream, a
+  momentum meter (last 3 minutes vs a normal 3-minute move: Choppy / Leaning / MOVING UP-DOWN at over 2×),
+  a 3-minute tick chart, and a 60-second countdown when a strong move starts, showing what a Trench trade
+  from that moment would show. A stake and multiplier box shows the bust distance in "normal minutes".
+  **TV mode** fills the screen. It keeps a live score on the device: how often strong moves kept going a
+  minute later, measured tick by tick, which answers what the 1-minute data couldn't.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
