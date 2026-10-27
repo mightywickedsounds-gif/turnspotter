@@ -421,6 +421,8 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   one, so each job now stays awake for about 5h40m (GitHub's limit is 6 hours).
 - Fix (round 26): a job froze for hours on one exchange request that never answered. Every request now gives
   up after 20 seconds and each bot run is capped at a few minutes, so a stuck request can't freeze the loop.
+- Fix: a job froze again at its first save. Saving no longer merges: the job resets to the latest main, puts its
+  own ledgers back (it's their only writer), commits and pushes, with a time limit on every git network call.
 
 ### Round 24: realistic paper trading, and a second bot built for real money
 - **Does the AI-calls paper bot really make money?** `research/paper_backtest.mjs` replays its exact rules on

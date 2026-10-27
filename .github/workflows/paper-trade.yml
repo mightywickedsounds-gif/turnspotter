@@ -9,7 +9,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: paper-trade-v2
+  group: paper-trade-v3
   cancel-in-progress: false   # the next run waits its turn, so there's almost always one awake
 jobs:
   trade:
@@ -23,16 +23,26 @@ jobs:
         run: |
           git config user.name "turnspotter-bot"
           git config user.email "turnspotter-bot@users.noreply.github.com"
+          # Save the ledgers on top of the latest main. This job is the only writer of paper/*.json, so instead of
+          # merging it resets to main and puts its own ledgers back: a failed save can never leave the repo stuck,
+          # and every git network call has a time limit.
+          save() {
+            mkdir -p "$RUNNER_TEMP/keep"; cp paper/ledger.json paper/trend.json "$RUNNER_TEMP/keep/" 2>/dev/null
+            for i in 1 2 3; do
+              if timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD \
+                 && cp "$RUNNER_TEMP"/keep/*.json paper/ && git add paper/ledger.json paper/trend.json \
+                 && { git diff --cached --quiet || git commit -qm "Paper trading update"; } \
+                 && timeout 60 git push -q origin HEAD:main; then echo "saved"; return 0; fi
+              echo "save attempt $i failed"; sleep 10
+            done
+            cp "$RUNNER_TEMP"/keep/*.json paper/   # keep our ledgers for the next try
+          }
           end=$((SECONDS + 20400)); saved=-900   # save on the first pass too
           while true; do
             out=$( (timeout 240 node paper/trader.mjs; timeout 120 node paper/trend.mjs) 2>&1) || true; echo "$out"   # hard time limits so one stuck request can't freeze the loop
             # save when a trade opens or closes, otherwise at most every 15 minutes (keeps the commit history sane)
             if echo "$out" | grep -q TRADES_CHANGED || [ $((SECONDS - saved)) -ge 900 ] || [ $SECONDS -ge $end ]; then
-              git add paper/ledger.json paper/trend.json
-              if git commit -qm "Paper trading update"; then
-                for i in 1 2 3; do git pull -q --rebase origin main && git push -q && break; sleep 5; done
-              fi
-              saved=$SECONDS
+              save; saved=$SECONDS
             fi
             [ $SECONDS -ge $end ] && break
             sleep 300
