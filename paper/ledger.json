@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 54.6885,
+ "balance": 58.711,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -531,7 +531,10 @@
    "expiresAt": 1793120560543,
    "experience": 0.457,
    "source": "Binance US",
-   "status": "open"
+   "status": "lost",
+   "exitPrice": 80567.34,
+   "pnl": -0.1575,
+   "closedAt": 1793120560543
   }
  ],
  "equity": [
@@ -1326,6 +1329,18 @@
   {
    "t": 1793119746959,
    "value": 58.87
+  },
+  {
+   "t": 1793120057522,
+   "value": 58.87
+  },
+  {
+   "t": 1793120363197,
+   "value": 58.87
+  },
+  {
+   "t": 1793120668496,
+   "value": 58.71
   }
  ],
  "config": {
@@ -1349,12 +1364,29 @@
   "need": 2000
  },
  "status": {
+  "BTC": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 80662.61,
+   "experience": 0.451,
+   "liveLearner": 0.256,
+   "record": 0.69,
+   "call": "WAIT",
+   "last400": {
+    "call": 0.225,
+    "bounceOrRollover": 0.005
+   },
+   "backtest": {
+    "calls": 170,
+    "right": 0.565
+   }
+  },
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2348.4,
-   "experience": 0.476,
-   "liveLearner": 0.306,
+   "price": 2352.62,
+   "experience": 0.451,
+   "liveLearner": 0.264,
    "record": 0.64,
    "call": "WAIT",
    "last400": {
@@ -1369,9 +1401,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 100.96,
-   "experience": 0.491,
-   "liveLearner": 0.429,
+   "price": 101.05,
+   "experience": 0.484,
+   "liveLearner": 0.425,
    "record": 0.59,
    "call": "WAIT",
    "last400": {
@@ -1386,9 +1418,9 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.323,
-   "experience": 0.467,
-   "liveLearner": 0.401,
+   "price": 1.3217,
+   "experience": 0.488,
+   "liveLearner": 0.429,
    "record": 0.65,
    "call": "WAIT",
    "last400": {
@@ -1403,9 +1435,9 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07833,
-   "experience": 0.453,
-   "liveLearner": 0.385,
+   "price": 0.07836,
+   "experience": 0.456,
+   "liveLearner": 0.39,
    "record": 0.53,
    "call": "WAIT",
    "last400": {
@@ -1418,5 +1450,5 @@
    }
   }
  },
- "lastRun": 1793119746959
+ "lastRun": 1793120668496
 }
