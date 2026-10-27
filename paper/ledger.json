@@ -670,6 +670,18 @@
   {
    "t": 1793085477064,
    "value": 50.88
+  },
+  {
+   "t": 1793085783428,
+   "value": 50.88
+  },
+  {
+   "t": 1793086087915,
+   "value": 50.88
+  },
+  {
+   "t": 1793086392756,
+   "value": 50.88
   }
  ],
  "config": {
@@ -692,24 +704,6 @@
   "conf": 0.55,
   "need": 2000
  },
- "status": {
-  "XRP": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 1.3,
-   "experience": 0.499,
-   "liveLearner": 0.443,
-   "record": 0.65,
-   "call": "WAIT",
-   "last400": {
-    "call": 0.235,
-    "bounceOrRollover": 0
-   },
-   "backtest": {
-    "calls": 160,
-    "right": 0.463
-   }
-  }
- },
- "lastRun": 1793085477064
+ "status": {},
+ "lastRun": 1793086392756
 }
