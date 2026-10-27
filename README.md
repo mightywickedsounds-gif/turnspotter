@@ -523,6 +523,20 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   **TV mode** fills the screen. It keeps a live score on the device: how often strong moves kept going a
   minute later, measured tick by tick, which answers what the 1-minute data couldn't.
 
+### Round 29: just Live and the Scalper bot
+- The site is now two tabs: **Live** and **Scalper bot**. The AI-calls market page, the 24/7 bots page and Practice
+  are hidden (their code stays; the GitHub paper bots keep running in the background).
+- The bot is a scalper: it watches the Live meter for the coin on screen and, when the last 3 minutes moved more than
+  2× a normal 3-minute move, it goes that way and is out within 1 minute (take profit +30% of the stake, the usual
+  automatic profit-banking rules, bust at 1/multiplier). Styles: Scalper ×1000 (25% of the bankroll per trade),
+  Scalper ×250 (bust 4× further away), All-in ×1000. Direction can be limited to UP-only or DOWN-only swings.
+- The table still reviews every trade, faster (about 2–3 seconds) because a swing won't wait. The Critic's swing
+  objections: a move under 2.5× normal (smaller moves followed through less in experiments10.py), and a bust closer
+  than one normal minute's move (ordinary wiggling can hit it); one objection halves the stake, two veto it. The Boss
+  keeps its profit-protection rule.
+- The 100-run Reality check is hidden: 1-minute candles can't fairly replay x1000 scalps (round 28). The Live
+  scoreboard measures the swings tick by tick instead.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

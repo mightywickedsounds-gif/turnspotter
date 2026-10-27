@@ -55,7 +55,8 @@ body[data-mood="up"]{--mood:var(--up)} body[data-mood="down"]{--mood:var(--down)
 @keyframes ping{0%{box-shadow:0 0 0 0 rgba(62,230,162,.55)}80%,100%{box-shadow:0 0 0 10px rgba(62,230,162,0)}}
 
 /* ticker */
-body[data-on="bot"] .watch,body[data-on="auto"] .watch{display:none}
+body[data-on="auto"] .watch{display:none}
+#botTiles{display:none}
 .watch{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .watch::-webkit-scrollbar{display:none}
 .chip{flex:none;display:flex;align-items:center;gap:10px;font:700 13px var(--body);padding:8px 14px;border-radius:12px;
@@ -501,12 +502,12 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   </header>
 
   <nav class="pages" id="pages" aria-label="Sections">
-    <button type="button" data-page="live">Live</button><button type="button" data-page="market" aria-current="page">Market</button><button type="button" data-page="bot">AI bot</button><button type="button" data-page="auto">24/7</button><button type="button" data-page="practice">Practice</button>
+    <button type="button" data-page="live" aria-current="page">Live</button><button type="button" data-page="bot">Scalper bot</button>
   </nav>
 
   <nav class="watch" id="watch" aria-label="Pick a coin"></nav>
 
-  <section class="card" id="liveCard" data-page="live" hidden>
+  <section class="card" id="liveCard" data-page="live">
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"/></svg>Live</h2>
       <button type="button" class="ghost" id="tvBtn">⛶ TV mode</button></div>
     <div class="lvTop">
@@ -525,7 +526,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <p class="lvScore" id="lvScore"></p>
   </section>
 
-  <section class="card main" data-page="market">
+  <section class="card main" data-page="market" hidden>
     <div class="mainTop">
       <div><div class="coinName" id="coinName">Bitcoin</div><span class="price" id="pNow">—</span> <span class="chg" id="pChg"></span></div>
       <button id="alerts" class="alert" type="button">🔔 Alert me</button>
@@ -537,8 +538,8 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   </section>
 
   <section class="card" id="botCard" data-page="bot" hidden>
-    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 16h6"/></svg>AI bot</h2>
-      <div class="seg" id="botTabs" role="tablist"><button type="button" data-bpane="run" aria-pressed="true">Run</button><button type="button" data-bpane="settings">Settings</button><button type="button" data-bpane="sim">Reality check</button><button type="button" data-bpane="hist">History</button></div>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 16h6"/></svg>Scalper bot</h2>
+      <div class="seg" id="botTabs" role="tablist"><button type="button" data-bpane="run" aria-pressed="true">Run</button><button type="button" data-bpane="settings">Settings</button><button type="button" data-bpane="sim" hidden>Reality check</button><button type="button" data-bpane="hist">History</button></div>
       <span class="botClockWrap">⏱ <b id="botClock">60:00</b></span></div>
     <div class="botTop">
       <div><div class="coinName">Bot's fake money</div><span class="price" id="botVal">$50.00</span> <span class="chg" id="botRet"></span>
@@ -575,10 +576,9 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <div class="bpane" data-bpane="settings" hidden>
       <div class="sub">Pick a style</div>
       <div class="styleCards presets">
-        <button type="button" data-preset="careful"><b>Careful</b><span>×20 · 20% per trade · slower, smaller swings</span></button>
-        <button type="button" data-preset="balanced"><b>Balanced</b><span>×100 · half the bankroll per trade</span></button>
-        <button type="button" data-preset="degen"><b>Degen</b><span>all-in · multiplier picked per coin</span></button>
-        <button type="button" data-preset="x1000"><b>Trench ×1000</b><span>all-in · a 0.1% move decides it</span></button>
+        <button type="button" data-preset="scalper"><b>Scalper ×1000</b><span>a quarter of the bankroll per trade</span></button>
+        <button type="button" data-preset="scalperSafe"><b>Scalper ×250</b><span>bust 4× further away</span></button>
+        <button type="button" data-preset="allIn"><b>All-in ×1000</b><span>everything on every swing</span></button>
       </div>
       <div class="botCfg">
           <label class="sl">Multiplier <b id="cfgMultV">auto</b><input type="range" id="cfgMult" min="0" max="1000" step="1" value="0"></label>
@@ -587,12 +587,12 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
       <p class="riskLine" id="botRisk"></p>
       <details class="moreOpts"><summary>More options</summary>
         <div class="botCfg">
-          <label>Direction<select id="cfgDir"><option value="ai">Follow the AI</option><option value="up">Always UP</option><option value="down">Always DOWN</option></select></label>
+          <label>Direction<select id="cfgDir"><option value="momentum">Follow the swing</option><option value="up">Only UP swings</option><option value="down">Only DOWN swings</option></select></label>
           <label class="sl">Take profit at <b id="cfgTpV">+100%</b><input type="range" id="cfgTp" min="0" max="500" step="5" value="100"></label>
           <label class="sl">Stop loss at <b id="cfgSlV">bust only</b><input type="range" id="cfgSl" min="10" max="100" step="5" value="100"></label>
           <label class="sl">Close after <b id="cfgHoldV">5 min</b><input type="range" id="cfgHold" min="1" max="60" step="1" value="5"></label>
           <label class="sl">Wait between trades <b id="cfgGapV">10 s</b><input type="range" id="cfgGap" min="3" max="180" step="1" value="10"></label>
-          <label class="sl">Only trade when the AI is at least <b id="cfgConfV">50%</b><input type="range" id="cfgConf" min="50" max="62" step="1" value="50"></label>
+          <label class="sl" hidden>Only trade when the AI is at least <b id="cfgConfV">50%</b><input type="range" id="cfgConf" min="50" max="62" step="1" value="50"></label>
           <label>Fee per trade (copy it from a Trench ticket)<span class="feeRow"><input type="number" id="cfgFee" min="0" max="50" step="0.01" value="1" aria-label="Fee amount"><select id="cfgFeeMode" aria-label="Fee is a percent of"><option value="stake">% of stake</option><option value="position">% of position</option></select></span></label>
           <label>Goal for each run<select id="cfgGoalX"><option value="2">2× the bankroll</option><option value="5">5× the bankroll</option><option value="10" selected>10× the bankroll</option><option value="100">100× the bankroll</option><option value="0">No goal (until time or broke)</option></select></label>
           <label>Time limit<select id="cfgMins"><option value="15">15 min</option><option value="30">30 min</option><option value="60" selected>60 min</option><option value="240">4 hours</option></select></label>
@@ -625,7 +625,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </div>
   </section>
 
-  <section class="card" data-page="market">
+  <section class="card" data-page="market" hidden>
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 4 8-9"/><path d="M3 21h18"/></svg>Chart</h2>
       <div class="seg" id="range" role="group" aria-label="Chart range"><button type="button" data-bars="24">6h</button><button type="button" data-bars="48">12h</button><button type="button" data-bars="96" aria-pressed="true">24h</button><button type="button" data-bars="288">3d</button></div></div>
     <div class="chartWrap"><canvas id="chart" aria-label="Price chart with the calls the AI made. Hover for details, drag to measure a move."></canvas><span class="pulse" id="pulse" hidden></span></div>
@@ -633,7 +633,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <div class="tablewrap"><table><tbody id="log"></tbody></table></div>
   </section>
 
-  <details class="card fold" id="flowCard" data-page="market"><summary>Live buys &amp; sells</summary>
+  <details class="card fold" id="flowCard" data-page="market" hidden><summary>Live buys &amp; sells</summary>
     <div class="rowHead"><span class="record" id="flowMeta">connecting…</span></div>
     <div class="tug">
       <div class="tugLbl"><span class="win">Buyers <b id="tugBuyPct">50%</b></span><span id="tugWho">last minute</span><span class="loss"><b id="tugSellPct">50%</b> Sellers</span></div>
@@ -651,7 +651,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </div>
   </details>
 
-  <details class="card fold" id="bookCard" data-page="market"><summary>Waiting orders</summary>
+  <details class="card fold" id="bookCard" data-page="market" hidden><summary>Waiting orders</summary>
     <div class="rowHead">
       <div class="seg" id="bookRange" role="group" aria-label="How far from the price"><button type="button" data-r="0.005">±0.5%</button><button type="button" data-r="0.01" aria-pressed="true">±1%</button><button type="button" data-r="0.02">±2%</button></div></div>
     <div class="bookStats">
@@ -745,7 +745,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   </section>
   <div class="toasts" id="toasts" aria-live="polite"></div>
 
-  <details class="card fold" id="settings" data-page="market">
+  <details class="card fold" id="settings" data-page="market" hidden>
     <summary>Settings</summary>
     <div class="controls">
       <label>How far ahead<select id="look">
@@ -764,7 +764,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </div>
   </details>
 
-  <details class="card fold" id="more" data-page="market">
+  <details class="card fold" id="more" data-page="market" hidden>
     <summary>How the AI works</summary>
     <div class="moreGrid">
       <div>
@@ -2133,14 +2133,25 @@ function recentRecord(){
   return {n:T.length, won:T.filter(t => t.pnl > 0).length, exp:T.reduce((s, t) => s + t.pWin, 0)};
 }
 const money2 = v => (v < 0 ? "−$" : "$") + Math.abs(v).toFixed(2);
+// For swing trades the Critic checks the swing itself. In research/experiments10.py, moves over 3× normal usually
+// followed through more than moves just over 2× (BTC +0.54 vs +0.31 bp, ETH +0.48 vs +0.20, DOGE +1.30 vs +0.53);
+// and a bust closer than one normal minute's move can be hit by ordinary wiggling alone.
+function councilRulesSwing(mo, dir, coin, mult){
+  const obj = [], a = Math.abs(mo.z), room = (1 / mult) / mo.sd;
+  if(Date.now() - (S.priceT[coin] || 0) > 10000) obj.push({veto:true, say:"I can't see a fresh price for this coin. Not trading blind."});
+  if(a < 2.5) obj.push({say:`That's only ${a.toFixed(1)}× a normal move. Moves this small followed through less than the big ones.`});
+  if(room < 1) obj.push({say:`The bust is only ${room.toFixed(1)}× a normal minute away. Normal wiggling alone can bust this.`});
+  const verdict = obj.some(o => o.veto) || obj.length >= 2 ? "veto" : obj.length ? "half" : "approve";
+  return {verdict, obj};
+}
 function councilScript(pick, dir, rule, boss, m, ctx){
   const D = dir > 0 ? "UP" : "DOWN", L = [];
   L.push({who:"trader", to:"boss", holo:"pitch", text:`${pick.coin} ${dir > 0 ? "▲" : "▼"} ${D}. ${pick.why.slice(0, 2).join(", ")}. I want ${money2(ctx.stake)} at ×${ctx.mult}.`});
-  if(!rule.obj.length) L.push({who:"critic", to:"trader", text:"I checked the last candle, the volatility and the lean. Nothing against it."});
+  if(!rule.obj.length) L.push({who:"critic", to:"trader", text:pick.swing ? "Big move, and the bust has room. Nothing against it." : "I checked the last candle, the volatility and the lean. Nothing against it."});
   else {
     L.push({who:"critic", to:"trader", text:rule.obj[0].say});
     if(rule.obj[1]) L.push({who:"critic", to:"boss", text:rule.obj[1].say});
-    L.push({who:"trader", to:"critic", text:rule.verdict === "veto" ? `The AI still says ${Math.round(Math.max(pick.exp, 1 - pick.exp) * 100)}% ${D}.` : "Fair, but the lean is still on our side."});
+    L.push({who:"trader", to:"critic", text:pick.swing ? (rule.verdict === "veto" ? "It's still moving though." : "Fair, but it's moving our way.") : rule.verdict === "veto" ? `The AI still says ${Math.round(Math.max(pick.exp, 1 - pick.exp) * 100)}% ${D}.` : "Fair, but the lean is still on our side."});
   }
   L.push({who:"boss", to:"all", holo:"sim", text:`I ran it 300 times. Banks ${Math.round(m.pBank * 100)}% (+${money2(m.win)}), busts ${Math.round(m.pBust * 100)}% (−${money2(m.loss)}). After the ${money2(m.fee)} fee we expect ${m.ev >= 0 ? "+" : ""}${money2(m.ev)} a trade.`});
   const rec = ctx.rec, runUp = ctx.bal - ctx.start;
@@ -2179,12 +2190,13 @@ function playCouncil(lines, verdict, extra, done){
     document.querySelectorAll(".cBub").forEach(b => { b.classList.toggle("gone", b.classList.contains("old")); if(b !== bub && b.classList.contains("show")) b.classList.add("old"); });
     bub.classList.remove("old", "show", "gone"); bub.querySelector("span").innerHTML = "<i></i><i></i><i></i>"; bub.classList.add("show", "typing");
     TBL.timer = setTimeout(() => { bub.classList.remove("typing"); bub.querySelector("span").textContent = l.text;
-      TBL.timer = setTimeout(next, reduceMotion ? 400 : 650 + Math.min(900, l.text.length * 9)); }, reduceMotion ? 50 : 360);
+      TBL.timer = setTimeout(next, (reduceMotion ? 400 : 650 + Math.min(900, l.text.length * 9)) * talkPace()); }, (reduceMotion ? 50 : 360) * talkPace());
   };
   next();
   tableInit();
 }
-function councilMs(lines){ return lines.reduce((s, l) => s + 360 + 650 + Math.min(900, l.text.length * 9), 0) + 300; }
+function talkPace(){ try{ return BOT.cfg.dir === "momentum" || BOT.cfg.dir === "up" || BOT.cfg.dir === "down" ? .45 : 1; }catch(e){ return 1; } }
+function councilMs(lines){ return lines.reduce((s, l) => s + (360 + 650 + Math.min(900, l.text.length * 9)) * talkPace(), 0) + 300; }
 
 const at = (o, x, y, z) => { o.position.set(x, y, z); return o; };
 async function tableInit(){
@@ -2509,6 +2521,7 @@ function liveUpdate(){
   liveSd();
   const now = LV.ticks.length ? LV.ticks.at(-1).p : priceOf(S.coin), then = livePriceAt(Date.now() - 180e3);
   const z = Math.log(now / then) / (LV.sd * Math.sqrt(3)), ok = now > 0 && isFinite(z);
+  if(ok){ LV.z = z; LV.zNow = now; LV.zThen = then; LV.zAt = Date.now(); }
   // a strong move starts a 60-second watch (one at a time, at most one a minute); it's scored when the minute is up
   if(ok && !LV.sig && Math.abs(z) > 2 && Date.now() - LV.last > 60e3){ LV.sig = {dir:Math.sign(z), p:now, t:Date.now(), coin:S.coin}; LV.last = Date.now(); }
   if(LV.sig && (LV.sig.coin !== S.coin)) LV.sig = null;
@@ -2543,6 +2556,8 @@ function liveUpdate(){
     : "Keeps score here: how often strong moves keep going for the next minute.";
   liveDraw(now);
 }
+// the Live meter's reading, if it's fresh and for the coin on screen
+function liveMomentum(){ return LV.coin === S.coin && Date.now() - (LV.zAt || 0) < 3000 && LV.sd > 0 ? {z:LV.z, now:LV.zNow, then:LV.zThen, sd:LV.sd} : null; }
 function liveDraw(now){
   const cv = $("lvChart"), dpr = Math.min(2, devicePixelRatio || 1), W = cv.clientWidth, Hh = cv.clientHeight; if(!W || !Hh) return;
   if(cv.width !== Math.round(W * dpr)){ cv.width = Math.round(W * dpr); cv.height = Math.round(Hh * dpr); }
@@ -2586,15 +2601,19 @@ document.addEventListener("keydown", e => { if(e.key === "Escape") $("liveCard")
 // Realism: orders fill 1 second after the decision at the market price, the fee is taken from the balance
 // when the trade opens, and bust / stop / take-profit are checked on every live trade.
 const BOT_KEY = "turnspotter-livebot2";
+// The bot scalps: it waits for a strong 3-minute move on the coin you're watching (the Live meter), jumps in
+// that direction and is out within a minute (README round 29).
 const PRESETS = {
-  x1000:  {dir:"ai", mult:1000, stake:100, tp:100, sl:100, hold:5,  gap:10, conf:50},
-  careful:  {dir:"ai", mult:20,  stake:20,  tp:30,  sl:50,  hold:30, gap:60, conf:55},
-  balanced: {dir:"ai", mult:100, stake:50,  tp:50,  sl:100, hold:15, gap:30, conf:53},
-  degen:  {dir:"ai", mult:0,    stake:100, tp:60,  sl:100, hold:10, gap:15, conf:52},
+  scalper:     {dir:"momentum", mult:1000, stake:25, tp:30, sl:100, hold:1, gap:5, conf:50},
+  scalperSafe: {dir:"momentum", mult:250,  stake:25, tp:30, sl:100, hold:1, gap:5, conf:50},
+  allIn:       {dir:"momentum", mult:1000, stake:100, tp:30, sl:100, hold:1, gap:5, conf:50},
 };
 const BOT = (() => { try{ const d = JSON.parse(localStorage.getItem(BOT_KEY)); if(d && d.cfg) return d; }catch(e){} return null; })()
   || {running:false, start:50, goal:500, cash:50, pos:null, pending:null, log:[], curve:[], endsAt:0, startedAt:0, follow:true, nextAt:0, done:null,
-      cfg:{...PRESETS.x1000, coins:[...COINS], mins:60, goalX:10, fee:1, feeMode:"stake"}, history:[], runs:[], runId:0};
+      cfg:{...PRESETS.scalper, coins:[...COINS], mins:60, goalX:10, fee:1, feeMode:"stake"}, history:[], runs:[], runId:0};
+// round 29: every bot became a scalper; old saved styles switch over once
+if(BOT.cfg.dir !== "momentum" && !BOT.scalperV){ Object.assign(BOT.cfg, PRESETS.scalper); }
+BOT.scalperV = 1;
 // fees are Trench's, not a strategy's: one setting, as a % of the stake (or of the position), used everywhere
 if(BOT.cfg.feeMode === undefined){ BOT.cfg.fee = 1; BOT.cfg.feeMode = "stake"; }
 // (the practice panel loads before this block, so fall back to the default until BOT exists)
@@ -2676,7 +2695,7 @@ function botStart(){
   BOT.runId = (BOT.runId || 0) + 1;
   Object.assign(BOT, {running:true, cash:BOT.start, pos:null, pending:null, log:[], curve:[{t:Date.now(), v:BOT.start}],
     startedAt:Date.now(), endsAt:Date.now() + c.mins * 60000, nextAt:Date.now() + 2000, done:null, protecting:false, runPeak:BOT.start});
-  say(`Run #${BOT.runId}: $${BOT.start.toFixed(2)} → ${isFinite(BOT.goal) ? "goal $" + BOT.goal.toFixed(0) : "no goal"} in ${c.mins} minutes. Trading ${c.coins.join(", ")}, ${c.dir === "ai" ? "following the AI" : "always " + c.dir.toUpperCase()}, ${c.mult ? "×" + c.mult : "auto multiplier"}, ${c.stake}% per trade, ${feeLabel(c)} fee.`, "sys");
+  say(`Run #${BOT.runId}: $${BOT.start.toFixed(2)} → ${isFinite(BOT.goal) ? "goal $" + BOT.goal.toFixed(0) : "no goal"} in ${c.mins} minutes. ${c.dir === "ai" ? `Trading ${c.coins.join(", ")}, following the AI` : `Scalping the coin on screen: in on a swing over 2× normal${c.dir === "momentum" ? "" : ` (${c.dir.toUpperCase()} only)`}, out within ${c.hold} min`}, ${c.mult ? "×" + c.mult : "auto multiplier"}, ${c.stake}% per trade, ${feeLabel(c)} fee.`, "sys");
   renderBot();
 }
 function botStop(reason){
@@ -2707,9 +2726,22 @@ function leanOf(coin){
   return {coin, score, why, exp:p.exp, move:p.move || .01, p};
 }
 function botDecide(){
-  const c = BOT.cfg, cands = c.coins.map(leanOf).filter(x => x && priceOf(x.coin));
-  if(!cands.length){ say("Waiting for prices on the selected coins…", "sys"); BOT.nextAt = Date.now() + 5000; return; }
+  const c = BOT.cfg;
   let pick, dir;
+  if(c.dir !== "ai"){
+    // scalping: wait for a strong 3-minute move on the coin on screen, then go with it
+    const mo = liveMomentum(), want = c.dir === "up" ? 1 : c.dir === "down" ? -1 : 0;
+    if(!mo || Math.abs(mo.z) <= 2 || (want && Math.sign(mo.z) !== want) || !priceOf(S.coin)){
+      BOT.nextAt = Date.now() + 1000; BOT.noSetup = true;   // keep watching every second
+      if(Date.now() - (BOT.lastWaitMsg || 0) > 60000){ BOT.lastWaitMsg = Date.now(); say(mo ? `Watching ${S.coin}: ${Math.abs(mo.z).toFixed(1)}× a normal move. Waiting for a swing over 2×.` : `Watching ${S.coin}: reading the live price…`, "sys"); }
+      return; }
+    dir = Math.sign(mo.z);
+    const move = mo.sd * Math.sqrt(S.look), pct = Math.abs(mo.now / mo.then - 1) * 100;
+    pick = {coin:S.coin, score:mo.z, swing:mo, exp:.5, move, why:[`${dir > 0 ? "up" : "down"} ${pct.toFixed(3)}% in 3 min`, `${Math.abs(mo.z).toFixed(1)}× a normal move`],
+      p:{exp:.5, move, f:[]}};
+  } else {
+  const cands = c.coins.map(leanOf).filter(x => x && priceOf(x.coin));
+  if(!cands.length){ say("Waiting for prices on the selected coins…", "sys"); BOT.nextAt = Date.now() + 5000; return; }
   if(c.dir === "ai"){
     const ok = cands.filter(x => Math.max(x.exp, 1 - x.exp) * 100 >= c.conf);
     if(!ok.length){ BOT.nextAt = Date.now() + Math.max(3, c.gap) * 1000; BOT.noSetup = true;   // re-check on the user's own wait setting
@@ -2717,6 +2749,7 @@ function botDecide(){
       return; }
     pick = ok.sort((a, b) => Math.abs(b.score) - Math.abs(a.score))[0]; dir = pick.score >= 0 ? 1 : -1;
   } else { dir = c.dir === "up" ? 1 : -1; pick = cands.sort((a, b) => dir * (b.score - a.score))[0]; }
+  }
   const moveHold = pick.move * Math.sqrt(c.hold / S.look);
   const mult = c.mult || Math.max(1, Math.min(1000, Math.floor(1 / (3 * moveHold))));
   // stake no more than what still leaves room to pay the fee at open
@@ -2727,7 +2760,7 @@ function botDecide(){
   if(stake < 1 || BOT.cash < 1){ return botStop("bust"); }
   BOT.noSetup = false;
   // the table: the Critic checks the idea, the Boss runs the numbers and has the final say
-  const peak = Math.max(BOT.runPeak || BOT.start, BOT.cash), rule = councilRules(pick.p, dir, pick.coin);
+  const peak = Math.max(BOT.runPeak || BOT.start, BOT.cash), rule = pick.swing ? councilRulesSwing(pick.swing, dir, pick.coin, mult) : councilRules(pick.p, dir, pick.coin);
   const boss = bossRules({c, bal:BOT.cash, start:BOT.start, peak, stake, mult, rule});
   const m = bossMath(c, boss.stake || stake, mult, dir, pick.p);
   const lines = councilScript(pick, dir, rule, boss, m, {stake, mult, bal:BOT.cash, start:BOT.start, peak, rec:recentRecord()}), talkMs = councilMs(lines);
@@ -3079,7 +3112,7 @@ $("pages").addEventListener("click", e => { const b = e.target.closest("button[d
 $("botTabs").addEventListener("click", e => { const b = e.target.closest("button[data-bpane]"); if(!b) return;
   document.querySelectorAll("#botCard .bpane").forEach(p => p.hidden = p.dataset.bpane !== b.dataset.bpane);
   $("botTabs").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); });
-try{ const pg = localStorage.getItem("turnspotter-page") || "live"; if(pg !== "market" && document.querySelector(`#pages button[data-page="${pg}"]`)) showPage(pg); }catch(e){ showPage("live"); }   // "flow" is now part of Market
+try{ const pg = localStorage.getItem("turnspotter-page"); showPage(document.querySelector(`#pages button[data-page="${pg}"]`) ? pg : "live"); }catch(e){ showPage("live"); }   // "flow" is now part of Market
 renderWatch();
 loadHistory();
 </script>
