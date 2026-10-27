@@ -537,6 +537,18 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - The 100-run Reality check is hidden: 1-minute candles can't fairly replay x1000 scalps (round 28). The Live
   scoreboard measures the swings tick by tick instead.
 
+### Round 30: "bet against a long streak of one colour" (research only)
+- From another Trench reel: wait for a long row of same-colour candles, then bet the opposite way.
+- `research/experiments11.py`: after exactly 3, 5, 7 or 9 same-colour candles in a row, bet the opposite colour on
+  the next candle (entering at its open). 1-minute candles (45 days) and 15-minute candles (2023 onward), five coins.
+- 15-minute candles, tens of thousands of streaks: after 3 in a row the next candle flipped 43–51% of the time and
+  the average move went against the bet on every coin (−0.5 to −1.9 bp); after 5 in a row, 45–52% and still negative
+  on 4 of 5 coins. Longer streaks (7–9) are rare and the results jump around from coin to coin (+3.4 bp on ETH at 9,
+  −10.3 bp on DOGE at 9) with no consistent sign.
+- 1-minute candles: same picture, mostly negative; the few positive cells come from small samples (36–44 streaks).
+- Conclusion: streaks don't reliably reverse. If anything they lean slightly toward continuing, which matches the
+  momentum follow-through in round 28. Not added to the site.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
