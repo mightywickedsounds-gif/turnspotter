@@ -1966,6 +1966,18 @@
   {
    "t": 1793152885049,
    "value": 57.74
+  },
+  {
+   "t": 1793153193926,
+   "value": 57.74
+  },
+  {
+   "t": 1793153500807,
+   "value": 57.74
+  },
+  {
+   "t": 1793153807659,
+   "value": 57.74
   }
  ],
  "config": {
@@ -1988,41 +2000,6 @@
   "conf": 0.55,
   "need": 2000
  },
- "status": {
-  "SOL": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 101.73,
-   "experience": 0.433,
-   "liveLearner": 0.296,
-   "record": 0.6,
-   "call": "DOWN",
-   "last400": {
-    "call": 0.22,
-    "bounceOrRollover": 0.007
-   },
-   "backtest": {
-    "calls": 157,
-    "right": 0.522
-   }
-  },
-  "XRP": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 1.338,
-   "experience": 0.443,
-   "liveLearner": 0.313,
-   "record": 0.66,
-   "call": "DOWN",
-   "last400": {
-    "call": 0.22,
-    "bounceOrRollover": 0
-   },
-   "backtest": {
-    "calls": 156,
-    "right": 0.481
-   }
-  }
- },
- "lastRun": 1793152885049
+ "status": {},
+ "lastRun": 1793153807659
 }
