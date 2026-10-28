@@ -2916,6 +2916,18 @@
   {
    "t": 1793202069521,
    "value": 54.38
+  },
+  {
+   "t": 1793202377310,
+   "value": 54.38
+  },
+  {
+   "t": 1793202682785,
+   "value": 54.38
+  },
+  {
+   "t": 1793202987490,
+   "value": 54.38
   }
  ],
  "config": {
@@ -2942,13 +2954,13 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 80716.01,
-   "experience": 0.526,
-   "liveLearner": 0.532,
+   "price": 80621.25,
+   "experience": 0.56,
+   "liveLearner": 0.534,
    "record": 0.65,
-   "call": "WAIT",
+   "call": "UP",
    "last400": {
-    "call": 0.235,
+    "call": 0.237,
     "bounceOrRollover": 0.005
    },
    "backtest": {
@@ -2959,13 +2971,13 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2337.92,
-   "experience": 0.536,
-   "liveLearner": 0.636,
+   "price": 2335.51,
+   "experience": 0.55,
+   "liveLearner": 0.687,
    "record": 0.6,
-   "call": "WAIT",
+   "call": "UP",
    "last400": {
-    "call": 0.228,
+    "call": 0.23,
     "bounceOrRollover": 0.015
    },
    "backtest": {
@@ -2976,9 +2988,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 101.27,
-   "experience": 0.518,
-   "liveLearner": 0.469,
+   "price": 101.13,
+   "experience": 0.544,
+   "liveLearner": 0.505,
    "record": 0.59,
    "call": "WAIT",
    "last400": {
@@ -2993,14 +3005,14 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.315,
-   "experience": 0.539,
-   "liveLearner": 0.61,
+   "price": 1.3127,
+   "experience": 0.557,
+   "liveLearner": 0.598,
    "record": 0.63,
-   "call": "WAIT",
+   "call": "UP",
    "last400": {
-    "call": 0.23,
-    "bounceOrRollover": 0.003
+    "call": 0.233,
+    "bounceOrRollover": 0.005
    },
    "backtest": {
     "calls": 158,
@@ -3010,9 +3022,9 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07934,
-   "experience": 0.512,
-   "liveLearner": 0.488,
+   "price": 0.07941,
+   "experience": 0.504,
+   "liveLearner": 0.544,
    "record": 0.57,
    "call": "WAIT",
    "last400": {
@@ -3025,5 +3037,5 @@
    }
   }
  },
- "lastRun": 1793202069521
+ "lastRun": 1793202987490
 }
