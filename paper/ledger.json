@@ -3475,6 +3475,18 @@
   {
    "t": 1793227903561,
    "value": 56.89
+  },
+  {
+   "t": 1793228211621,
+   "value": 56.89
+  },
+  {
+   "t": 1793228518052,
+   "value": 56.89
+  },
+  {
+   "t": 1793228823986,
+   "value": 56.89
   }
  ],
  "config": {
@@ -3501,9 +3513,9 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 81314.34,
-   "experience": 0.492,
-   "liveLearner": 0.493,
+   "price": 81293.44,
+   "experience": 0.494,
+   "liveLearner": 0.473,
    "record": 0.65,
    "call": "WAIT",
    "last400": {
@@ -3511,16 +3523,16 @@
     "bounceOrRollover": 0.003
    },
    "backtest": {
-    "calls": 172,
-    "right": 0.581
+    "calls": 171,
+    "right": 0.573
    }
   },
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2361.58,
+   "price": 2360.65,
    "experience": 0.503,
-   "liveLearner": 0.529,
+   "liveLearner": 0.559,
    "record": 0.64,
    "call": "WAIT",
    "last400": {
@@ -3529,15 +3541,15 @@
    },
    "backtest": {
     "calls": 161,
-    "right": 0.559
+    "right": 0.553
    }
   },
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 102.58,
+   "price": 102.53,
    "experience": 0.501,
-   "liveLearner": 0.523,
+   "liveLearner": 0.481,
    "record": 0.63,
    "call": "WAIT",
    "last400": {
@@ -3552,9 +3564,9 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.3276,
-   "experience": 0.513,
-   "liveLearner": 0.494,
+   "price": 1.3275,
+   "experience": 0.512,
+   "liveLearner": 0.486,
    "record": 0.66,
    "call": "WAIT",
    "last400": {
@@ -3563,15 +3575,15 @@
    },
    "backtest": {
     "calls": 158,
-    "right": 0.494
+    "right": 0.487
    }
   },
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.08006,
-   "experience": 0.495,
-   "liveLearner": 0.61,
+   "price": 0.07988,
+   "experience": 0.518,
+   "liveLearner": 0.656,
    "record": 0.57,
    "call": "WAIT",
    "last400": {
@@ -3584,5 +3596,5 @@
    }
   }
  },
- "lastRun": 1793227903561
+ "lastRun": 1793228823986
 }
