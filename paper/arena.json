@@ -1,0 +1,122 @@
+{
+ "start": 50,
+ "startedAt": 1793286669135,
+ "config": {
+  "start": 50,
+  "mult": 100,
+  "stakePct": 0.1,
+  "feePct": 1,
+  "minStake": 1
+ },
+ "lastT": 1793286600000,
+ "bots": {
+  "scalper": {
+   "name": "Scalper",
+   "desc": "Goes with a strong 3-minute swing (over 2× normal)",
+   "balance": 50,
+   "trades": 0,
+   "wins": 0,
+   "busts": 0,
+   "best": 0,
+   "worst": 0,
+   "recent": [],
+   "equity": [
+    {
+     "t": 1793286669135,
+     "v": 50
+    },
+    {
+     "t": 1793286669135,
+     "v": 50
+    }
+   ]
+  },
+  "fader": {
+   "name": "Streak Fader",
+   "desc": "Bets against 5 same-colour candles in a row",
+   "balance": 50,
+   "trades": 0,
+   "wins": 0,
+   "busts": 0,
+   "best": 0,
+   "worst": 0,
+   "recent": [],
+   "equity": [
+    {
+     "t": 1793286669135,
+     "v": 50
+    },
+    {
+     "t": 1793286669135,
+     "v": 50
+    }
+   ]
+  },
+  "breakout": {
+   "name": "Breakout Bro",
+   "desc": "Trades the break of a tight 30-minute range",
+   "balance": 50,
+   "trades": 0,
+   "wins": 0,
+   "busts": 0,
+   "best": 0,
+   "worst": 0,
+   "recent": [],
+   "equity": [
+    {
+     "t": 1793286669135,
+     "v": 50
+    },
+    {
+     "t": 1793286669135,
+     "v": 50
+    }
+   ]
+  },
+  "bull": {
+   "name": "Always Bullish",
+   "desc": "Bets UP every 30 minutes, no matter what",
+   "balance": 50,
+   "trades": 0,
+   "wins": 0,
+   "busts": 0,
+   "best": 0,
+   "worst": 0,
+   "recent": [],
+   "equity": [
+    {
+     "t": 1793286669135,
+     "v": 50
+    },
+    {
+     "t": 1793286669135,
+     "v": 50
+    }
+   ]
+  },
+  "flipper": {
+   "name": "Coin Flipper",
+   "desc": "Random direction every 30 minutes: the control",
+   "balance": 50,
+   "trades": 0,
+   "wins": 0,
+   "busts": 0,
+   "best": 0,
+   "worst": 0,
+   "recent": [],
+   "equity": [
+    {
+     "t": 1793286669135,
+     "v": 50
+    },
+    {
+     "t": 1793286669135,
+     "v": 50
+    }
+   ]
+  }
+ },
+ "lastRun": 1793286669135,
+ "price": 81359.64,
+ "src": "Coinbase"
+}
