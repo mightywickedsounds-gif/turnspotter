@@ -8,7 +8,7 @@
   "feePct": 1,
   "minStake": 1
  },
- "lastT": 1793291100000,
+ "lastT": 1793291400000,
  "bots": {
   "scalper": {
    "name": "Scalper",
@@ -87,6 +87,10 @@
     },
     {
      "t": 1793291193430,
+     "v": 50
+    },
+    {
+     "t": 1793291496250,
      "v": 50
     }
    ]
@@ -194,6 +198,10 @@
     {
      "t": 1793291193430,
      "v": 49.75
+    },
+    {
+     "t": 1793291496250,
+     "v": 49.75
     }
    ]
   },
@@ -275,18 +283,22 @@
     {
      "t": 1793291193430,
      "v": 50
+    },
+    {
+     "t": 1793291496250,
+     "v": 50
     }
    ]
   },
   "bull": {
    "name": "Always Bullish",
    "desc": "Bets UP every 30 minutes, no matter what",
-   "balance": 50.324,
-   "trades": 2,
+   "balance": 50.1804,
+   "trades": 3,
    "wins": 1,
    "busts": 0,
    "best": 0.3465,
-   "worst": -0.0225,
+   "worst": -0.1436,
    "recent": [
     {
      "t": 1793287800000,
@@ -298,6 +310,12 @@
      "t": 1793289600000,
      "dir": 1,
      "pnl": -0.0225,
+     "busted": false
+    },
+    {
+     "t": 1793291400000,
+     "dir": 1,
+     "pnl": -0.1436,
      "busted": false
     }
    ],
@@ -369,17 +387,21 @@
     {
      "t": 1793291193430,
      "v": 50.32
+    },
+    {
+     "t": 1793291496250,
+     "v": 50.18
     }
    ]
   },
   "flipper": {
    "name": "Coin Flipper",
    "desc": "Random direction every 30 minutes: the control",
-   "balance": 49.4765,
-   "trades": 2,
-   "wins": 0,
+   "balance": 49.5188,
+   "trades": 3,
+   "wins": 1,
    "busts": 0,
-   "best": 0,
+   "best": 0.0423,
    "worst": -0.4465,
    "recent": [
     {
@@ -393,6 +415,12 @@
      "dir": -1,
      "pnl": -0.077,
      "busted": false
+    },
+    {
+     "t": 1793291400000,
+     "dir": -1,
+     "pnl": 0.0423,
+     "busted": false
     }
    ],
    "equity": [
@@ -463,11 +491,15 @@
     {
      "t": 1793291193430,
      "v": 49.48
+    },
+    {
+     "t": 1793291496250,
+     "v": 49.52
     }
    ]
   }
  },
- "lastRun": 1793291193430,
- "price": 81393.67,
+ "lastRun": 1793291496250,
+ "price": 81331.19,
  "src": "Coinbase"
 }
