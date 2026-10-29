@@ -1,0 +1,50 @@
+name: Bot Arena
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # GitHub fires this late and unevenly, so each run stays awake for ~5h40m
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [paper/arena.mjs, .github/workflows/arena.yml]
+permissions:
+  contents: write
+concurrency:
+  group: bot-arena            # its own queue, separate from the paper bots
+  cancel-in-progress: false
+jobs:
+  arena:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/setup-node@v4
+        with: {node-version: "20"}
+      - name: Run the arena every 5 minutes for ~5h40m
+        run: |
+          git config user.name "turnspotter-bot"
+          git config user.email "turnspotter-bot@users.noreply.github.com"
+          # This job writes ONE file, paper/arena.json, and nothing else. To save, it resets to the newest main and
+          # puts only its own file back, so it can never overwrite the paper bots' ledgers (or anything else).
+          save() {
+            mkdir -p "$RUNNER_TEMP/keep"; cp paper/arena.json "$RUNNER_TEMP/keep/arena.json" || return 0
+            for i in 1 2 3; do
+              if timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD \
+                 && cp "$RUNNER_TEMP/keep/arena.json" paper/arena.json && git add paper/arena.json \
+                 && { git diff --cached --quiet || git commit -qm "Bot Arena update"; } \
+                 && timeout 60 git push -q origin HEAD:main; then echo "saved"; return 0; fi
+              echo "save attempt $i failed"; sleep 10
+            done
+            cp "$RUNNER_TEMP/keep/arena.json" paper/arena.json
+          }
+          # start from the newest arena file, never a stale copy
+          timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD
+          end=$((SECONDS + 20400)); saved=-900
+          while true; do
+            out=$(timeout 120 node paper/arena.mjs 2>&1) || true; echo "$out"
+            if echo "$out" | grep -q TRADES_CHANGED || [ $((SECONDS - saved)) -ge 900 ] || [ $SECONDS -ge $end ]; then
+              save; saved=$SECONDS
+            fi
+            [ $SECONDS -ge $end ] && break
+            sleep 300
+          done

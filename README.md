@@ -592,6 +592,10 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   Breakout Bro (break of a tight 30-minute range), Always Bullish and Coin Flipper (the control). x100, 10% per trade,
   in and out within one minute, 1% fee, bust on a 1% move inside the minute. A leaderboard shows who's ahead and how
   many strategies beat the coin flip.
+- The arena runs in its **own** GitHub job (`.github/workflows/arena.yml`, its own queue) and writes only
+  `paper/arena.json`; the paper-bot job writes only `paper/ledger.json` and `paper/trend.json`. Each saves by resetting to
+  the newest main and putting back only its own file, so neither can overwrite the other (tested with both jobs taking
+  turns on a scratch copy of the repo).
 
 ## Files
 
