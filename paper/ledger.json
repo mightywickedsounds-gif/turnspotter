@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 37.3158,
+ "balance": 33.5858,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -1471,6 +1471,22 @@
    "openedAt": 1793236501220,
    "expiresAt": 1793240101220,
    "experience": 0.583,
+   "source": "Binance US",
+   "status": "open"
+  },
+  {
+   "id": "ETH-1793237423790",
+   "coin": "ETH",
+   "dir": 1,
+   "entry": 2345.31,
+   "spread": 0.000192,
+   "stake": 3.73,
+   "mult": 50,
+   "fee": 0.0373,
+   "bustPrice": 2298.4038,
+   "openedAt": 1793237423790,
+   "expiresAt": 1793241023790,
+   "experience": 0.572,
    "source": "Binance US",
    "status": "open"
   }
@@ -3651,6 +3667,18 @@
   {
    "t": 1793236501220,
    "value": 56.89
+  },
+  {
+   "t": 1793236810372,
+   "value": 56.89
+  },
+  {
+   "t": 1793237116942,
+   "value": 56.89
+  },
+  {
+   "t": 1793237423790,
+   "value": 56.89
   }
  ],
  "config": {
@@ -3674,57 +3702,23 @@
   "need": 2000
  },
  "status": {
-  "BTC": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 80977.61,
-   "experience": 0.574,
-   "liveLearner": 0.515,
-   "record": 0.65,
-   "call": "UP",
-   "last400": {
-    "call": 0.237,
-    "bounceOrRollover": 0.003
-   },
-   "backtest": {
-    "calls": 171,
-    "right": 0.573
-   }
-  },
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2347.79,
-   "experience": 0.578,
-   "liveLearner": 0.454,
+   "price": 2347,
+   "experience": 0.572,
+   "liveLearner": 0.491,
    "record": 0.64,
    "call": "UP",
    "last400": {
-    "call": 0.233,
+    "call": 0.235,
     "bounceOrRollover": 0.01
    },
    "backtest": {
     "calls": 160,
     "right": 0.556
    }
-  },
-  "DOGE": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 0.07924,
-   "experience": 0.583,
-   "liveLearner": 0.699,
-   "record": 0.57,
-   "call": "UP",
-   "last400": {
-    "call": 0.263,
-    "bounceOrRollover": 0
-   },
-   "backtest": {
-    "calls": 163,
-    "right": 0.534
-   }
   }
  },
- "lastRun": 1793236501220
+ "lastRun": 1793237423790
 }
