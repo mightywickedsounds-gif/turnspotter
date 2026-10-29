@@ -8,7 +8,7 @@
   "feePct": 1,
   "minStake": 1
  },
- "lastT": 1793300160000,
+ "lastT": 1793300460000,
  "bots": {
   "scalper": {
    "name": "Scalper",
@@ -207,6 +207,10 @@
     },
     {
      "t": 1793300240325,
+     "v": 50
+    },
+    {
+     "t": 1793300542261,
      "v": 50
     }
    ]
@@ -458,6 +462,10 @@
     {
      "t": 1793300240325,
      "v": 49.89
+    },
+    {
+     "t": 1793300542261,
+     "v": 49.89
     }
    ]
   },
@@ -684,18 +692,22 @@
     {
      "t": 1793300240325,
      "v": 50.49
+    },
+    {
+     "t": 1793300542261,
+     "v": 50.49
     }
    ]
   },
   "bull": {
    "name": "Always Bullish",
    "desc": "Bets UP every 30 minutes, no matter what",
-   "balance": 49.7835,
-   "trades": 7,
+   "balance": 49.4862,
+   "trades": 8,
    "wins": 2,
    "busts": 0,
    "best": 0.3465,
-   "worst": -0.2176,
+   "worst": -0.2973,
    "recent": [
     {
      "t": 1793287800000,
@@ -737,6 +749,12 @@
      "t": 1793298600000,
      "dir": 1,
      "pnl": -0.2176,
+     "busted": false
+    },
+    {
+     "t": 1793300400000,
+     "dir": 1,
+     "pnl": -0.2973,
      "busted": false
     }
    ],
@@ -928,17 +946,21 @@
     {
      "t": 1793300240325,
      "v": 49.78
+    },
+    {
+     "t": 1793300542261,
+     "v": 49.49
     }
    ]
   },
   "flipper": {
    "name": "Coin Flipper",
    "desc": "Random direction every 30 minutes: the control",
-   "balance": 49.4544,
-   "trades": 7,
-   "wins": 3,
+   "balance": 49.6509,
+   "trades": 8,
+   "wins": 4,
    "busts": 0,
-   "best": 0.116,
+   "best": 0.1965,
    "worst": -0.4465,
    "recent": [
     {
@@ -982,6 +1004,12 @@
      "dir": -1,
      "pnl": 0.116,
      "busted": false
+    },
+    {
+     "t": 1793300400000,
+     "dir": -1,
+     "pnl": 0.1965,
+     "busted": false
     }
    ],
    "equity": [
@@ -1172,11 +1200,15 @@
     {
      "t": 1793300240325,
      "v": 49.45
+    },
+    {
+     "t": 1793300542261,
+     "v": 49.65
     }
    ]
   }
  },
- "lastRun": 1793300240325,
- "price": 80814.57,
+ "lastRun": 1793300542261,
+ "price": 80736.21,
  "src": "Coinbase"
 }
