@@ -597,6 +597,23 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   the newest main and putting back only its own file, so neither can overwrite the other (tested with both jobs taking
   turns on a scratch copy of the repo).
 
+### Round 33: jump in earlier, or wait for a bigger move? (research only)
+- Question from the owner: waiting for a 2× move means missing the first part of it. `research/experiments13.py` tries
+  triggers from 0.5× to 3× a normal 1- or 3-minute move (45 days of 1-minute candles) and measures what comes after.
+- After the trigger, average move in its direction over the next 1 / 3 minutes (bp), last-3-minute triggers:
+
+  | Trigger | BTC | ETH | SOL | Triggers per day (BTC) |
+  |---|---|---|---|---|
+  | over 0.5× | +0.15 / +0.11 | +0.15 / +0.15 | +0.21 / +0.26 | 695 |
+  | over 1× | +0.17 / +0.20 | +0.23 / +0.23 | +0.30 / +0.38 | 359 |
+  | over 2× (the bot) | +0.31 / +0.30 | +0.20 / +0.36 | +0.51 / +0.81 | 92 |
+  | over 3× | +0.54 / +0.91 | +0.48 / +1.06 | +0.66 / +1.16 | 29 |
+
+- Earlier triggers fire far more often but what follows them is weaker: the start of a big move looks like ordinary
+  wiggling. The bigger the move already is, the more it tends to keep going, and holding 3 minutes instead of 1 helps
+  on the big moves. Every number is still under about 0.01% of the price, smaller than Trench's likely spread.
+- Nothing changed on the site.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
