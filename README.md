@@ -552,6 +552,28 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - Conclusion: streaks don't reliably reverse. If anything they lean slightly toward continuing, which matches the
   momentum follow-through in round 28. Not added to the site.
 
+### Round 31: the Scalper bot on real Trench, simulated second by second (research only)
+- `research/experiments12.py` simulates the bot's exact x1000 rules (bust −0.1%, take profit +30% of the stake,
+  instant close at 85% of it, bank 40%+ held 3 s, give-back lock, 60 s max) on second-by-second prices with each
+  coin's real 1-minute volatility from the last 45 days, the follow-through measured in round 28 (+0.20 to +0.64 bp
+  per minute), the 1% fee, and an entry worse than the chart by a spread of 0, 0.5 or 1 bp (Trench doesn't publish
+  it; its price sat about 1.2 bp from Coinbase's).
+- Per trade, % of the stake, with the measured follow-through:
+
+  | Coin | No spread | 0.5 bp spread | 1 bp spread | Busted (1 bp) |
+  |---|---|---|---|---|
+  | BTC | −0.1% | −4.4% | −9.7% | 10% |
+  | ETH | −0.2% | −5.5% | −9.9% | 19% |
+  | SOL | −0.3% | −4.6% | −9.5% | 21% |
+  | XRP | −0.7% | −4.7% | −10.1% | 21% |
+  | DOGE | −1.7% | −5.5% | −11.1% | 23% |
+
+  It wins 63–81% of trades, but each bust costs the whole stake, so the average is negative. Even double the
+  measured follow-through only reaches about +1% per trade on BTC, and only with zero spread.
+- $50 at 25% a trade on BTC: with no spread the median run is $32 after 100 trades and $15 after 300; with a
+  0.5 bp spread, $10 after 100 and $0.39 after 300 (93% of runs under $5); with 1 bp, 100% under $5 by 300 trades.
+- On DOGE, SOL and XRP the bust (0.1%) is closer than one normal minute's move, so ordinary wiggling busts it.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
