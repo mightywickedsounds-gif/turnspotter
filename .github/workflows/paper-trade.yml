@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [paper/trader.mjs, paper/trend.mjs, .github/workflows/paper-trade.yml]
+    paths: [paper/trader.mjs, paper/trend.mjs, paper/arena.mjs, .github/workflows/paper-trade.yml]
 permissions:
   contents: write
 concurrency:
@@ -28,10 +28,10 @@ jobs:
           # merging it resets to main and puts its own ledgers back: a failed save can never leave the repo stuck,
           # and every git network call has a time limit.
           save() {
-            mkdir -p "$RUNNER_TEMP/keep"; cp paper/ledger.json paper/trend.json "$RUNNER_TEMP/keep/" 2>/dev/null
+            mkdir -p "$RUNNER_TEMP/keep"; cp paper/ledger.json paper/trend.json paper/arena.json "$RUNNER_TEMP/keep/" 2>/dev/null
             for i in 1 2 3; do
               if timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD \
-                 && cp "$RUNNER_TEMP"/keep/*.json paper/ && git add paper/ledger.json paper/trend.json \
+                 && cp "$RUNNER_TEMP"/keep/*.json paper/ && git add paper/*.json \
                  && { git diff --cached --quiet || git commit -qm "Paper trading update"; } \
                  && timeout 60 git push -q origin HEAD:main; then echo "saved"; return 0; fi
               echo "save attempt $i failed"; sleep 10
@@ -42,7 +42,7 @@ jobs:
           timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD
           end=$((SECONDS + 20400)); saved=-900   # save on the first pass too
           while true; do
-            out=$( (timeout 240 node paper/trader.mjs; timeout 120 node paper/trend.mjs) 2>&1) || true; echo "$out"   # hard time limits so one stuck request can't freeze the loop
+            out=$( (timeout 240 node paper/trader.mjs; timeout 120 node paper/trend.mjs; timeout 120 node paper/arena.mjs) 2>&1) || true; echo "$out"   # hard time limits so one stuck request can't freeze the loop
             # save when a trade opens or closes, otherwise at most every 15 minutes (keeps the commit history sane)
             if echo "$out" | grep -q TRADES_CHANGED || [ $((SECONDS - saved)) -ge 900 ] || [ $SECONDS -ge $end ]; then
               save; saved=$SECONDS

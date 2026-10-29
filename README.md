@@ -574,6 +574,25 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   0.5 bp spread, $10 after 100 and $0.39 after 300 (93% of runs under $5); with 1 bp, 100% under $5 by 300 trades.
 - On DOGE, SOL and XRP the bust (0.1%) is closer than one normal minute's move, so ordinary wiggling busts it.
 
+### Round 32: Bot Arena, Multiverse mode, and matching Trench's price
+- **Which Bitcoin price does Trench use?** `research/price_probe.py` (run on GitHub) read Bitcoin from 13 feeds at once.
+  They split into two groups about $100 apart: US-dollar spot markets (Coinbase, Kraken, Bitstamp, Gemini, Binance US
+  BTC/USD) around $80,995–81,005, and USDT / futures markets (OKX, OKX futures, Hyperliquid, Binance US BTC/USDT)
+  around $81,055–81,130. Trench sat about $100 from Coinbase, so it's probably in the second group. Its public web
+  code only loads its price connection after login, so it doesn't say which. Binance, Bybit and Pyth refuse US servers.
+- **Match Trench's price** (Live tab): eleven Bitcoin feeds live side by side; type Trench's price and tap Check a few
+  times, and it ranks the feeds by how close they were. "Use" switches the Live tab and the Scalper bot to that feed for
+  Bitcoin (the 3-minute history restarts, because the feeds sit ~$100 apart).
+- **Multiverse mode** (Live tab, 🌌): 100 possible next minutes from the current price, random walks with the coin's
+  normal 1-minute move and no edge added, coloured by how a Trench trade at your stake and multiplier would end (green
+  = take profit +30%, red = bust, grey = neither in 60 s), with the average result after the fee. The fan stays put and
+  the real price walks into it.
+- **Bot Arena** (new tab, `paper/arena.mjs`, `paper/arena.json`): five strategies with $50 each trade Bitcoin 24/7 on
+  GitHub on Coinbase 1-minute candles: Scalper (strong 3-minute swing), Streak Fader (against 5 same-colour candles),
+  Breakout Bro (break of a tight 30-minute range), Always Bullish and Coin Flipper (the control). x100, 10% per trade,
+  in and out within one minute, 1% fee, bust on a 1% move inside the minute. A leaderboard shows who's ahead and how
+  many strategies beat the coin flip.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

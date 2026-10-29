@@ -55,7 +55,7 @@ body[data-mood="up"]{--mood:var(--up)} body[data-mood="down"]{--mood:var(--down)
 @keyframes ping{0%{box-shadow:0 0 0 0 rgba(62,230,162,.55)}80%,100%{box-shadow:0 0 0 10px rgba(62,230,162,0)}}
 
 /* ticker */
-body[data-on="auto"] .watch{display:none}
+body[data-on="auto"] .watch,body[data-on="arena"] .watch{display:none}
 #botTiles{display:none}
 .watch{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .watch::-webkit-scrollbar{display:none}
@@ -278,6 +278,22 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 #liveCard.tv #lvChart,#liveCard:fullscreen #lvChart{height:52vh}
 #liveCard.tv .lvPrice,#liveCard:fullscreen .lvPrice{font-size:clamp(56px,10vw,140px)}
 #liveCard.tv .lvState b,#liveCard:fullscreen .lvState b{font-size:clamp(30px,6vw,84px)}
+.matchRow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px} .matchRow input{max-width:200px;font:600 14px var(--mono)}
+.matchTbl td{font:600 12.5px var(--mono);padding:6px 8px} .matchTbl tr.best td{color:var(--up)} .matchTbl tr.on td:first-child::after{content:" ●";color:var(--cyan)}
+.matchTbl button{font-size:11.5px;padding:4px 9px}
+#mvBtn[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 18px -6px var(--accent);color:var(--ink)}
+#mvTxt b{font-family:var(--mono)}
+.arenaBanner{margin:0 0 12px;font:700 15px var(--body)}
+.arenaList{display:grid;gap:10px}
+.arenaRow{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;border:1px solid var(--edge);background:rgba(140,155,255,.04);position:relative;overflow:hidden;animation:rise .4s both}
+.arenaRow.first{border-color:color-mix(in srgb,var(--warn) 55%,transparent);box-shadow:0 0 30px -12px var(--warn)}
+.arenaRow.control{border-style:dashed}
+.arenaRank{font:800 22px var(--display);text-align:center;color:var(--muted)} .arenaRow.first .arenaRank{color:var(--warn)}
+.arenaName b{font:700 15px var(--body)} .arenaName span{display:block;font:500 12px var(--body);color:var(--muted);margin-top:2px}
+.arenaName i{font:600 10.5px var(--mono);font-style:normal;color:var(--muted);margin-left:6px}
+.arenaMoney{text-align:right} .arenaMoney b{display:block;font:700 20px var(--mono)} .arenaMoney span{font:600 12px var(--mono)}
+.arenaRow svg{position:absolute;inset:auto 0 0 0;width:100%;height:34px;opacity:.35;pointer-events:none}
+.arenaBar{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(140,155,255,.07),transparent);pointer-events:none}
 /* bot v2 */
 .styleCards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
 .styleCards button{display:grid;gap:4px;text-align:left;padding:12px;border-radius:12px;backdrop-filter:none}
@@ -502,14 +518,14 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   </header>
 
   <nav class="pages" id="pages" aria-label="Sections">
-    <button type="button" data-page="live" aria-current="page">Live</button><button type="button" data-page="bot">Scalper bot</button>
+    <button type="button" data-page="live" aria-current="page">Live</button><button type="button" data-page="bot">Scalper bot</button><button type="button" data-page="arena">Arena</button>
   </nav>
 
   <nav class="watch" id="watch" aria-label="Pick a coin"></nav>
 
   <section class="card" id="liveCard" data-page="live">
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"/></svg>Live</h2>
-      <button type="button" class="ghost" id="tvBtn">⛶ TV mode</button></div>
+      <span><button type="button" class="ghost" id="mvBtn" aria-pressed="false">🌌 Multiverse</button> <button type="button" class="ghost" id="tvBtn">⛶ TV mode</button></span></div>
     <div class="lvTop">
       <div><div class="coinName" id="lvCoin">Bitcoin</div><div class="lvPrice" id="lvPrice">—</div></div>
       <div class="lvState n" id="lvState"><b id="lvWord">Reading…</b><span id="lvSub"></span></div>
@@ -523,7 +539,21 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
       <label>Multiplier <select id="lvMult"><option>50</option><option>100</option><option>250</option><option>500</option><option selected>1000</option></select></label>
       <span class="lvIf" id="lvIf"></span>
     </div>
+    <p class="lvScore" id="mvTxt" hidden></p>
     <p class="lvScore" id="lvScore"></p>
+    <details class="moreOpts" id="matchBox"><summary>Match Trench's price <span id="feedNow" class="acctSub"></span></summary>
+      <p class="acctSub" style="margin:6px 0 10px">Bitcoin from different markets, live. Type the price Trench shows and tap Check, a few times; the closest market wins. Prices move fast, so check when it's calm.</p>
+      <div class="matchRow"><input type="number" id="trenchPx" inputmode="decimal" placeholder="Trench's BTC price" step="0.01"><button type="button" class="ghost" id="matchBtn">Check</button><button type="button" class="ghost" id="matchReset">Clear</button></div>
+      <div class="tablewrap"><table class="matchTbl"><tbody id="matchTbl"></tbody></table></div>
+      <p class="acctSub" id="matchVerdict"></p>
+    </details>
+  </section>
+
+  <section class="card" id="arenaCard" data-page="arena" hidden>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Bot Arena</h2><span class="record" id="arenaMeta">loading…</span></div>
+    <p class="arenaBanner" id="arenaBanner"></p>
+    <div class="arenaList" id="arenaList"></div>
+    <p class="note">Five strategies, $50 of fake money each, trading Bitcoin around the clock on GitHub: ×100, 10% of their money per trade, in and out within a minute, 1% fee. The Coin Flipper picks at random: a strategy that can't beat it has no edge.</p>
   </section>
 
   <section class="card main" data-page="market" hidden>
@@ -1260,7 +1290,7 @@ function setLivePrice(price){
   else if(price !== S.target){ pe.classList.remove("flash-up","flash-down"); void pe.offsetWidth;
     pe.classList.add(price > S.target ? "flash-up" : "flash-down"); clearTimeout(S.flashT); S.flashT = setTimeout(() => pe.classList.remove("flash-up","flash-down"), 900); }
   S.target = price;
-  S.ticks.push({t:Date.now(), p:price}); if(!FLOW.trades.length) liveTick(price);
+  S.ticks.push({t:Date.now(), p:price}); if(!FLOW.trades.length && !feedOwns(S.coin)) liveTick(price);
   if(S.ticks.length > 20000 || (S.ticks.length && S.ticks[0].t < Date.now() - 2 * 3600e3)) S.ticks.splice(0, Math.max(1, S.ticks.length - 15000));
 }
 async function fetchTicker(){
@@ -1479,9 +1509,9 @@ function addTrade(t, samePrices){
   // Trades only move prices when they come from the SAME exchange as the price feed. Different exchanges
   // trade a little apart (Binance vs Binance US can differ by ~0.1%), and mixing them handed the ×1000
   // bot fake "wins": it bought at one exchange's price and cashed out on the other's.
-  if(samePrices){ S.prices[S.coin] = t.p; S.priceT[S.coin] = Date.now(); markPush(S.coin, t.p);
+  if(samePrices && !feedOwns(S.coin)){ S.prices[S.coin] = t.p; S.priceT[S.coin] = Date.now(); markPush(S.coin, t.p);
     if(BOT.running) botCheck(S.coin, t.p); }   // bust / stop / take-profit on every single live trade
-  liveTick(t.p, t.t);
+  if(!feedOwns(S.coin)) liveTick(t.p, t.t);
   FLOW.trades.push(t); if(FLOW.trades.length > 600) FLOW.trades.splice(0, 200);
   const sec = Math.floor(t.t / 1000), b = FLOW.secs.get(sec) || {buy:0, sell:0};
   if(t.buy) b.buy += t.v; else b.sell += t.v;
@@ -1615,6 +1645,7 @@ function markPx(coin){
   return recent.length ? recent[recent.length >> 1] : S.prices[coin];
 }
 function onPrice(coin, price){
+  if(feedOwns(coin)) return;   // the price feed matched to Trench is in charge of this coin
   S.prices[coin] = price; S.priceT[coin] = Date.now(); markPush(coin, price);
   if(BOT.running) botCheck(coin, price);
   for(const p of PR.positions.filter(x => x.coin === coin)){
@@ -2507,7 +2538,7 @@ function livePriceAt(t){
   if(T.length && T[0].t <= t){ let lo = 0, hi = T.length - 1;
     while(lo < hi){ const mid = (lo + hi + 1) >> 1; if(T[mid].t <= t) lo = mid; else hi = mid - 1; }
     return T[lo].p; }
-  if(LV.m1) for(let i = LV.m1.length - 1; i >= 0; i--){ const k = LV.m1[i]; if(k.t <= t) return k.t + 60e3 <= t ? k.c : k.o; }
+  if(LV.m1 && !feedOwns(S.coin)) for(let i = LV.m1.length - 1; i >= 0; i--){ const k = LV.m1[i]; if(k.t <= t) return k.t + 60e3 <= t ? k.c : k.o; }
   return NaN;
 }
 function liveScore(sig, now){
@@ -2562,19 +2593,22 @@ function liveDraw(now){
   const cv = $("lvChart"), dpr = Math.min(2, devicePixelRatio || 1), W = cv.clientWidth, Hh = cv.clientHeight; if(!W || !Hh) return;
   if(cv.width !== Math.round(W * dpr)){ cv.width = Math.round(W * dpr); cv.height = Math.round(Hh * dpr); }
   const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, Hh);
-  const t1 = Date.now(), t0 = t1 - 180e3;
+  const t1 = Date.now(), t0 = t1 - (MV.on ? 120e3 : 180e3);   // Multiverse: 2 minutes back, 1 minute ahead
   let pts = LV.ticks.filter(k => k.t >= t0);
-  if(LV.m1 && (!pts.length || pts[0].t > t0 + 20e3)){ const first = pts.length ? pts[0].t : t1;
+  if(LV.m1 && !feedOwns(S.coin) && (!pts.length || pts[0].t > t0 + 20e3)){ const first = pts.length ? pts[0].t : t1;
     pts = LV.m1.filter(k => k.t >= t0 - 60e3 && k.t + 60e3 < first).map(k => ({t:k.t + 60e3, p:k.c})).concat(pts); }
   if(pts.length < 2) return;
   let lo = Math.min(...pts.map(k => k.p)), hi = Math.max(...pts.map(k => k.p));
   if(LV.sig){ lo = Math.min(lo, LV.sig.p); hi = Math.max(hi, LV.sig.p); }
+  const fan = MV.on ? multiverse(now) : null, span = MV.on ? 180e3 : 180e3;
+  if(fan){ lo = Math.min(lo, fan.lo, fan.bust, fan.tp); hi = Math.max(hi, fan.hi, fan.bust, fan.tp); }
   const pad = (hi - lo) * .15 || now * 1e-4; lo -= pad; hi += pad;
-  const X = t => (t - t0) / 180e3 * (W - 70), Y = p => 10 + (hi - p) / (hi - lo) * (Hh - 30);
+  const X = t => (t - t0) / span * (W - 70), Y = p => 10 + (hi - p) / (hi - lo) * (Hh - 30);
+  if(fan) drawFan(g, fan, X, Y, W);
   const up = pts.at(-1).p >= pts[0].p, col = up ? css("--up") : css("--down");
   // grid + time labels
   g.strokeStyle = "rgba(140,155,255,.08)"; g.lineWidth = 1; g.font = "600 10.5px JetBrains Mono, monospace"; g.fillStyle = css("--faint");
-  for(let m = 0; m <= 3; m++){ const x = X(t0 + m * 60e3); g.beginPath(); g.moveTo(x, 6); g.lineTo(x, Hh - 18); g.stroke(); g.fillText(m === 3 ? "now" : `-${3 - m}m`, Math.max(2, x - 10), Hh - 4); }
+  for(let m = 0; m <= 3; m++){ const x = X(t0 + m * 60e3), ago = Math.round((t1 - (t0 + m * 60e3)) / 60e3); g.beginPath(); g.moveTo(x, 6); g.lineTo(x, Hh - 18); g.stroke(); g.fillText(ago === 0 ? "now" : ago < 0 ? `+${-ago}m` : `-${ago}m`, Math.max(2, Math.min(W - 100, x - 10)), Hh - 4); }
   // area + line
   const grad = g.createLinearGradient(0, 0, 0, Hh); grad.addColorStop(0, col + "55"); grad.addColorStop(1, col + "00");
   g.beginPath(); pts.forEach((k, i) => i ? g.lineTo(X(k.t), Y(k.p)) : g.moveTo(X(k.t), Y(k.p)));
@@ -2597,6 +2631,142 @@ $("tvBtn").addEventListener("click", () => {
   if(c.requestFullscreen) c.requestFullscreen().catch(() => c.classList.toggle("tv")); else c.classList.toggle("tv");
 });
 document.addEventListener("keydown", e => { if(e.key === "Escape") $("liveCard").classList.remove("tv"); });
+// ───────── Bot Arena: five strategies, $50 each, trading Bitcoin 24/7 on GitHub (paper/arena.mjs) ─────────
+async function loadArena(){
+  if(document.body.dataset.on !== "arena") return;
+  try{
+    const L = await (await fetch("paper/arena.json?" + Date.now(), {cache:"no-store"})).json();
+    const bots = Object.entries(L.bots).map(([id, b]) => ({id, ...b})).sort((a, b) => b.balance - a.balance);
+    const flip = L.bots.flipper ? L.bots.flipper.balance : NaN, beat = bots.filter(b => b.id !== "flipper" && b.balance > flip).length;
+    const mins = Math.round((Date.now() - L.lastRun) / 60000), days = (Date.now() - L.startedAt) / 864e5;
+    $("arenaMeta").textContent = `${days < 1 ? Math.max(1, Math.round(days * 24)) + " h" : days.toFixed(1) + " days"} in · updated ${mins < 1 ? "just now" : mins + " min ago"}`;
+    $("arenaBanner").innerHTML = isNaN(flip) ? "" : `${beat} of 4 strategies are beating the coin flip${beat ? "" : " 🪙"}`;
+    const top = Math.max(...bots.map(b => b.balance), L.start);
+    $("arenaList").innerHTML = bots.map((b, i) => {
+      const chg = b.balance / L.start - 1, eq = b.equity.map(e => e.v), lo = Math.min(...eq, L.start), hi = Math.max(...eq, L.start);
+      const spark = eq.length > 1 ? `<svg viewBox="0 0 300 34" preserveAspectRatio="none" aria-hidden="true"><polyline points="${eq.map((v, k) => `${(k / (eq.length - 1) * 300).toFixed(1)},${(32 - (v - lo) / ((hi - lo) || 1) * 30).toFixed(1)}`).join(" ")}" fill="none" stroke="${chg >= 0 ? "var(--up)" : "var(--down)"}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>` : "";
+      return `<div class="arenaRow ${i === 0 ? "first" : ""} ${b.id === "flipper" ? "control" : ""}" style="animation-delay:${i * 60}ms">
+        <i class="arenaBar" style="width:${(b.balance / top * 100).toFixed(1)}%"></i>
+        <div class="arenaRank">${i === 0 ? "👑" : "#" + (i + 1)}</div>
+        <div class="arenaName"><b>${b.name}</b>${b.id === "flipper" ? "<i>CONTROL</i>" : ""}<span>${b.desc} · ${b.trades} trades · ${b.trades ? Math.round(100 * b.wins / b.trades) : 0}% won${b.busts ? ` · ${b.busts} busted` : ""}</span></div>
+        <div class="arenaMoney"><b>$${b.balance.toFixed(2)}</b><span class="${chg >= 0 ? "win" : "loss"}">${chg >= 0 ? "▲" : "▼"} ${Math.abs(chg * 100).toFixed(1)}%</span></div>${spark}</div>`; }).join("");
+  }catch(e){ $("arenaMeta").textContent = "starting up"; $("arenaList").innerHTML = `<p class="acctSub">The arena's first round is on its way from GitHub. Check back in a few minutes.</p>`; }
+}
+setInterval(loadArena, 60000);
+// ───────── Multiverse: 100 possible next minutes, coloured by how a Trench trade from here would end ─────────
+// Each future is a random walk with this coin's normal 1-minute move (no edge added: the measured follow-through is
+// far too small to see). Green = it reached the bot's take-profit (+30% of the stake) first, red = it hit the bust
+// first, grey = neither within 60 s. The fan stays put and the real price walks into it.
+const MV = {on:false, fan:null};
+function multiverse(now){
+  const f = MV.fan, dirNow = LV.sig ? LV.sig.dir : (LV.z || 0) < 0 ? -1 : 1;
+  if(f && Date.now() - f.t < 60e3 && f.coin === S.coin && !(LV.sig && f.sigT !== LV.sig.t)) return f;
+  if(!(LV.sd > 0) || !(now > 0)) return null;
+  const mult = +$("lvMult").value, stake = Math.max(1, +$("lvStake").value || 10), sd = LV.sd / Math.sqrt(60), d = dirNow;
+  const bust = now * (1 - d / mult), tp = now * (1 + d * .30 / mult);
+  const paths = []; let lo = now, hi = now, win = 0, busts = 0, sum = 0;
+  for(let i = 0; i < 100; i++){
+    let x = 0, end = null; const pts = [now];
+    for(let s = 1; s <= 60; s++){ x += sd * gauss(); const p = now * Math.exp(x); pts.push(p);
+      if(d * (p / now - 1) >= .30 / mult){ end = "win"; break; } if(d * (p / now - 1) <= -1 / mult){ end = "bust"; break; } }
+    const last = pts.at(-1); lo = Math.min(lo, ...pts); hi = Math.max(hi, ...pts);
+    const pnl = end === "win" ? stake * .30 : end === "bust" ? -stake : Math.max(-stake, stake * mult * d * (last / now - 1));
+    if(end === "win") win++; if(end === "bust") busts++; sum += pnl - feeOf(stake, mult);
+    paths.push({pts, end});
+  }
+  MV.fan = {t:Date.now(), coin:S.coin, sigT:LV.sig ? LV.sig.t : null, p:now, d, mult, stake, bust, tp, paths, lo, hi, win, busts, avg:sum / 100};
+  $("mvTxt").hidden = false;
+  $("mvTxt").innerHTML = `100 futures for ${d > 0 ? "▲ UP" : "▼ DOWN"} $${stake} ×${mult} from here: <b class="win">${win} bank +30%</b> · <b class="loss">${busts} bust</b> · ${100 - win - busts} undecided · average <b class="${MV.fan.avg >= 0 ? "win" : "loss"}">${lvMoney(MV.fan.avg)}</b> a trade after the fee`;
+  return MV.fan;
+}
+function drawFan(g, f, X, Y, W){
+  const age = Math.min(1, (Date.now() - f.t) / 1500);   // the fan unfolds over 1.5 s
+  // take-profit and bust lines
+  for(const [p, col, label] of [[f.tp, css("--up"), "take profit"], [f.bust, css("--down"), "bust"]]){
+    g.setLineDash([3, 6]); g.strokeStyle = col; g.globalAlpha = .6; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(X(f.t), Y(p)); g.lineTo(W - 70, Y(p)); g.stroke(); g.setLineDash([]);
+    g.globalAlpha = .8; g.fillStyle = col; g.font = "600 10px JetBrains Mono, monospace"; g.fillText(label, X(f.t) + 4, Y(p) + (label === "bust" ? 12 : -4)); }
+  g.lineWidth = 1.1;
+  for(const path of f.paths){
+    const n = Math.max(2, Math.ceil(path.pts.length * age));
+    g.strokeStyle = path.end === "win" ? css("--up") : path.end === "bust" ? css("--down") : css("--muted");
+    g.globalAlpha = path.end ? .32 : .16;
+    g.beginPath(); for(let k = 0; k < n; k++){ const x = X(f.t + k * 1000), y = Y(path.pts[k]); k ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
+    if(path.end && n === path.pts.length){ g.globalAlpha = .7; g.fillStyle = g.strokeStyle; g.beginPath(); g.arc(X(f.t + (n - 1) * 1000), Y(path.pts[n - 1]), 2, 0, Math.PI * 2); g.fill(); }
+  }
+  g.globalAlpha = 1;
+}
+$("mvBtn").addEventListener("click", () => { MV.on = !MV.on; MV.fan = null; $("mvBtn").setAttribute("aria-pressed", String(MV.on)); if(!MV.on) $("mvTxt").hidden = true; });
+["lvStake", "lvMult"].forEach(id => $(id).addEventListener("input", () => { MV.fan = null; }));
+// ───────── Match Trench's price: Bitcoin from many markets, so the Live tab can watch the one Trench uses ─────────
+// Trench's own feed isn't public. Bitcoin trades about $100 apart between US-dollar spot markets (Coinbase, Kraken,
+// Bitstamp, Gemini) and USDT / futures markets (OKX, Hyperliquid, Bybit), so we let the user compare (round 32).
+const FEEDS = [
+  {name:"Coinbase", url:"wss://ws-feed.exchange.coinbase.com", sub:{type:"subscribe", product_ids:["BTC-USD"], channels:["ticker"]}, px:d => d.type === "ticker" ? +d.price : null},
+  {name:"Kraken", url:"wss://ws.kraken.com/v2", sub:{method:"subscribe", params:{channel:"ticker", symbol:["BTC/USD"]}}, px:d => d.channel === "ticker" && d.data ? +d.data[0].last : null},
+  {name:"Bitstamp", url:"wss://ws.bitstamp.net", sub:{event:"bts:subscribe", data:{channel:"live_trades_btcusd"}}, px:d => d.event === "trade" ? +d.data.price : null},
+  {name:"Gemini", url:"wss://api.gemini.com/v1/marketdata/BTCUSD?trades=true&bids=false&offers=false", px:d => { const e = (d.events || []).filter(x => x.type === "trade").pop(); return e ? +e.price : null; }},
+  {name:"Binance US (USD)", url:"wss://stream.binance.us:9443/ws/btcusd@trade", px:d => d.e === "trade" ? +d.p : null},
+  {name:"Binance US (USDT)", url:"wss://stream.binance.us:9443/ws/btcusdt@trade", px:d => d.e === "trade" ? +d.p : null},
+  {name:"OKX (USDT)", url:"wss://ws.okx.com:8443/ws/v5/public", sub:{op:"subscribe", args:[{channel:"tickers", instId:"BTC-USDT"}]}, px:d => d.data && d.arg && d.arg.channel === "tickers" ? +d.data[0].last : null},
+  {name:"OKX futures", url:"wss://ws.okx.com:8443/ws/v5/public", sub:{op:"subscribe", args:[{channel:"tickers", instId:"BTC-USDT-SWAP"}]}, px:d => d.data && d.arg && d.arg.channel === "tickers" ? +d.data[0].last : null},
+  {name:"Hyperliquid", url:"wss://api.hyperliquid.xyz/ws", sub:{method:"subscribe", subscription:{type:"trades", coin:"BTC"}}, px:d => d.channel === "trades" && d.data && d.data.length ? +d.data.at(-1).px : null},
+  {name:"Bybit futures", url:"wss://stream.bybit.com/v5/public/linear", sub:{op:"subscribe", args:["publicTrade.BTCUSDT"]}, px:d => d.topic && d.data && d.data.length ? +d.data.at(-1).p : null},
+  {name:"Binance futures", url:"wss://fstream.binance.com/ws/btcusdt@aggTrade", px:d => d.e === "aggTrade" ? +d.p : null},
+];
+const FEED = {chosen:null, socks:{}, last:{}, lastT:{}, checks:[]};
+try{ FEED.chosen = localStorage.getItem("turnspotter-feed"); FEED.checks = JSON.parse(localStorage.getItem("turnspotter-feedchecks")) || []; }catch(e){}
+function feedOwns(coin){ return !!FEED.chosen && coin === "BTC" && Date.now() - (FEED.lastT[FEED.chosen] || 0) < 10000; }
+function feedOpen(f){
+  if(FEED.socks[f.name]) return;
+  let ws; try{ ws = new WebSocket(f.url); }catch(e){ return; }
+  FEED.socks[f.name] = ws;
+  ws.onopen = () => { if(f.sub) ws.send(JSON.stringify(f.sub)); };
+  ws.onmessage = ev => { let d; try{ d = JSON.parse(ev.data); }catch(e){ return; } const p = f.px(d); if(!(p > 0)) return;
+    FEED.last[f.name] = p; FEED.lastT[f.name] = Date.now();
+    if(FEED.chosen === f.name && S.coin === "BTC"){
+      liveTick(p); S.prices.BTC = p; S.priceT.BTC = Date.now(); markPush("BTC", p); if(BOT.running) botCheck("BTC", p); } };
+  ws.onclose = () => { if(FEED.socks[f.name] !== ws) return; delete FEED.socks[f.name];
+    if(FEED.chosen === f.name || $("matchBox").open) setTimeout(() => feedOpen(f), 3000); };
+}
+function feedClose(name){ const ws = FEED.socks[name]; if(!ws) return; delete FEED.socks[name]; ws.onclose = null; try{ ws.close(); }catch(e){} }
+function feedChoose(name){
+  FEED.chosen = name; try{ name ? localStorage.setItem("turnspotter-feed", name) : localStorage.removeItem("turnspotter-feed"); }catch(e){}
+  LV.coin = null; LV.ticks = []; LV.sig = null;   // start the 3-minute history fresh on the new market (they sit ~$100 apart)
+  if(name) feedOpen(FEEDS.find(f => f.name === name));
+  if(!$("matchBox").open) for(const f of FEEDS) if(f.name !== name) feedClose(f.name);
+  renderMatch();
+}
+function matchScores(){
+  const sc = {};
+  for(const f of FEEDS){ const d = FEED.checks.filter(c => c.feeds[f.name] > 0).map(c => Math.abs(c.feeds[f.name] - c.trench));
+    if(d.length) sc[f.name] = {avg:d.reduce((a, b) => a + b, 0) / d.length, n:d.length}; }
+  return sc;
+}
+function renderMatch(){
+  $("feedNow").textContent = FEED.chosen ? `· watching ${FEED.chosen}` : "";
+  if(!$("matchBox").open) return;
+  const sc = matchScores(), ranked = Object.entries(sc).sort((a, b) => a[1].avg - b[1].avg), best = ranked.length ? ranked[0][0] : null;
+  const typed = +$("trenchPx").value;
+  $("matchTbl").innerHTML = FEEDS.map(f => { const p = FEED.last[f.name], fresh = Date.now() - (FEED.lastT[f.name] || 0) < 15000, s = sc[f.name];
+    return `<tr class="${f.name === best ? "best" : ""} ${f.name === FEED.chosen ? "on" : ""}"><td>${f.name}</td><td>${fresh ? lvPx(p) : "—"}</td>
+      <td>${fresh && typed > 0 ? ((p - typed >= 0 ? "+$" : "−$") + Math.abs(p - typed).toFixed(2)) : ""}</td>
+      <td>${s ? `avg $${s.avg.toFixed(2)} off (${s.n})` : ""}</td>
+      <td>${fresh ? `<button type="button" class="ghost" data-use="${f.name}">${f.name === FEED.chosen ? "In use" : "Use"}</button>` : ""}</td></tr>`; }).join("");
+  $("matchVerdict").innerHTML = best ? `Closest to Trench so far: <b>${best}</b>, $${sc[best].avg.toFixed(2)} off on average over ${sc[best].n} check${sc[best].n > 1 ? "s" : ""}.${FEED.chosen === best ? "" : " Tap Use next to it to watch it on the Live tab."}`
+    : (FEED.chosen ? `Live tab and Scalper bot are watching ${FEED.chosen} for Bitcoin.` : "No checks yet.") + (FEED.chosen ? ` <button type="button" class="ghost" data-use="">Back to the default feed</button>` : "");
+}
+$("matchBox").addEventListener("toggle", () => { if($("matchBox").open) FEEDS.forEach(feedOpen); else for(const f of FEEDS) if(f.name !== FEED.chosen) feedClose(f.name); renderMatch(); });
+$("matchBtn").addEventListener("click", () => { const t = +$("trenchPx").value; if(!(t > 0)) return;
+  const feeds = {}; for(const f of FEEDS) if(Date.now() - (FEED.lastT[f.name] || 0) < 5000) feeds[f.name] = FEED.last[f.name];
+  FEED.checks.push({t:Date.now(), trench:t, feeds}); if(FEED.checks.length > 12) FEED.checks.shift();
+  try{ localStorage.setItem("turnspotter-feedchecks", JSON.stringify(FEED.checks)); }catch(e){}
+  $("trenchPx").value = ""; renderMatch(); });
+$("matchReset").addEventListener("click", () => { FEED.checks = []; try{ localStorage.removeItem("turnspotter-feedchecks"); }catch(e){} renderMatch(); });
+$("matchBox").addEventListener("click", e => { const b = e.target.closest("[data-use]"); if(b) feedChoose(b.dataset.use || null); });
+$("trenchPx").addEventListener("input", renderMatch);
+setInterval(renderMatch, 1000);
+if(FEED.chosen) feedOpen(FEEDS.find(f => f.name === FEED.chosen) || FEEDS[0]);
 // ───────── live AI bot: trades fake money on screen toward a goal, with the user's own settings ─────────
 // Realism: orders fill 1 second after the decision at the market price, the fee is taken from the balance
 // when the trade opens, and bust / stop / take-profit are checked on every live trade.
@@ -3106,6 +3276,7 @@ function showPage(name){
   try{ localStorage.setItem("turnspotter-page", name); }catch(e){}
   if(name === "practice" && !$("pane-whatif").hidden) runWhatIf();
   if(name === "bot") tableInit();
+  if(name === "arena") loadArena();
   window.scrollTo({top:0, behavior:reduceMotion ? "auto" : "smooth"});
 }
 $("pages").addEventListener("click", e => { const b = e.target.closest("button[data-page]"); if(b) showPage(b.dataset.page); });
