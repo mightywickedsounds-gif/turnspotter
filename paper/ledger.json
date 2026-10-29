@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 33.5858,
+ "balance": 34.7517,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -1443,7 +1443,10 @@
    "expiresAt": 1793239485317,
    "experience": 0.55,
    "source": "Binance US",
-   "status": "open"
+   "status": "lost",
+   "exitPrice": 1.2983,
+   "pnl": -3.9541,
+   "closedAt": 1793239485317
   },
   {
    "id": "BTC-1793236501220",
@@ -3709,6 +3712,10 @@
   {
    "t": 1793239269261,
    "value": 47.05
+  },
+  {
+   "t": 1793239578270,
+   "value": 43.09
   }
  ],
  "config": {
@@ -3749,6 +3756,23 @@
     "right": 0.537
    }
   },
+  "XRP": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 1.2976,
+   "experience": 0.614,
+   "liveLearner": 0.664,
+   "record": 0.65,
+   "call": "UP",
+   "last400": {
+    "call": 0.245,
+    "bounceOrRollover": 0.005
+   },
+   "backtest": {
+    "calls": 158,
+    "right": 0.487
+   }
+  },
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
@@ -3767,5 +3791,5 @@
    }
   }
  },
- "lastRun": 1793239269261
+ "lastRun": 1793239578270
 }
