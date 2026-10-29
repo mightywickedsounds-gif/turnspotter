@@ -17,6 +17,7 @@ jobs:
     timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
+        with: {ref: main}   # the latest main, not the commit that was current when this run was queued
       - uses: actions/setup-node@v4
         with: {node-version: "20"}
       - name: Trade every 5 minutes for ~5h40m
@@ -37,6 +38,8 @@ jobs:
             done
             cp "$RUNNER_TEMP"/keep/*.json paper/   # keep our ledgers for the next try
           }
+          # a queued run can start long after it was scheduled: start from the newest ledgers, never a stale copy
+          timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD
           end=$((SECONDS + 20400)); saved=-900   # save on the first pass too
           while true; do
             out=$( (timeout 240 node paper/trader.mjs; timeout 120 node paper/trend.mjs) 2>&1) || true; echo "$out"   # hard time limits so one stuck request can't freeze the loop

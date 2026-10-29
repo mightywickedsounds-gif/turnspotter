@@ -423,6 +423,9 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   up after 20 seconds and each bot run is capped at a few minutes, so a stuck request can't freeze the loop.
 - Fix: a job froze again at its first save. Saving no longer merges: the job resets to the latest main, puts its
   own ledgers back (it's their only writer), commits and pushes, with a time limit on every git network call.
+- Fix: a queued job started from the commit that was current when it was queued, so at a hand-over it saved an
+  older ledger over a newer one (one open XRP trade disappeared on Oct 28 at 21:09). Each job now starts from the
+  newest main.
 
 ### Round 24: realistic paper trading, and a second bot built for real money
 - **Does the AI-calls paper bot really make money?** `research/paper_backtest.mjs` replays its exact rules on
