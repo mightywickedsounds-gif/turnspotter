@@ -1424,7 +1424,10 @@
    "expiresAt": 1793239485317,
    "experience": 0.571,
    "source": "Binance US",
-   "status": "open"
+   "status": "busted",
+   "exitPrice": 99.7052,
+   "pnl": -5.69,
+   "closedAt": 1793239200000
   },
   {
    "id": "XRP-1793235885317",
@@ -1472,7 +1475,10 @@
    "expiresAt": 1793240101220,
    "experience": 0.583,
    "source": "Binance US",
-   "status": "open"
+   "status": "busted",
+   "exitPrice": 0.0778806,
+   "pnl": -4.15,
+   "closedAt": 1793239200000
   },
   {
    "id": "ETH-1793237423790",
@@ -3691,6 +3697,18 @@
   {
    "t": 1793238346784,
    "value": 56.89
+  },
+  {
+   "t": 1793238655274,
+   "value": 56.89
+  },
+  {
+   "t": 1793238962205,
+   "value": 56.89
+  },
+  {
+   "t": 1793239269261,
+   "value": 47.05
   }
  ],
  "config": {
@@ -3713,6 +3731,41 @@
   "conf": 0.55,
   "need": 2000
  },
- "status": {},
- "lastRun": 1793238346784
+ "status": {
+  "SOL": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 99.86,
+   "experience": 0.611,
+   "liveLearner": 0.676,
+   "record": 0.61,
+   "call": "UP",
+   "last400": {
+    "call": 0.24,
+    "bounceOrRollover": 0.003
+   },
+   "backtest": {
+    "calls": 162,
+    "right": 0.537
+   }
+  },
+  "DOGE": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 0.07802,
+   "experience": 0.613,
+   "liveLearner": 0.825,
+   "record": 0.57,
+   "call": "UP",
+   "last400": {
+    "call": 0.268,
+    "bounceOrRollover": 0
+   },
+   "backtest": {
+    "calls": 162,
+    "right": 0.537
+   }
+  }
+ },
+ "lastRun": 1793239269261
 }
