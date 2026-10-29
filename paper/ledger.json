@@ -4327,6 +4327,18 @@
   {
    "t": 1793268145947,
    "value": 36.21
+  },
+  {
+   "t": 1793268454832,
+   "value": 36.21
+  },
+  {
+   "t": 1793268761573,
+   "value": 36.21
+  },
+  {
+   "t": 1793269067875,
+   "value": 36.21
   }
  ],
  "config": {
@@ -4353,13 +4365,13 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 80227.3,
-   "experience": 0.493,
-   "liveLearner": 0.559,
+   "price": 80170.45,
+   "experience": 0.508,
+   "liveLearner": 0.556,
    "record": 0.59,
    "call": "WAIT",
    "last400": {
-    "call": 0.258,
+    "call": 0.255,
     "bounceOrRollover": 0.005
    },
    "backtest": {
@@ -4370,13 +4382,13 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2322.21,
-   "experience": 0.498,
-   "liveLearner": 0.599,
+   "price": 2318.2,
+   "experience": 0.529,
+   "liveLearner": 0.577,
    "record": 0.64,
    "call": "WAIT",
    "last400": {
-    "call": 0.245,
+    "call": 0.242,
     "bounceOrRollover": 0.018
    },
    "backtest": {
@@ -4387,13 +4399,13 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 100.3,
-   "experience": 0.486,
-   "liveLearner": 0.588,
+   "price": 100.18,
+   "experience": 0.511,
+   "liveLearner": 0.65,
    "record": 0.61,
    "call": "WAIT",
    "last400": {
-    "call": 0.242,
+    "call": 0.24,
     "bounceOrRollover": 0.007
    },
    "backtest": {
@@ -4401,33 +4413,16 @@
     "right": 0.516
    }
   },
-  "XRP": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 1.2932,
-   "experience": 0.514,
-   "liveLearner": 0.669,
-   "record": 0.63,
-   "call": "WAIT",
-   "last400": {
-    "call": 0.25,
-    "bounceOrRollover": 0.013
-   },
-   "backtest": {
-    "calls": 155,
-    "right": 0.477
-   }
-  },
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
    "price": 0.07822,
-   "experience": 0.513,
-   "liveLearner": 0.634,
+   "experience": 0.509,
+   "liveLearner": 0.627,
    "record": 0.6,
    "call": "WAIT",
    "last400": {
-    "call": 0.26,
+    "call": 0.258,
     "bounceOrRollover": 0.005
    },
    "backtest": {
@@ -4436,5 +4431,5 @@
    }
   }
  },
- "lastRun": 1793268145947
+ "lastRun": 1793269067875
 }
