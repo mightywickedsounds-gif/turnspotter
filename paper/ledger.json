@@ -3742,6 +3742,18 @@
   {
    "t": 1793241118047,
    "value": 36.69
+  },
+  {
+   "t": 1793241427075,
+   "value": 36.69
+  },
+  {
+   "t": 1793241733474,
+   "value": 36.69
+  },
+  {
+   "t": 1793242039871,
+   "value": 36.69
   }
  ],
  "config": {
@@ -3768,10 +3780,10 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 79951.4,
-   "experience": 0.611,
-   "liveLearner": 0.509,
-   "record": 0.65,
+   "price": 79732.4,
+   "experience": 0.615,
+   "liveLearner": 0.481,
+   "record": 0.64,
    "call": "UP",
    "last400": {
     "call": 0.25,
@@ -3785,26 +3797,26 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2303.61,
-   "experience": 0.597,
-   "liveLearner": 0.587,
+   "price": 2300.29,
+   "experience": 0.582,
+   "liveLearner": 0.585,
    "record": 0.64,
    "call": "UP",
    "last400": {
-    "call": 0.245,
+    "call": 0.247,
     "bounceOrRollover": 0.01
    },
    "backtest": {
-    "calls": 161,
-    "right": 0.553
+    "calls": 160,
+    "right": 0.556
    }
   },
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 99.64,
-   "experience": 0.577,
-   "liveLearner": 0.577,
+   "price": 99.55,
+   "experience": 0.586,
+   "liveLearner": 0.463,
    "record": 0.59,
    "call": "UP",
    "last400": {
@@ -3819,13 +3831,13 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2933,
-   "experience": 0.607,
-   "liveLearner": 0.562,
-   "record": 0.64,
+   "price": 1.2909,
+   "experience": 0.592,
+   "liveLearner": 0.516,
+   "record": 0.63,
    "call": "UP",
    "last400": {
-    "call": 0.247,
+    "call": 0.25,
     "bounceOrRollover": 0.005
    },
    "backtest": {
@@ -3836,9 +3848,9 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07772,
-   "experience": 0.617,
-   "liveLearner": 0.647,
+   "price": 0.0775,
+   "experience": 0.596,
+   "liveLearner": 0.596,
    "record": 0.57,
    "call": "UP",
    "last400": {
@@ -3851,5 +3863,5 @@
    }
   }
  },
- "lastRun": 1793241118047
+ "lastRun": 1793242039871
 }
