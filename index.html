@@ -2903,7 +2903,7 @@ function botDecide(){
     const mo = liveMomentum(), want = c.dir === "up" ? 1 : c.dir === "down" ? -1 : 0;
     if(!mo || Math.abs(mo.z) <= 2 || (want && Math.sign(mo.z) !== want) || !priceOf(S.coin)){
       BOT.nextAt = Date.now() + 1000; BOT.noSetup = true;   // keep watching every second
-      if(Date.now() - (BOT.lastWaitMsg || 0) > 60000){ BOT.lastWaitMsg = Date.now(); say(mo ? `Watching ${S.coin}: ${Math.abs(mo.z).toFixed(1)}× a normal move. Waiting for a swing over 2×.` : `Watching ${S.coin}: reading the live price…`, "sys"); }
+      if(Date.now() - (BOT.lastWaitMsg || 0) > 60000){ BOT.lastWaitMsg = Date.now(); say(mo ? `Watching ${S.coin}: the last 3 minutes moved ${(Math.abs(mo.now / mo.then - 1) * 100).toFixed(3)}%, ${Math.abs(mo.z).toFixed(1)}× a normal 3 minutes${Math.abs(mo.z) < .5 ? " (very calm)" : ""}. Jumping in once a move is at least 2× normal (about ${(2 * mo.sd * Math.sqrt(3) * 100).toFixed(2)}% right now).` : `Watching ${S.coin}: reading the live price…`, "sys"); }
       return; }
     dir = Math.sign(mo.z);
     const move = mo.sd * Math.sqrt(S.look), pct = Math.abs(mo.now / mo.then - 1) * 100;
