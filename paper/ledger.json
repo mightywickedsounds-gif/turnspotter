@@ -4648,6 +4648,10 @@
   {
    "t": 1793283507388,
    "value": 35.7
+  },
+  {
+   "t": 1793283531777,
+   "value": 35.7
   }
  ],
  "config": {
@@ -4670,41 +4674,6 @@
   "conf": 0.55,
   "need": 2000
  },
- "status": {
-  "ETH": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 2329.08,
-   "experience": 0.468,
-   "liveLearner": 0.35,
-   "record": 0.64,
-   "call": "WAIT",
-   "last400": {
-    "call": 0.228,
-    "bounceOrRollover": 0.018
-   },
-   "backtest": {
-    "calls": 158,
-    "right": 0.551
-   }
-  },
-  "DOGE": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 0.07929,
-   "experience": 0.437,
-   "liveLearner": 0.432,
-   "record": 0.59,
-   "call": "DOWN",
-   "last400": {
-    "call": 0.25,
-    "bounceOrRollover": 0.005
-   },
-   "backtest": {
-    "calls": 163,
-    "right": 0.534
-   }
-  }
- },
- "lastRun": 1793283507388
+ "status": {},
+ "lastRun": 1793283531777
 }
