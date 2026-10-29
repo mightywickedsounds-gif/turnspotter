@@ -3886,6 +3886,18 @@
   {
    "t": 1793245747514,
    "value": 36.69
+  },
+  {
+   "t": 1793246055017,
+   "value": 36.69
+  },
+  {
+   "t": 1793246360606,
+   "value": 36.69
+  },
+  {
+   "t": 1793246668099,
+   "value": 36.69
   }
  ],
  "config": {
@@ -3908,24 +3920,6 @@
   "conf": 0.55,
   "need": 2000
  },
- "status": {
-  "DOGE": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 0.07774,
-   "experience": 0.55,
-   "liveLearner": 0.578,
-   "record": 0.58,
-   "call": "WAIT",
-   "last400": {
-    "call": 0.275,
-    "bounceOrRollover": 0.003
-   },
-   "backtest": {
-    "calls": 162,
-    "right": 0.531
-   }
-  }
- },
- "lastRun": 1793245747514
+ "status": {},
+ "lastRun": 1793246668099
 }
