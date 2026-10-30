@@ -6941,6 +6941,10 @@
   {
    "t": 1793385995585,
    "value": 19.76
+  },
+  {
+   "t": 1793386303605,
+   "value": 19.76
   }
  ],
  "config": {
@@ -6964,23 +6968,6 @@
   "need": 2000
  },
  "status": {
-  "BTC": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 76725.05,
-   "experience": 0.587,
-   "liveLearner": 0.501,
-   "record": 0.48,
-   "call": "UP",
-   "last400": {
-    "call": 0.297,
-    "bounceOrRollover": 0.02
-   },
-   "backtest": {
-    "calls": 165,
-    "right": 0.558
-   }
-  },
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
@@ -7016,5 +7003,5 @@
    }
   }
  },
- "lastRun": 1793385995585
+ "lastRun": 1793386303605
 }
