@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 12.5643,
+ "balance": 11.3043,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -2630,6 +2630,22 @@
    "openedAt": 1793369096132,
    "expiresAt": 1793372696132,
    "experience": 0.49,
+   "source": "Binance US",
+   "status": "open"
+  },
+  {
+   "id": "ETH-1793370633740",
+   "coin": "ETH",
+   "dir": 1,
+   "entry": 2225.15,
+   "spread": 0.000121,
+   "stake": 1.26,
+   "mult": 50,
+   "fee": 0.0126,
+   "bustPrice": 2180.647,
+   "openedAt": 1793370633740,
+   "expiresAt": 1793374233740,
+   "experience": 0.498,
    "source": "Binance US",
    "status": "open"
   }
@@ -6578,6 +6594,14 @@
   {
    "t": 1793370018640,
    "value": 19.14
+  },
+  {
+   "t": 1793370327195,
+   "value": 19.14
+  },
+  {
+   "t": 1793370633740,
+   "value": 19.14
   }
  ],
  "config": {
@@ -6604,20 +6628,20 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2216.39,
-   "experience": 0.561,
-   "liveLearner": 0.379,
+   "price": 2224.3,
+   "experience": 0.498,
+   "liveLearner": 0.532,
    "record": 0.6,
-   "call": "UP",
+   "call": "WAIT",
    "last400": {
     "call": 0.245,
     "bounceOrRollover": 0.018
    },
    "backtest": {
-    "calls": 158,
-    "right": 0.557
+    "calls": 157,
+    "right": 0.554
    }
   }
  },
- "lastRun": 1793370018640
+ "lastRun": 1793370633740
 }
