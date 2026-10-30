@@ -5839,6 +5839,18 @@
   {
    "t": 1793337739866,
    "value": 18.46
+  },
+  {
+   "t": 1793338047265,
+   "value": 18.46
+  },
+  {
+   "t": 1793338352803,
+   "value": 18.46
+  },
+  {
+   "t": 1793338658598,
+   "value": 18.46
   }
  ],
  "config": {
@@ -5865,9 +5877,9 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 78593.04,
-   "experience": 0.463,
-   "liveLearner": 0.593,
+   "price": 78667.84,
+   "experience": 0.456,
+   "liveLearner": 0.594,
    "record": 0.49,
    "call": "WAIT",
    "last400": {
@@ -5882,9 +5894,9 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2248.95,
-   "experience": 0.485,
-   "liveLearner": 0.644,
+   "price": 2248.82,
+   "experience": 0.483,
+   "liveLearner": 0.636,
    "record": 0.6,
    "call": "WAIT",
    "last400": {
@@ -5899,26 +5911,26 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 97.86,
-   "experience": 0.456,
-   "liveLearner": 0.674,
+   "price": 98.02,
+   "experience": 0.444,
+   "liveLearner": 0.628,
    "record": 0.5,
-   "call": "WAIT",
+   "call": "DOWN",
    "last400": {
-    "call": 0.28,
+    "call": 0.282,
     "bounceOrRollover": 0.022
    },
    "backtest": {
-    "calls": 159,
-    "right": 0.497
+    "calls": 158,
+    "right": 0.494
    }
   },
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2606,
-   "experience": 0.451,
-   "liveLearner": 0.549,
+   "price": 1.26,
+   "experience": 0.452,
+   "liveLearner": 0.545,
    "record": 0.52,
    "call": "WAIT",
    "last400": {
@@ -5926,16 +5938,16 @@
     "bounceOrRollover": 0.018
    },
    "backtest": {
-    "calls": 159,
-    "right": 0.459
+    "calls": 158,
+    "right": 0.456
    }
   },
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
    "price": 0.07646,
-   "experience": 0.471,
-   "liveLearner": 0.648,
+   "experience": 0.458,
+   "liveLearner": 0.674,
    "record": 0.51,
    "call": "WAIT",
    "last400": {
@@ -5948,5 +5960,5 @@
    }
   }
  },
- "lastRun": 1793337739866
+ "lastRun": 1793338658598
 }
