@@ -2241,7 +2241,10 @@
    "expiresAt": 1793320490990,
    "experience": 0.566,
    "source": "Binance US",
-   "status": "open"
+   "status": "busted",
+   "exitPrice": 2202.6724,
+   "pnl": -1.93,
+   "closedAt": 1793319720000
   },
   {
    "id": "DOGE-1793318420472",
@@ -5536,6 +5539,10 @@
   {
    "t": 1793319645342,
    "value": 19.29
+  },
+  {
+   "t": 1793319952463,
+   "value": 17.36
   }
  ],
  "config": {
@@ -5576,6 +5583,23 @@
     "right": 0.562
    }
   },
+  "ETH": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 2245.24,
+   "experience": 0.594,
+   "liveLearner": 0.624,
+   "record": 0.64,
+   "call": "UP",
+   "last400": {
+    "call": 0.258,
+    "bounceOrRollover": 0.025
+   },
+   "backtest": {
+    "calls": 159,
+    "right": 0.56
+   }
+  },
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
@@ -5611,5 +5635,5 @@
    }
   }
  },
- "lastRun": 1793319645342
+ "lastRun": 1793319952463
 }
