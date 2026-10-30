@@ -8,30 +8,18 @@
   "feePct": 1,
   "minStake": 1
  },
- "lastT": 1793394240000,
+ "lastT": 1793394540000,
  "bots": {
   "scalper": {
    "name": "Scalper",
    "desc": "Goes with a strong 3-minute swing (over 2× normal)",
-   "balance": 44.4383,
-   "trades": 83,
-   "wins": 37,
+   "balance": 44.5131,
+   "trades": 85,
+   "wins": 38,
    "busts": 0,
    "best": 2.193,
    "worst": -3.5767,
    "recent": [
-    {
-     "t": 1793371200000,
-     "dir": 1,
-     "pnl": 0.9091,
-     "busted": false
-    },
-    {
-     "t": 1793371260000,
-     "dir": 1,
-     "pnl": -0.5048,
-     "busted": false
-    },
     {
      "t": 1793371800000,
      "dir": 1,
@@ -138,6 +126,18 @@
      "t": 1793390580000,
      "dir": 1,
      "pnl": -0.7268,
+     "busted": false
+    },
+    {
+     "t": 1793394420000,
+     "dir": -1,
+     "pnl": 0.4748,
+     "busted": false
+    },
+    {
+     "t": 1793394480000,
+     "dir": -1,
+     "pnl": -0.4,
      "busted": false
     }
    ],
@@ -1597,25 +1597,23 @@
     {
      "t": 1793394338122,
      "v": 44.44
+    },
+    {
+     "t": 1793394641094,
+     "v": 44.51
     }
    ]
   },
   "fader": {
    "name": "Streak Fader",
    "desc": "Bets against 5 same-colour candles in a row",
-   "balance": 44.1646,
-   "trades": 49,
-   "wins": 13,
+   "balance": 44.47,
+   "trades": 50,
+   "wins": 14,
    "busts": 0,
    "best": 0.7747,
    "worst": -0.9902,
    "recent": [
-    {
-     "t": 1793336760000,
-     "dir": -1,
-     "pnl": -0.2144,
-     "busted": false
-    },
     {
      "t": 1793339220000,
      "dir": -1,
@@ -1728,6 +1726,12 @@
      "t": 1793394180000,
      "dir": -1,
      "pnl": 0.2829,
+     "busted": false
+    },
+    {
+     "t": 1793394480000,
+     "dir": 1,
+     "pnl": 0.3054,
      "busted": false
     }
    ],
@@ -3187,17 +3191,21 @@
     {
      "t": 1793394338122,
      "v": 44.16
+    },
+    {
+     "t": 1793394641094,
+     "v": 44.47
     }
    ]
   },
   "breakout": {
    "name": "Breakout Bro",
    "desc": "Trades the break of a tight 30-minute range",
-   "balance": 50.9624,
-   "trades": 13,
-   "wins": 6,
+   "balance": 52.4696,
+   "trades": 15,
+   "wins": 8,
    "busts": 0,
-   "best": 0.7214,
+   "best": 0.9521,
    "worst": -0.3402,
    "recent": [
     {
@@ -3276,6 +3284,18 @@
      "t": 1793382780000,
      "dir": -1,
      "pnl": 0.0849,
+     "busted": false
+    },
+    {
+     "t": 1793394360000,
+     "dir": -1,
+     "pnl": 0.9521,
+     "busted": false
+    },
+    {
+     "t": 1793394420000,
+     "dir": -1,
+     "pnl": 0.5551,
      "busted": false
     }
    ],
@@ -4735,6 +4755,10 @@
     {
      "t": 1793394338122,
      "v": 50.96
+    },
+    {
+     "t": 1793394641094,
+     "v": 52.47
     }
    ]
   },
@@ -6324,6 +6348,10 @@
     },
     {
      "t": 1793394338122,
+     "v": 40.28
+    },
+    {
+     "t": 1793394641094,
      "v": 40.28
     }
    ]
@@ -7915,11 +7943,15 @@
     {
      "t": 1793394338122,
      "v": 52.18
+    },
+    {
+     "t": 1793394641094,
+     "v": 52.18
     }
    ]
   }
  },
- "lastRun": 1793394338122,
- "price": 76759.16,
+ "lastRun": 1793394641094,
+ "price": 76473.98,
  "src": "Coinbase"
 }
