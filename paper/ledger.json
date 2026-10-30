@@ -2222,7 +2222,10 @@
    "expiresAt": 1793319572704,
    "experience": 0.572,
    "source": "Binance US",
-   "status": "open"
+   "status": "busted",
+   "exitPrice": 93.765313,
+   "pnl": -1.91,
+   "closedAt": 1793319480000
   },
   {
    "id": "ETH-1793316890990",
@@ -5529,6 +5532,10 @@
   {
    "t": 1793319338282,
    "value": 21.2
+  },
+  {
+   "t": 1793319645342,
+   "value": 19.29
   }
  ],
  "config": {
@@ -5569,6 +5576,23 @@
     "right": 0.562
    }
   },
+  "SOL": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 95.45,
+   "experience": 0.593,
+   "liveLearner": 0.534,
+   "record": 0.52,
+   "call": "UP",
+   "last400": {
+    "call": 0.275,
+    "bounceOrRollover": 0.018
+   },
+   "backtest": {
+    "calls": 159,
+    "right": 0.503
+   }
+  },
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
@@ -5587,5 +5611,5 @@
    }
   }
  },
- "lastRun": 1793319338282
+ "lastRun": 1793319645342
 }
