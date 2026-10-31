@@ -7369,6 +7369,10 @@
   {
    "t": 1793406899534,
    "value": 17.87
+  },
+  {
+   "t": 1793406922707,
+   "value": 17.87
   }
  ],
  "config": {
@@ -7409,23 +7413,6 @@
     "right": 0.497
    }
   },
-  "XRP": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 1.2602,
-   "experience": 0.438,
-   "liveLearner": 0.385,
-   "record": 0.54,
-   "call": "DOWN",
-   "last400": {
-    "call": 0.275,
-    "bounceOrRollover": 0.018
-   },
-   "backtest": {
-    "calls": 156,
-    "right": 0.455
-   }
-  },
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
@@ -7444,5 +7431,5 @@
    }
   }
  },
- "lastRun": 1793406899534
+ "lastRun": 1793406922707
 }
