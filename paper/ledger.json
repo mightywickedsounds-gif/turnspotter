@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 15.402,
+ "balance": 13.862,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -3323,6 +3323,22 @@
    "openedAt": 1793471685408,
    "expiresAt": 1793475285408,
    "experience": 0.47,
+   "source": "Binance US",
+   "status": "open"
+  },
+  {
+   "id": "XRP-1793475065214",
+   "coin": "XRP",
+   "dir": -1,
+   "entry": 1.255,
+   "spread": 0.000159,
+   "stake": 1.54,
+   "mult": 50,
+   "fee": 0.0154,
+   "bustPrice": 1.2801,
+   "openedAt": 1793475065214,
+   "expiresAt": 1793478665214,
+   "experience": 0.497,
    "source": "Binance US",
    "status": "open"
   }
@@ -8647,6 +8663,14 @@
   {
    "t": 1793474450059,
    "value": 16.62
+  },
+  {
+   "t": 1793474759218,
+   "value": 16.62
+  },
+  {
+   "t": 1793475065214,
+   "value": 16.62
   }
  ],
  "config": {
@@ -8673,10 +8697,10 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 77676.22,
-   "experience": 0.483,
-   "liveLearner": 0.469,
-   "record": 0.43,
+   "price": 77598.92,
+   "experience": 0.537,
+   "liveLearner": 0.471,
+   "record": 0.44,
    "call": "WAIT",
    "last400": {
     "call": 0.275,
@@ -8690,9 +8714,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 96.11,
-   "experience": 0.48,
-   "liveLearner": 0.412,
+   "price": 95.9,
+   "experience": 0.537,
+   "liveLearner": 0.519,
    "record": 0.46,
    "call": "WAIT",
    "last400": {
@@ -8707,13 +8731,13 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2567,
-   "experience": 0.439,
-   "liveLearner": 0.328,
+   "price": 1.2546,
+   "experience": 0.497,
+   "liveLearner": 0.432,
    "record": 0.52,
-   "call": "DOWN",
+   "call": "WAIT",
    "last400": {
-    "call": 0.285,
+    "call": 0.282,
     "bounceOrRollover": 0.018
    },
    "backtest": {
@@ -8725,8 +8749,8 @@
    "src": "Binance US",
    "candles": 1999,
    "price": 0.076,
-   "experience": 0.421,
-   "liveLearner": 0.33,
+   "experience": 0.423,
+   "liveLearner": 0.412,
    "record": 0.5,
    "call": "DOWN",
    "last400": {
@@ -8739,5 +8763,5 @@
    }
   }
  },
- "lastRun": 1793474450059
+ "lastRun": 1793475065214
 }
