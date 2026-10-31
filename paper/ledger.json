@@ -8389,6 +8389,18 @@
   {
    "t": 1793462492537,
    "value": 16.79
+  },
+  {
+   "t": 1793462799463,
+   "value": 16.79
+  },
+  {
+   "t": 1793463104414,
+   "value": 16.79
+  },
+  {
+   "t": 1793463409130,
+   "value": 16.79
   }
  ],
  "config": {
@@ -8412,29 +8424,12 @@
   "need": 2000
  },
  "status": {
-  "BTC": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 77603.57,
-   "experience": 0.46,
-   "liveLearner": 0.458,
-   "record": 0.44,
-   "call": "WAIT",
-   "last400": {
-    "call": 0.275,
-    "bounceOrRollover": 0.02
-   },
-   "backtest": {
-    "calls": 161,
-    "right": 0.547
-   }
-  },
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2250.96,
-   "experience": 0.482,
-   "liveLearner": 0.402,
+   "price": 2251.88,
+   "experience": 0.477,
+   "liveLearner": 0.383,
    "record": 0.59,
    "call": "WAIT",
    "last400": {
@@ -8449,9 +8444,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 95.99,
-   "experience": 0.485,
-   "liveLearner": 0.561,
+   "price": 96.06,
+   "experience": 0.481,
+   "liveLearner": 0.526,
    "record": 0.46,
    "call": "WAIT",
    "last400": {
@@ -8459,44 +8454,27 @@
     "bounceOrRollover": 0.028
    },
    "backtest": {
-    "calls": 161,
-    "right": 0.503
-   }
-  },
-  "XRP": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 1.2526,
-   "experience": 0.452,
-   "liveLearner": 0.431,
-   "record": 0.5,
-   "call": "WAIT",
-   "last400": {
-    "call": 0.278,
-    "bounceOrRollover": 0.018
-   },
-   "backtest": {
-    "calls": 156,
-    "right": 0.455
+    "calls": 160,
+    "right": 0.5
    }
   },
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07542,
-   "experience": 0.47,
-   "liveLearner": 0.529,
+   "price": 0.07576,
+   "experience": 0.401,
+   "liveLearner": 0.335,
    "record": 0.51,
-   "call": "WAIT",
+   "call": "DOWN",
    "last400": {
-    "call": 0.265,
+    "call": 0.268,
     "bounceOrRollover": 0.013
    },
    "backtest": {
-    "calls": 165,
-    "right": 0.527
+    "calls": 164,
+    "right": 0.524
    }
   }
  },
- "lastRun": 1793462492537
+ "lastRun": 1793463409130
 }
