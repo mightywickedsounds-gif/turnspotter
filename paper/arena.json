@@ -8,7 +8,7 @@
   "feePct": 1,
   "minStake": 1
  },
- "lastT": 1793555820000,
+ "lastT": 1793556120000,
  "bots": {
   "scalper": {
    "name": "Scalper",
@@ -3772,6 +3772,10 @@
     },
     {
      "t": 1793555915367,
+     "v": 37.96
+    },
+    {
+     "t": 1793556217184,
      "v": 37.96
     }
    ]
@@ -7539,25 +7543,23 @@
     {
      "t": 1793555915367,
      "v": 40.53
+    },
+    {
+     "t": 1793556217184,
+     "v": 40.53
     }
    ]
   },
   "breakout": {
    "name": "Breakout Bro",
    "desc": "Trades the break of a tight 30-minute range",
-   "balance": 39.24,
-   "trades": 237,
+   "balance": 39.2268,
+   "trades": 238,
    "wins": 70,
    "busts": 0,
    "best": 0.9521,
    "worst": -0.491,
    "recent": [
-    {
-     "t": 1793542080000,
-     "dir": 1,
-     "pnl": -0.2009,
-     "busted": false
-    },
     {
      "t": 1793542500000,
      "dir": 1,
@@ -7670,6 +7672,12 @@
      "t": 1793555820000,
      "dir": -1,
      "pnl": -0.0636,
+     "busted": false
+    },
+    {
+     "t": 1793556000000,
+     "dir": -1,
+     "pnl": -0.0132,
      "busted": false
     }
    ],
@@ -11305,25 +11313,23 @@
     {
      "t": 1793555915367,
      "v": 39.24
+    },
+    {
+     "t": 1793556217184,
+     "v": 39.23
     }
    ]
   },
   "bull": {
    "name": "Always Bullish",
    "desc": "Bets UP every 30 minutes, no matter what",
-   "balance": 35.901,
-   "trades": 149,
+   "balance": 35.8413,
+   "trades": 150,
    "wins": 39,
    "busts": 0,
    "best": 0.6092,
    "worst": -1.0556,
    "recent": [
-    {
-     "t": 1793520000000,
-     "dir": 1,
-     "pnl": 0.0865,
-     "busted": false
-    },
     {
      "t": 1793521800000,
      "dir": 1,
@@ -11437,6 +11443,12 @@
      "dir": 1,
      "pnl": -0.0683,
      "busted": false
+    },
+    {
+     "t": 1793556000000,
+     "dir": 1,
+     "pnl": -0.0597,
+     "busted": false
     }
    ],
    "equity": [
@@ -15071,25 +15083,23 @@
     {
      "t": 1793555915367,
      "v": 35.9
+    },
+    {
+     "t": 1793556217184,
+     "v": 35.84
     }
    ]
   },
   "flipper": {
    "name": "Coin Flipper",
    "desc": "Random direction every 30 minutes: the control",
-   "balance": 48.5714,
-   "trades": 149,
+   "balance": 48.555,
+   "trades": 150,
    "wins": 61,
    "busts": 0,
    "best": 0.7207,
    "worst": -1.2861,
    "recent": [
-    {
-     "t": 1793520000000,
-     "dir": -1,
-     "pnl": -0.2137,
-     "busted": false
-    },
     {
      "t": 1793521800000,
      "dir": 1,
@@ -15203,6 +15213,12 @@
      "dir": -1,
      "pnl": -0.005,
      "busted": false
+    },
+    {
+     "t": 1793556000000,
+     "dir": -1,
+     "pnl": -0.0164,
+     "busted": false
     }
    ],
    "equity": [
@@ -18837,11 +18853,15 @@
     {
      "t": 1793555915367,
      "v": 48.57
+    },
+    {
+     "t": 1793556217184,
+     "v": 48.55
     }
    ]
   }
  },
- "lastRun": 1793555915367,
- "price": 77893.25,
+ "lastRun": 1793556217184,
+ "price": 77835,
  "src": "Coinbase"
 }
