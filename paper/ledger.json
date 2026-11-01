@@ -9511,6 +9511,18 @@
   {
    "t": 1793512262544,
    "value": 17.7
+  },
+  {
+   "t": 1793512569356,
+   "value": 17.7
+  },
+  {
+   "t": 1793512874395,
+   "value": 17.7
+  },
+  {
+   "t": 1793513179568,
+   "value": 17.7
   }
  ],
  "config": {
@@ -9537,13 +9549,13 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 77797.21,
-   "experience": 0.498,
-   "liveLearner": 0.469,
+   "price": 77881.23,
+   "experience": 0.442,
+   "liveLearner": 0.461,
    "record": 0.47,
-   "call": "WAIT",
+   "call": "DOWN",
    "last400": {
-    "call": 0.27,
+    "call": 0.273,
     "bounceOrRollover": 0.02
    },
    "backtest": {
@@ -9554,9 +9566,9 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2265.69,
-   "experience": 0.53,
-   "liveLearner": 0.405,
+   "price": 2270.19,
+   "experience": 0.482,
+   "liveLearner": 0.423,
    "record": 0.61,
    "call": "WAIT",
    "last400": {
@@ -9571,13 +9583,13 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 95.55,
-   "experience": 0.539,
-   "liveLearner": 0.594,
+   "price": 95.75,
+   "experience": 0.487,
+   "liveLearner": 0.518,
    "record": 0.5,
    "call": "WAIT",
    "last400": {
-    "call": 0.323,
+    "call": 0.32,
     "bounceOrRollover": 0.028
    },
    "backtest": {
@@ -9588,13 +9600,13 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2542,
-   "experience": 0.478,
-   "liveLearner": 0.482,
+   "price": 1.2557,
+   "experience": 0.467,
+   "liveLearner": 0.43,
    "record": 0.53,
    "call": "WAIT",
    "last400": {
-    "call": 0.295,
+    "call": 0.292,
     "bounceOrRollover": 0.018
    },
    "backtest": {
@@ -9606,12 +9618,12 @@
    "src": "Binance US",
    "candles": 1999,
    "price": 0.07577,
-   "experience": 0.462,
-   "liveLearner": 0.435,
+   "experience": 0.475,
+   "liveLearner": 0.486,
    "record": 0.54,
    "call": "WAIT",
    "last400": {
-    "call": 0.307,
+    "call": 0.305,
     "bounceOrRollover": 0.013
    },
    "backtest": {
@@ -9620,5 +9632,5 @@
    }
   }
  },
- "lastRun": 1793512262544
+ "lastRun": 1793513179568
 }
