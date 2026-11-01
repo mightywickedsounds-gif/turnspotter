@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 15.0114,
+ "balance": 13.5114,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -3529,6 +3529,22 @@
    "openedAt": 1793498414884,
    "expiresAt": 1793502014884,
    "experience": 0.498,
+   "source": "Binance US",
+   "status": "open"
+  },
+  {
+   "id": "DOGE-1793500259654",
+   "coin": "DOGE",
+   "dir": 1,
+   "entry": 0.07566,
+   "spread": 0.000529,
+   "stake": 1.5,
+   "mult": 50,
+   "fee": 0.015,
+   "bustPrice": 0.0741468,
+   "openedAt": 1793500259654,
+   "expiresAt": 1793503859654,
+   "experience": 0.559,
    "source": "Binance US",
    "status": "open"
   }
@@ -9185,6 +9201,14 @@
   {
    "t": 1793499644919,
    "value": 17.91
+  },
+  {
+   "t": 1793499953105,
+   "value": 17.91
+  },
+  {
+   "t": 1793500259654,
+   "value": 17.91
   }
  ],
  "config": {
@@ -9211,13 +9235,13 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 95.61,
-   "experience": 0.549,
-   "liveLearner": 0.544,
+   "price": 95.57,
+   "experience": 0.558,
+   "liveLearner": 0.545,
    "record": 0.47,
-   "call": "WAIT",
+   "call": "UP",
    "last400": {
-    "call": 0.318,
+    "call": 0.32,
     "bounceOrRollover": 0.028
    },
    "backtest": {
@@ -9228,13 +9252,13 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2511,
-   "experience": 0.549,
-   "liveLearner": 0.507,
-   "record": 0.51,
-   "call": "WAIT",
+   "price": 1.2508,
+   "experience": 0.571,
+   "liveLearner": 0.484,
+   "record": 0.52,
+   "call": "UP",
    "last400": {
-    "call": 0.292,
+    "call": 0.295,
     "bounceOrRollover": 0.018
    },
    "backtest": {
@@ -9245,13 +9269,13 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07566,
-   "experience": 0.558,
-   "liveLearner": 0.498,
+   "price": 0.07561,
+   "experience": 0.559,
+   "liveLearner": 0.533,
    "record": 0.53,
    "call": "UP",
    "last400": {
-    "call": 0.305,
+    "call": 0.307,
     "bounceOrRollover": 0.013
    },
    "backtest": {
@@ -9260,5 +9284,5 @@
    }
   }
  },
- "lastRun": 1793499644919
+ "lastRun": 1793500259654
 }
