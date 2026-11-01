@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 15.5388,
+ "balance": 13.9888,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -4121,6 +4121,22 @@
    "openedAt": 1793561608755,
    "expiresAt": 1793565208755,
    "experience": 0.543,
+   "source": "Binance US",
+   "status": "open"
+  },
+  {
+   "id": "DOGE-1793564363831",
+   "coin": "DOGE",
+   "dir": 1,
+   "entry": 0.07497,
+   "spread": 0.0004,
+   "stake": 1.55,
+   "mult": 50,
+   "fee": 0.0155,
+   "bustPrice": 0.0734706,
+   "openedAt": 1793564363831,
+   "expiresAt": 1793567963831,
+   "experience": 0.558,
    "source": "Binance US",
    "status": "open"
   }
@@ -10621,6 +10637,18 @@
   {
    "t": 1793563446894,
    "value": 16.86
+  },
+  {
+   "t": 1793563753636,
+   "value": 16.86
+  },
+  {
+   "t": 1793564058726,
+   "value": 16.86
+  },
+  {
+   "t": 1793564363831,
+   "value": 16.86
   }
  ],
  "config": {
@@ -10647,13 +10675,13 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 77818.1,
-   "experience": 0.514,
-   "liveLearner": 0.606,
-   "record": 0.5,
+   "price": 77779.24,
+   "experience": 0.546,
+   "liveLearner": 0.645,
+   "record": 0.51,
    "call": "WAIT",
    "last400": {
-    "call": 0.255,
+    "call": 0.253,
     "bounceOrRollover": 0.02
    },
    "backtest": {
@@ -10664,14 +10692,14 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2259.23,
-   "experience": 0.535,
-   "liveLearner": 0.729,
+   "price": 2258.64,
+   "experience": 0.555,
+   "liveLearner": 0.746,
    "record": 0.61,
-   "call": "WAIT",
+   "call": "UP",
    "last400": {
     "call": 0.19,
-    "bounceOrRollover": 0.015
+    "bounceOrRollover": 0.018
    },
    "backtest": {
     "calls": 152,
@@ -10681,14 +10709,14 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 93.93,
-   "experience": 0.554,
-   "liveLearner": 0.554,
+   "price": 93.89,
+   "experience": 0.553,
+   "liveLearner": 0.562,
    "record": 0.48,
    "call": "UP",
    "last400": {
-    "call": 0.33,
-    "bounceOrRollover": 0.028
+    "call": 0.333,
+    "bounceOrRollover": 0.03
    },
    "backtest": {
     "calls": 164,
@@ -10698,14 +10726,14 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07514,
-   "experience": 0.554,
-   "liveLearner": 0.648,
+   "price": 0.07512,
+   "experience": 0.558,
+   "liveLearner": 0.649,
    "record": 0.56,
    "call": "UP",
    "last400": {
-    "call": 0.282,
-    "bounceOrRollover": 0.015
+    "call": 0.285,
+    "bounceOrRollover": 0.018
    },
    "backtest": {
     "calls": 168,
@@ -10713,5 +10741,5 @@
    }
   }
  },
- "lastRun": 1793563446894
+ "lastRun": 1793564363831
 }
