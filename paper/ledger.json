@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 12.1985,
+ "balance": 13.6505,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -3533,7 +3533,10 @@
    "expiresAt": 1793502014884,
    "experience": 0.498,
    "source": "Binance US",
-   "status": "open"
+   "status": "lost",
+   "exitPrice": 77732.95,
+   "pnl": -0.018,
+   "closedAt": 1793502014884
   },
   {
    "id": "DOGE-1793500259654",
@@ -9256,6 +9259,18 @@
   {
    "t": 1793501183102,
    "value": 18.03
+  },
+  {
+   "t": 1793501492023,
+   "value": 18.03
+  },
+  {
+   "t": 1793501798369,
+   "value": 18.03
+  },
+  {
+   "t": 1793502105116,
+   "value": 18.01
   }
  ],
  "config": {
@@ -9279,12 +9294,29 @@
   "need": 2000
  },
  "status": {
+  "BTC": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 77741.58,
+   "experience": 0.489,
+   "liveLearner": 0.437,
+   "record": 0.47,
+   "call": "WAIT",
+   "last400": {
+    "call": 0.27,
+    "bounceOrRollover": 0.02
+   },
+   "backtest": {
+    "calls": 162,
+    "right": 0.543
+   }
+  },
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2265.99,
-   "experience": 0.476,
-   "liveLearner": 0.407,
+   "price": 2266.02,
+   "experience": 0.5,
+   "liveLearner": 0.336,
    "record": 0.6,
    "call": "WAIT",
    "last400": {
@@ -9295,41 +9327,7 @@
     "calls": 154,
     "right": 0.552
    }
-  },
-  "SOL": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 95.44,
-   "experience": 0.577,
-   "liveLearner": 0.579,
-   "record": 0.47,
-   "call": "UP",
-   "last400": {
-    "call": 0.323,
-    "bounceOrRollover": 0.028
-   },
-   "backtest": {
-    "calls": 160,
-    "right": 0.5
-   }
-  },
-  "XRP": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 1.2488,
-   "experience": 0.584,
-   "liveLearner": 0.553,
-   "record": 0.52,
-   "call": "UP",
-   "last400": {
-    "call": 0.297,
-    "bounceOrRollover": 0.018
-   },
-   "backtest": {
-    "calls": 157,
-    "right": 0.439
-   }
   }
  },
- "lastRun": 1793501183102
+ "lastRun": 1793502105116
 }
