@@ -8,7 +8,7 @@
   "feePct": 1,
   "minStake": 1
  },
- "lastT": 1793534040000,
+ "lastT": 1793534640000,
  "bots": {
   "scalper": {
    "name": "Scalper",
@@ -3481,25 +3481,27 @@
     {
      "t": 1793534214590,
      "v": 39.53
+    },
+    {
+     "t": 1793534516400,
+     "v": 39.53
+    },
+    {
+     "t": 1793534816693,
+     "v": 39.53
     }
    ]
   },
   "fader": {
    "name": "Streak Fader",
    "desc": "Bets against 5 same-colour candles in a row",
-   "balance": 40.9164,
-   "trades": 100,
-   "wins": 28,
+   "balance": 40.9876,
+   "trades": 101,
+   "wins": 29,
    "busts": 0,
    "best": 0.7747,
    "worst": -0.9902,
    "recent": [
-    {
-     "t": 1793477400000,
-     "dir": -1,
-     "pnl": -0.0563,
-     "busted": false
-    },
     {
      "t": 1793485740000,
      "dir": -1,
@@ -3612,6 +3614,12 @@
      "t": 1793532840000,
      "dir": 1,
      "pnl": -0.1701,
+     "busted": false
+    },
+    {
+     "t": 1793534580000,
+     "dir": -1,
+     "pnl": 0.0712,
      "busted": false
     }
    ],
@@ -6955,31 +6963,27 @@
     {
      "t": 1793534214590,
      "v": 40.92
+    },
+    {
+     "t": 1793534516400,
+     "v": 40.92
+    },
+    {
+     "t": 1793534816693,
+     "v": 40.99
     }
    ]
   },
   "breakout": {
    "name": "Breakout Bro",
    "desc": "Trades the break of a tight 30-minute range",
-   "balance": 42.0155,
-   "trades": 207,
-   "wins": 64,
+   "balance": 41.9526,
+   "trades": 209,
+   "wins": 65,
    "busts": 0,
    "best": 0.9521,
    "worst": -0.491,
    "recent": [
-    {
-     "t": 1793519520000,
-     "dir": 1,
-     "pnl": -0.1115,
-     "busted": false
-    },
-    {
-     "t": 1793520000000,
-     "dir": 1,
-     "pnl": 0.0988,
-     "busted": false
-    },
     {
      "t": 1793520060000,
      "dir": 1,
@@ -7086,6 +7090,18 @@
      "t": 1793532960000,
      "dir": -1,
      "pnl": -0.2459,
+     "busted": false
+    },
+    {
+     "t": 1793534520000,
+     "dir": 1,
+     "pnl": 0.0946,
+     "busted": false
+    },
+    {
+     "t": 1793534580000,
+     "dir": 1,
+     "pnl": -0.1575,
      "busted": false
     }
    ],
@@ -10429,25 +10445,27 @@
     {
      "t": 1793534214590,
      "v": 42.02
+    },
+    {
+     "t": 1793534516400,
+     "v": 42.02
+    },
+    {
+     "t": 1793534816693,
+     "v": 41.95
     }
    ]
   },
   "bull": {
    "name": "Always Bullish",
    "desc": "Bets UP every 30 minutes, no matter what",
-   "balance": 36.3721,
-   "trades": 137,
-   "wins": 36,
+   "balance": 36.4522,
+   "trades": 138,
+   "wins": 37,
    "busts": 0,
    "best": 0.6092,
    "worst": -1.0556,
    "recent": [
-    {
-     "t": 1793498400000,
-     "dir": 1,
-     "pnl": -0.0202,
-     "busted": false
-    },
     {
      "t": 1793500200000,
      "dir": 1,
@@ -10561,6 +10579,12 @@
      "dir": 1,
      "pnl": -0.0364,
      "busted": false
+    },
+    {
+     "t": 1793534400000,
+     "dir": 1,
+     "pnl": 0.0801,
+     "busted": false
     }
    ],
    "equity": [
@@ -13903,25 +13927,27 @@
     {
      "t": 1793534214590,
      "v": 36.37
+    },
+    {
+     "t": 1793534516400,
+     "v": 36.37
+    },
+    {
+     "t": 1793534816693,
+     "v": 36.45
     }
    ]
   },
   "flipper": {
    "name": "Coin Flipper",
    "desc": "Random direction every 30 minutes: the control",
-   "balance": 48.7085,
-   "trades": 137,
-   "wins": 57,
+   "balance": 48.8157,
+   "trades": 138,
+   "wins": 58,
    "busts": 0,
    "best": 0.7207,
    "worst": -1.2861,
    "recent": [
-    {
-     "t": 1793498400000,
-     "dir": 1,
-     "pnl": -0.0273,
-     "busted": false
-    },
     {
      "t": 1793500200000,
      "dir": -1,
@@ -14035,6 +14061,12 @@
      "dir": -1,
      "pnl": -0.0489,
      "busted": false
+    },
+    {
+     "t": 1793534400000,
+     "dir": 1,
+     "pnl": 0.1072,
+     "busted": false
     }
    ],
    "equity": [
@@ -17377,11 +17409,19 @@
     {
      "t": 1793534214590,
      "v": 48.71
+    },
+    {
+     "t": 1793534516400,
+     "v": 48.71
+    },
+    {
+     "t": 1793534816693,
+     "v": 48.82
     }
    ]
   }
  },
- "lastRun": 1793534214590,
- "price": 77808.86,
+ "lastRun": 1793534816693,
+ "price": 77844.18,
  "src": "Coinbase"
 }
