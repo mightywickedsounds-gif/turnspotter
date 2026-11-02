@@ -11287,6 +11287,18 @@
   {
    "t": 1793593543546,
    "value": 20.69
+  },
+  {
+   "t": 1793593850831,
+   "value": 20.69
+  },
+  {
+   "t": 1793594157121,
+   "value": 20.69
+  },
+  {
+   "t": 1793594462972,
+   "value": 20.69
   }
  ],
  "config": {
@@ -11313,9 +11325,9 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 78704.44,
-   "experience": 0.462,
-   "liveLearner": 0.458,
+   "price": 78614.5,
+   "experience": 0.493,
+   "liveLearner": 0.526,
    "record": 0.51,
    "call": "WAIT",
    "last400": {
@@ -11330,9 +11342,9 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2309.83,
-   "experience": 0.462,
-   "liveLearner": 0.355,
+   "price": 2307.89,
+   "experience": 0.471,
+   "liveLearner": 0.392,
    "record": 0.62,
    "call": "WAIT",
    "last400": {
@@ -11347,9 +11359,9 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2588,
-   "experience": 0.498,
-   "liveLearner": 0.382,
+   "price": 1.2593,
+   "experience": 0.488,
+   "liveLearner": 0.373,
    "record": 0.58,
    "call": "WAIT",
    "last400": {
@@ -11364,9 +11376,9 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07606,
-   "experience": 0.481,
-   "liveLearner": 0.429,
+   "price": 0.0761,
+   "experience": 0.468,
+   "liveLearner": 0.397,
    "record": 0.59,
    "call": "WAIT",
    "last400": {
@@ -11379,5 +11391,5 @@
    }
   }
  },
- "lastRun": 1793593543546
+ "lastRun": 1793594462972
 }
