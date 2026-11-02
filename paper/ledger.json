@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 17.9143,
+ "balance": 16.1243,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -4976,6 +4976,22 @@
    "openedAt": 1793657788246,
    "expiresAt": 1793661388246,
    "experience": 0.543,
+   "source": "Binance US",
+   "status": "open"
+  },
+  {
+   "id": "ETH-1793660537213",
+   "coin": "ETH",
+   "dir": 1,
+   "entry": 2250.12,
+   "spread": 0.000058,
+   "stake": 1.79,
+   "mult": 50,
+   "fee": 0.0179,
+   "bustPrice": 2205.1176,
+   "openedAt": 1793660537213,
+   "expiresAt": 1793664137213,
+   "experience": 0.499,
    "source": "Binance US",
    "status": "open"
   }
@@ -12660,6 +12676,18 @@
   {
    "t": 1793659621210,
    "value": 19.9
+  },
+  {
+   "t": 1793659927897,
+   "value": 19.9
+  },
+  {
+   "t": 1793660232566,
+   "value": 19.9
+  },
+  {
+   "t": 1793660537213,
+   "value": 19.9
   }
  ],
  "config": {
@@ -12686,11 +12714,11 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2251.27,
-   "experience": 0.557,
-   "liveLearner": 0.64,
+   "price": 2256.8,
+   "experience": 0.499,
+   "liveLearner": 0.565,
    "record": 0.59,
-   "call": "UP",
+   "call": "WAIT",
    "last400": {
     "call": 0.172,
     "bounceOrRollover": 0.013
@@ -12703,9 +12731,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 91.89,
-   "experience": 0.543,
-   "liveLearner": 0.64,
+   "price": 92.14,
+   "experience": 0.506,
+   "liveLearner": 0.494,
    "record": 0.57,
    "call": "WAIT",
    "last400": {
@@ -12720,9 +12748,9 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2496,
-   "experience": 0.509,
-   "liveLearner": 0.475,
+   "price": 1.2504,
+   "experience": 0.487,
+   "liveLearner": 0.411,
    "record": 0.63,
    "call": "WAIT",
    "last400": {
@@ -12738,8 +12766,8 @@
    "src": "Binance US",
    "candles": 1999,
    "price": 0.07406,
-   "experience": 0.546,
-   "liveLearner": 0.557,
+   "experience": 0.536,
+   "liveLearner": 0.533,
    "record": 0.66,
    "call": "WAIT",
    "last400": {
@@ -12748,9 +12776,9 @@
    },
    "backtest": {
     "calls": 173,
-    "right": 0.543
+    "right": 0.549
    }
   }
  },
- "lastRun": 1793659621210
+ "lastRun": 1793660537213
 }
