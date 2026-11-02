@@ -8,6 +8,7 @@ on:
     paths: [paper/arena.mjs, .github/workflows/arena.yml]
 permissions:
   contents: write
+  actions: write      # lets each run queue the next one (GitHub's cron timer skips hours at a time)
 concurrency:
   group: bot-arena            # its own queue, separate from the paper bots
   cancel-in-progress: false
@@ -48,3 +49,8 @@ jobs:
             [ $SECONDS -ge $end ] && break
             sleep 300
           done
+      - name: Queue the next run
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run arena.yml --ref main --repo "$GITHUB_REPOSITORY" || echo "could not queue the next run"

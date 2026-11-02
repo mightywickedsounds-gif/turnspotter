@@ -596,6 +596,9 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   `paper/arena.json`; the paper-bot job writes only `paper/ledger.json` and `paper/trend.json`. Each saves by resetting to
   the newest main and putting back only its own file, so neither can overwrite the other (tested with both jobs taking
   turns on a scratch copy of the repo).
+- Fix: GitHub's every-15-minutes timer went quiet for ~8 hours on Nov 2, so when the running jobs finished nothing
+  replaced them and both bots stopped for ~2 hours. Each job now queues its own next run as its last step
+  (workflow_dispatch with the job's own token), so the chain no longer depends on GitHub's timer.
 
 ### Round 33: jump in earlier, or wait for a bigger move? (research only)
 - Question from the owner: waiting for a 2× move means missing the first part of it. `research/experiments13.py` tries

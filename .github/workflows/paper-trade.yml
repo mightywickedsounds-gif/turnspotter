@@ -8,6 +8,7 @@ on:
     paths: [paper/trader.mjs, paper/trend.mjs, .github/workflows/paper-trade.yml]
 permissions:
   contents: write
+  actions: write      # lets each run queue the next one (GitHub's cron timer skips hours at a time)
 concurrency:
   group: paper-trade-v3
   cancel-in-progress: false   # the next run waits its turn, so there's almost always one awake
@@ -51,3 +52,8 @@ jobs:
             [ $SECONDS -ge $end ] && break
             sleep 300
           done
+      - name: Queue the next run
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run paper-trade.yml --ref main --repo "$GITHUB_REPOSITORY" || echo "could not queue the next run"
