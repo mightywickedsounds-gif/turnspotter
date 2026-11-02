@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 16.2081,
+ "balance": 14.5881,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -4612,6 +4612,22 @@
    "openedAt": 1793615662814,
    "expiresAt": 1793619262814,
    "experience": 0.545,
+   "source": "Binance US",
+   "status": "open"
+  },
+  {
+   "id": "DOGE-1793619021061",
+   "coin": "DOGE",
+   "dir": 1,
+   "entry": 0.0754,
+   "spread": 0.000531,
+   "stake": 1.62,
+   "mult": 50,
+   "fee": 0.0162,
+   "bustPrice": 0.073892,
+   "openedAt": 1793619021061,
+   "expiresAt": 1793622621061,
+   "experience": 0.555,
    "source": "Binance US",
    "status": "open"
   }
@@ -11840,6 +11856,14 @@
   {
    "t": 1793618410045,
    "value": 19.65
+  },
+  {
+   "t": 1793618716517,
+   "value": 19.65
+  },
+  {
+   "t": 1793619021061,
+   "value": 19.65
   }
  ],
  "config": {
@@ -11866,11 +11890,11 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 77978.61,
-   "experience": 0.547,
-   "liveLearner": 0.579,
+   "price": 77893.96,
+   "experience": 0.574,
+   "liveLearner": 0.609,
    "record": 0.51,
-   "call": "WAIT",
+   "call": "UP",
    "last400": {
     "call": 0.223,
     "bounceOrRollover": 0.018
@@ -11883,13 +11907,13 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2288.43,
-   "experience": 0.516,
-   "liveLearner": 0.497,
+   "price": 2286.47,
+   "experience": 0.533,
+   "liveLearner": 0.521,
    "record": 0.6,
    "call": "WAIT",
    "last400": {
-    "call": 0.15,
+    "call": 0.147,
     "bounceOrRollover": 0.01
    },
    "backtest": {
@@ -11900,13 +11924,13 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07532,
-   "experience": 0.563,
-   "liveLearner": 0.552,
+   "price": 0.07529,
+   "experience": 0.555,
+   "liveLearner": 0.516,
    "record": 0.59,
    "call": "UP",
    "last400": {
-    "call": 0.27,
+    "call": 0.273,
     "bounceOrRollover": 0.015
    },
    "backtest": {
@@ -11915,5 +11939,5 @@
    }
   }
  },
- "lastRun": 1793618410045
+ "lastRun": 1793619021061
 }
