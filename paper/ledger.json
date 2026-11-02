@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 18.2238,
+ "balance": 19.9247,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -4768,7 +4768,10 @@
    "expiresAt": 1793634529889,
    "experience": 0.521,
    "source": "Binance US",
-   "status": "open"
+   "status": "lost",
+   "exitPrice": 77852.8,
+   "pnl": -0.0691,
+   "closedAt": 1793634529889
   }
  ],
  "equity": [
@@ -12195,6 +12198,18 @@
   {
    "t": 1793633678166,
    "value": 19.99
+  },
+  {
+   "t": 1793633984546,
+   "value": 19.99
+  },
+  {
+   "t": 1793634289051,
+   "value": 19.99
+  },
+  {
+   "t": 1793634593432,
+   "value": 19.92
   }
  ],
  "config": {
@@ -12218,12 +12233,29 @@
   "need": 2000
  },
  "status": {
+  "BTC": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 78000,
+   "experience": 0.495,
+   "liveLearner": 0.514,
+   "record": 0.52,
+   "call": "WAIT",
+   "last400": {
+    "call": 0.24,
+    "bounceOrRollover": 0.018
+   },
+   "backtest": {
+    "calls": 164,
+    "right": 0.561
+   }
+  },
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2293.45,
-   "experience": 0.497,
-   "liveLearner": 0.594,
+   "price": 2288.49,
+   "experience": 0.533,
+   "liveLearner": 0.667,
    "record": 0.6,
    "call": "WAIT",
    "last400": {
@@ -12238,9 +12270,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 94.42,
-   "experience": 0.51,
-   "liveLearner": 0.551,
+   "price": 94.24,
+   "experience": 0.531,
+   "liveLearner": 0.589,
    "record": 0.61,
    "call": "WAIT",
    "last400": {
@@ -12255,9 +12287,9 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2517,
-   "experience": 0.544,
-   "liveLearner": 0.628,
+   "price": 1.2544,
+   "experience": 0.502,
+   "liveLearner": 0.445,
    "record": 0.62,
    "call": "WAIT",
    "last400": {
@@ -12274,7 +12306,7 @@
    "candles": 1999,
    "price": 0.0756,
    "experience": 0.493,
-   "liveLearner": 0.479,
+   "liveLearner": 0.474,
    "record": 0.63,
    "call": "WAIT",
    "last400": {
@@ -12287,5 +12319,5 @@
    }
   }
  },
- "lastRun": 1793633678166
+ "lastRun": 1793634593432
 }
