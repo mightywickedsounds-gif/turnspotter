@@ -12159,6 +12159,18 @@
   {
    "t": 1793630929889,
    "value": 19.99
+  },
+  {
+   "t": 1793631237869,
+   "value": 19.99
+  },
+  {
+   "t": 1793631542651,
+   "value": 19.99
+  },
+  {
+   "t": 1793631847218,
+   "value": 19.99
   }
  ],
  "config": {
@@ -12182,29 +12194,12 @@
   "need": 2000
  },
  "status": {
-  "BTC": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 77874.62,
-   "experience": 0.521,
-   "liveLearner": 0.547,
-   "record": 0.51,
-   "call": "WAIT",
-   "last400": {
-    "call": 0.237,
-    "bounceOrRollover": 0.018
-   },
-   "backtest": {
-    "calls": 163,
-    "right": 0.558
-   }
-  },
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2289,
-   "experience": 0.51,
-   "liveLearner": 0.568,
+   "price": 2290.66,
+   "experience": 0.506,
+   "liveLearner": 0.549,
    "record": 0.6,
    "call": "WAIT",
    "last400": {
@@ -12219,9 +12214,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 94.3,
-   "experience": 0.489,
-   "liveLearner": 0.442,
+   "price": 94.36,
+   "experience": 0.505,
+   "liveLearner": 0.407,
    "record": 0.59,
    "call": "WAIT",
    "last400": {
@@ -12229,16 +12224,16 @@
     "bounceOrRollover": 0.022
    },
    "backtest": {
-    "calls": 166,
-    "right": 0.53
+    "calls": 167,
+    "right": 0.533
    }
   },
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2522,
+   "price": 1.2519,
    "experience": 0.529,
-   "liveLearner": 0.573,
+   "liveLearner": 0.521,
    "record": 0.63,
    "call": "WAIT",
    "last400": {
@@ -12246,8 +12241,8 @@
     "bounceOrRollover": 0.005
    },
    "backtest": {
-    "calls": 160,
-    "right": 0.481
+    "calls": 161,
+    "right": 0.484
    }
   },
   "DOGE": {
@@ -12255,7 +12250,7 @@
    "candles": 1999,
    "price": 0.0756,
    "experience": 0.497,
-   "liveLearner": 0.434,
+   "liveLearner": 0.414,
    "record": 0.63,
    "call": "WAIT",
    "last400": {
@@ -12268,5 +12263,5 @@
    }
   }
  },
- "lastRun": 1793630929889
+ "lastRun": 1793631847218
 }
