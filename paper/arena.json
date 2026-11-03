@@ -8,24 +8,18 @@
   "feePct": 1,
   "minStake": 1
  },
- "lastT": 1793696700000,
+ "lastT": 1793697000000,
  "bots": {
   "scalper": {
    "name": "Scalper",
    "desc": "Goes with a strong 3-minute swing (over 2× normal)",
-   "balance": 29.8592,
-   "trades": 306,
+   "balance": 29.708,
+   "trades": 307,
    "wins": 102,
    "busts": 0,
    "best": 2.193,
    "worst": -3.5767,
    "recent": [
-    {
-     "t": 1793672340000,
-     "dir": -1,
-     "pnl": -0.208,
-     "busted": false
-    },
     {
      "t": 1793673300000,
      "dir": 1,
@@ -138,6 +132,12 @@
      "t": 1793693100000,
      "dir": -1,
      "pnl": -0.1834,
+     "busted": false
+    },
+    {
+     "t": 1793696820000,
+     "dir": 1,
+     "pnl": -0.1512,
      "busted": false
     }
    ],
@@ -5585,25 +5585,23 @@
     {
      "t": 1793696780373,
      "v": 29.86
+    },
+    {
+     "t": 1793697082467,
+     "v": 29.71
     }
    ]
   },
   "fader": {
    "name": "Streak Fader",
    "desc": "Bets against 5 same-colour candles in a row",
-   "balance": 36.3692,
-   "trades": 180,
+   "balance": 35.876,
+   "trades": 181,
    "wins": 54,
    "busts": 0,
    "best": 0.7747,
    "worst": -0.9902,
    "recent": [
-    {
-     "t": 1793671080000,
-     "dir": 1,
-     "pnl": -0.0422,
-     "busted": false
-    },
     {
      "t": 1793674800000,
      "dir": 1,
@@ -5716,6 +5714,12 @@
      "t": 1793695380000,
      "dir": 1,
      "pnl": 0.0165,
+     "busted": false
+    },
+    {
+     "t": 1793696760000,
+     "dir": -1,
+     "pnl": -0.4932,
      "busted": false
     }
    ],
@@ -11163,25 +11167,23 @@
     {
      "t": 1793696780373,
      "v": 36.37
+    },
+    {
+     "t": 1793697082467,
+     "v": 35.88
     }
    ]
   },
   "breakout": {
    "name": "Breakout Bro",
    "desc": "Trades the break of a tight 30-minute range",
-   "balance": 35.4064,
-   "trades": 359,
-   "wins": 119,
+   "balance": 35.8152,
+   "trades": 360,
+   "wins": 120,
    "busts": 0,
    "best": 0.9521,
    "worst": -0.491,
    "recent": [
-    {
-     "t": 1793671620000,
-     "dir": -1,
-     "pnl": -0.0652,
-     "busted": false
-    },
     {
      "t": 1793674440000,
      "dir": -1,
@@ -11294,6 +11296,12 @@
      "t": 1793696700000,
      "dir": 1,
      "pnl": 0.0862,
+     "busted": false
+    },
+    {
+     "t": 1793696760000,
+     "dir": 1,
+     "pnl": 0.4088,
      "busted": false
     }
    ],
@@ -16741,6 +16749,10 @@
     {
      "t": 1793696780373,
      "v": 35.41
+    },
+    {
+     "t": 1793697082467,
+     "v": 35.82
     }
    ]
   },
@@ -22318,6 +22330,10 @@
     },
     {
      "t": 1793696780373,
+     "v": 32.62
+    },
+    {
+     "t": 1793697082467,
      "v": 32.62
     }
    ]
@@ -27897,11 +27913,15 @@
     {
      "t": 1793696780373,
      "v": 42.34
+    },
+    {
+     "t": 1793697082467,
+     "v": 42.34
     }
    ]
   }
  },
- "lastRun": 1793696780373,
- "price": 76588.35,
+ "lastRun": 1793697082467,
+ "price": 76644.81,
  "src": "Coinbase"
 }
