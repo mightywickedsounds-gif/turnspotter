@@ -13557,6 +13557,18 @@
   {
    "t": 1793700161512,
    "value": 23.49
+  },
+  {
+   "t": 1793700470782,
+   "value": 23.49
+  },
+  {
+   "t": 1793700776832,
+   "value": 23.49
+  },
+  {
+   "t": 1793701083023,
+   "value": 23.49
   }
  ],
  "config": {
@@ -13583,9 +13595,9 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 77051.73,
-   "experience": 0.462,
-   "liveLearner": 0.416,
+   "price": 77044.68,
+   "experience": 0.471,
+   "liveLearner": 0.431,
    "record": 0.57,
    "call": "WAIT",
    "last400": {
@@ -13594,32 +13606,15 @@
    },
    "backtest": {
     "calls": 167,
-    "right": 0.551
-   }
-  },
-  "ETH": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 2268.51,
-   "experience": 0.451,
-   "liveLearner": 0.409,
-   "record": 0.6,
-   "call": "WAIT",
-   "last400": {
-    "call": 0.138,
-    "bounceOrRollover": 0.005
-   },
-   "backtest": {
-    "calls": 151,
-    "right": 0.55
+    "right": 0.557
    }
   },
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 92.38,
-   "experience": 0.476,
-   "liveLearner": 0.389,
+   "price": 92.41,
+   "experience": 0.47,
+   "liveLearner": 0.397,
    "record": 0.58,
    "call": "WAIT",
    "last400": {
@@ -13634,13 +13629,13 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2561,
-   "experience": 0.467,
-   "liveLearner": 0.304,
+   "price": 1.2542,
+   "experience": 0.501,
+   "liveLearner": 0.415,
    "record": 0.63,
    "call": "WAIT",
    "last400": {
-    "call": 0.17,
+    "call": 0.168,
     "bounceOrRollover": 0
    },
    "backtest": {
@@ -13652,8 +13647,8 @@
    "src": "Binance US",
    "candles": 1999,
    "price": 0.07413,
-   "experience": 0.496,
-   "liveLearner": 0.4,
+   "experience": 0.495,
+   "liveLearner": 0.417,
    "record": 0.71,
    "call": "WAIT",
    "last400": {
@@ -13661,10 +13656,10 @@
     "bounceOrRollover": 0.013
    },
    "backtest": {
-    "calls": 168,
-    "right": 0.542
+    "calls": 169,
+    "right": 0.544
    }
   }
  },
- "lastRun": 1793700161512
+ "lastRun": 1793701083023
 }
