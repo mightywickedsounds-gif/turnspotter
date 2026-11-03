@@ -13983,6 +13983,18 @@
   {
    "t": 1793719221615,
    "value": 20.55
+  },
+  {
+   "t": 1793719530731,
+   "value": 20.55
+  },
+  {
+   "t": 1793719836503,
+   "value": 20.55
+  },
+  {
+   "t": 1793720142529,
+   "value": 20.55
   }
  ],
  "config": {
@@ -14009,9 +14021,9 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 77426.46,
-   "experience": 0.491,
-   "liveLearner": 0.517,
+   "price": 77346.47,
+   "experience": 0.51,
+   "liveLearner": 0.495,
    "record": 0.54,
    "call": "WAIT",
    "last400": {
@@ -14026,9 +14038,9 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2291.23,
-   "experience": 0.499,
-   "liveLearner": 0.433,
+   "price": 2286.49,
+   "experience": 0.512,
+   "liveLearner": 0.495,
    "record": 0.61,
    "call": "WAIT",
    "last400": {
@@ -14043,9 +14055,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 93.33,
-   "experience": 0.481,
-   "liveLearner": 0.258,
+   "price": 93.09,
+   "experience": 0.511,
+   "liveLearner": 0.415,
    "record": 0.6,
    "call": "WAIT",
    "last400": {
@@ -14060,9 +14072,9 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2756,
-   "experience": 0.519,
-   "liveLearner": 0.34,
+   "price": 1.2728,
+   "experience": 0.515,
+   "liveLearner": 0.37,
    "record": 0.62,
    "call": "WAIT",
    "last400": {
@@ -14070,16 +14082,16 @@
     "bounceOrRollover": 0
    },
    "backtest": {
-    "calls": 160,
-    "right": 0.519
+    "calls": 159,
+    "right": 0.516
    }
   },
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07528,
-   "experience": 0.473,
-   "liveLearner": 0.281,
+   "price": 0.07503,
+   "experience": 0.505,
+   "liveLearner": 0.446,
    "record": 0.7,
    "call": "WAIT",
    "last400": {
@@ -14087,10 +14099,10 @@
     "bounceOrRollover": 0.013
    },
    "backtest": {
-    "calls": 168,
-    "right": 0.536
+    "calls": 167,
+    "right": 0.533
    }
   }
  },
- "lastRun": 1793719221615
+ "lastRun": 1793720142529
 }
