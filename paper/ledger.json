@@ -15750,6 +15750,18 @@
   {
    "t": 1793800040559,
    "value": 16.99
+  },
+  {
+   "t": 1793800346168,
+   "value": 16.99
+  },
+  {
+   "t": 1793800650361,
+   "value": 16.99
+  },
+  {
+   "t": 1793800954583,
+   "value": 16.99
   }
  ],
  "config": {
@@ -15776,9 +15788,9 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 78422.71,
-   "experience": 0.487,
-   "liveLearner": 0.506,
+   "price": 78360.08,
+   "experience": 0.504,
+   "liveLearner": 0.508,
    "record": 0.49,
    "call": "WAIT",
    "last400": {
@@ -15786,16 +15798,16 @@
     "bounceOrRollover": 0.007
    },
    "backtest": {
-    "calls": 167,
-    "right": 0.545
+    "calls": 166,
+    "right": 0.542
    }
   },
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2319.34,
-   "experience": 0.501,
-   "liveLearner": 0.409,
+   "price": 2319.19,
+   "experience": 0.504,
+   "liveLearner": 0.361,
    "record": 0.57,
    "call": "WAIT",
    "last400": {
@@ -15810,10 +15822,10 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 92.91,
-   "experience": 0.527,
-   "liveLearner": 0.323,
-   "record": 0.62,
+   "price": 93,
+   "experience": 0.511,
+   "liveLearner": 0.386,
+   "record": 0.63,
    "call": "WAIT",
    "last400": {
     "call": 0.237,
@@ -15827,9 +15839,9 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2821,
-   "experience": 0.504,
-   "liveLearner": 0.37,
+   "price": 1.2845,
+   "experience": 0.487,
+   "liveLearner": 0.376,
    "record": 0.7,
    "call": "WAIT",
    "last400": {
@@ -15845,8 +15857,8 @@
    "src": "Binance US",
    "candles": 1999,
    "price": 0.07483,
-   "experience": 0.513,
-   "liveLearner": 0.4,
+   "experience": 0.521,
+   "liveLearner": 0.423,
    "record": 0.7,
    "call": "WAIT",
    "last400": {
@@ -15854,10 +15866,10 @@
     "bounceOrRollover": 0.015
    },
    "backtest": {
-    "calls": 170,
-    "right": 0.547
+    "calls": 169,
+    "right": 0.544
    }
   }
  },
- "lastRun": 1793800040559
+ "lastRun": 1793800954583
 }
