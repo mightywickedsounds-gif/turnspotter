@@ -15909,6 +15909,18 @@
   {
    "t": 1793805553559,
    "value": 15.29
+  },
+  {
+   "t": 1793805860619,
+   "value": 15.29
+  },
+  {
+   "t": 1793806165839,
+   "value": 15.29
+  },
+  {
+   "t": 1793806471096,
+   "value": 15.29
   }
  ],
  "config": {
@@ -15935,11 +15947,11 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 80858.77,
-   "experience": 0.414,
-   "liveLearner": 0.641,
+   "price": 80596.82,
+   "experience": 0.484,
+   "liveLearner": 0.692,
    "record": 0.49,
-   "call": "DOWN",
+   "call": "WAIT",
    "last400": {
     "call": 0.28,
     "bounceOrRollover": 0.007
@@ -15950,5 +15962,5 @@
    }
   }
  },
- "lastRun": 1793805553559
+ "lastRun": 1793806471096
 }
