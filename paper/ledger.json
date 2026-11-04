@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 17.7652,
+ "balance": 15.939,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -5718,7 +5718,10 @@
    "expiresAt": 1793751387359,
    "experience": 0.459,
    "source": "Binance US",
-   "status": "open"
+   "status": "won",
+   "exitPrice": 0.07502,
+   "pnl": 0.8038,
+   "closedAt": 1793751387359
   },
   {
    "id": "ETH-1793750534382",
@@ -5733,6 +5736,54 @@
    "openedAt": 1793750534382,
    "expiresAt": 1793754134382,
    "experience": 0.595,
+   "source": "Binance US",
+   "status": "open"
+  },
+  {
+   "id": "BTC-1793751450130",
+   "coin": "BTC",
+   "dir": 1,
+   "entry": 77333.01,
+   "spread": 0,
+   "stake": 1.78,
+   "mult": 50,
+   "fee": 0.0178,
+   "bustPrice": 75786.35,
+   "openedAt": 1793751450130,
+   "expiresAt": 1793755050130,
+   "experience": 0.56,
+   "source": "Binance US",
+   "status": "open"
+  },
+  {
+   "id": "SOL-1793751450130",
+   "coin": "SOL",
+   "dir": 1,
+   "entry": 92.61,
+   "spread": 0.000108,
+   "stake": 1.6,
+   "mult": 50,
+   "fee": 0.016,
+   "bustPrice": 90.7578,
+   "openedAt": 1793751450130,
+   "expiresAt": 1793755050130,
+   "experience": 0.565,
+   "source": "Binance US",
+   "status": "open"
+  },
+  {
+   "id": "XRP-1793751450130",
+   "coin": "XRP",
+   "dir": 1,
+   "entry": 1.274,
+   "spread": 0.000078,
+   "stake": 1.44,
+   "mult": 50,
+   "fee": 0.0144,
+   "bustPrice": 1.24852,
+   "openedAt": 1793751450130,
+   "expiresAt": 1793755050130,
+   "experience": 0.554,
    "source": "Binance US",
    "status": "open"
   }
@@ -14617,6 +14668,18 @@
   {
    "t": 1793750534382,
    "value": 21.93
+  },
+  {
+   "t": 1793750841095,
+   "value": 21.93
+  },
+  {
+   "t": 1793751145523,
+   "value": 21.93
+  },
+  {
+   "t": 1793751450130,
+   "value": 22.73
   }
  ],
  "config": {
@@ -14643,13 +14706,13 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 77436.03,
-   "experience": 0.605,
-   "liveLearner": 0.624,
+   "price": 77354.22,
+   "experience": 0.56,
+   "liveLearner": 0.364,
    "record": 0.53,
    "call": "UP",
    "last400": {
-    "call": 0.233,
+    "call": 0.235,
     "bounceOrRollover": 0.007
    },
    "backtest": {
@@ -14657,57 +14720,57 @@
     "right": 0.555
    }
   },
-  "ETH": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 2274.89,
-   "experience": 0.595,
-   "liveLearner": 0.674,
-   "record": 0.61,
-   "call": "UP",
-   "last400": {
-    "call": 0.155,
-    "bounceOrRollover": 0.005
-   },
-   "backtest": {
-    "calls": 151,
-    "right": 0.55
-   }
-  },
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 92.84,
-   "experience": 0.587,
-   "liveLearner": 0.482,
+   "price": 92.61,
+   "experience": 0.565,
+   "liveLearner": 0.398,
    "record": 0.6,
    "call": "UP",
    "last400": {
-    "call": 0.253,
+    "call": 0.255,
     "bounceOrRollover": 0.01
    },
    "backtest": {
     "calls": 167,
-    "right": 0.539
+    "right": 0.545
    }
   },
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2764,
-   "experience": 0.552,
-   "liveLearner": 0.58,
+   "price": 1.2743,
+   "experience": 0.554,
+   "liveLearner": 0.62,
    "record": 0.62,
    "call": "UP",
    "last400": {
-    "call": 0.17,
+    "call": 0.172,
     "bounceOrRollover": 0
    },
    "backtest": {
     "calls": 158,
     "right": 0.519
    }
+  },
+  "DOGE": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 0.07518,
+   "experience": 0.544,
+   "liveLearner": 0.555,
+   "record": 0.71,
+   "call": "WAIT",
+   "last400": {
+    "call": 0.253,
+    "bounceOrRollover": 0.013
+   },
+   "backtest": {
+    "calls": 168,
+    "right": 0.542
+   }
   }
  },
- "lastRun": 1793750534382
+ "lastRun": 1793751450130
 }
