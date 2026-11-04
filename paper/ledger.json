@@ -16068,6 +16068,18 @@
   {
    "t": 1793815343103,
    "value": 14.32
+  },
+  {
+   "t": 1793815650571,
+   "value": 14.32
+  },
+  {
+   "t": 1793815955530,
+   "value": 14.32
+  },
+  {
+   "t": 1793816260575,
+   "value": 14.32
   }
  ],
  "config": {
@@ -16094,9 +16106,9 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 80419.64,
-   "experience": 0.485,
-   "liveLearner": 0.53,
+   "price": 80634.4,
+   "experience": 0.454,
+   "liveLearner": 0.48,
    "record": 0.49,
    "call": "WAIT",
    "last400": {
@@ -16111,9 +16123,9 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2424.66,
-   "experience": 0.484,
-   "liveLearner": 0.369,
+   "price": 2435.25,
+   "experience": 0.45,
+   "liveLearner": 0.348,
    "record": 0.57,
    "call": "WAIT",
    "last400": {
@@ -16128,9 +16140,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 95.73,
-   "experience": 0.518,
-   "liveLearner": 0.437,
+   "price": 96.1,
+   "experience": 0.486,
+   "liveLearner": 0.304,
    "record": 0.63,
    "call": "WAIT",
    "last400": {
@@ -16138,16 +16150,16 @@
     "bounceOrRollover": 0.01
    },
    "backtest": {
-    "calls": 168,
-    "right": 0.536
+    "calls": 167,
+    "right": 0.533
    }
   },
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.31,
-   "experience": 0.511,
-   "liveLearner": 0.446,
+   "price": 1.3173,
+   "experience": 0.473,
+   "liveLearner": 0.37,
    "record": 0.71,
    "call": "WAIT",
    "last400": {
@@ -16155,16 +16167,16 @@
     "bounceOrRollover": 0.005
    },
    "backtest": {
-    "calls": 160,
-    "right": 0.525
+    "calls": 159,
+    "right": 0.522
    }
   },
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07684,
-   "experience": 0.502,
-   "liveLearner": 0.398,
+   "price": 0.07711,
+   "experience": 0.484,
+   "liveLearner": 0.364,
    "record": 0.69,
    "call": "WAIT",
    "last400": {
@@ -16177,5 +16189,5 @@
    }
   }
  },
- "lastRun": 1793815343103
+ "lastRun": 1793816260575
 }
