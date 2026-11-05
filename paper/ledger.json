@@ -6782,7 +6782,10 @@
    "expiresAt": 1793891856144,
    "experience": 0.563,
    "source": "Binance US",
-   "status": "open"
+   "status": "busted",
+   "exitPrice": 77870.428,
+   "pnl": -1.34,
+   "closedAt": 1793890860000
   },
   {
    "id": "ETH-1793888256144",
@@ -17597,6 +17600,10 @@
   {
    "t": 1793890702372,
    "value": 9.08
+  },
+  {
+   "t": 1793891009387,
+   "value": 7.74
   }
  ],
  "config": {
@@ -17620,29 +17627,46 @@
   "need": 2000
  },
  "status": {
+  "BTC": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 78293.96,
+   "experience": 0.603,
+   "liveLearner": 0.437,
+   "record": 0.48,
+   "call": "UP",
+   "last400": {
+    "call": 0.268,
+    "bounceOrRollover": 0.01
+   },
+   "backtest": {
+    "calls": 162,
+    "right": 0.531
+   }
+  },
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2363.41,
-   "experience": 0.595,
-   "liveLearner": 0.433,
-   "record": 0.58,
+   "price": 2343.5,
+   "experience": 0.604,
+   "liveLearner": 0.411,
+   "record": 0.57,
    "call": "UP",
    "last400": {
-    "call": 0.207,
+    "call": 0.21,
     "bounceOrRollover": 0.013
    },
    "backtest": {
-    "calls": 149,
-    "right": 0.55
+    "calls": 148,
+    "right": 0.547
    }
   },
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 94.06,
-   "experience": 0.598,
-   "liveLearner": 0.674,
+   "price": 93.03,
+   "experience": 0.605,
+   "liveLearner": 0.691,
    "record": 0.6,
    "call": "UP",
    "last400": {
@@ -17657,13 +17681,13 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2868,
-   "experience": 0.595,
-   "liveLearner": 0.857,
+   "price": 1.2798,
+   "experience": 0.583,
+   "liveLearner": 0.842,
    "record": 0.7,
    "call": "UP",
    "last400": {
-    "call": 0.182,
+    "call": 0.185,
     "bounceOrRollover": 0.005
    },
    "backtest": {
@@ -17674,13 +17698,13 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07488,
-   "experience": 0.6,
-   "liveLearner": 0.538,
+   "price": 0.07429,
+   "experience": 0.601,
+   "liveLearner": 0.519,
    "record": 0.69,
    "call": "UP",
    "last400": {
-    "call": 0.223,
+    "call": 0.225,
     "bounceOrRollover": 0.015
    },
    "backtest": {
@@ -17689,5 +17713,5 @@
    }
   }
  },
- "lastRun": 1793890702372
+ "lastRun": 1793891009387
 }
