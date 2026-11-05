@@ -6798,7 +6798,10 @@
    "expiresAt": 1793891856144,
    "experience": 0.559,
    "source": "Binance US",
-   "status": "open"
+   "status": "busted",
+   "exitPrice": 2336.5258,
+   "pnl": -1.2,
+   "closedAt": 1793890620000
   },
   {
    "id": "SOL-1793889171391",
@@ -6833,7 +6836,10 @@
    "expiresAt": 1793892771391,
    "experience": 0.54,
    "source": "Binance US",
-   "status": "open"
+   "status": "busted",
+   "exitPrice": 1.277136,
+   "pnl": -1,
+   "closedAt": 1793890620000
   },
   {
    "id": "DOGE-1793889171391",
@@ -6849,7 +6855,10 @@
    "expiresAt": 1793892771391,
    "experience": 0.543,
    "source": "Binance US",
-   "status": "open"
+   "status": "busted",
+   "exitPrice": 0.0742448,
+   "pnl": -1,
+   "closedAt": 1793890500000
   }
  ],
  "equity": [
@@ -17584,6 +17593,10 @@
   {
    "t": 1793890395836,
    "value": 12.28
+  },
+  {
+   "t": 1793890702372,
+   "value": 9.08
   }
  ],
  "config": {
@@ -17607,6 +17620,23 @@
   "need": 2000
  },
  "status": {
+  "ETH": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 2363.41,
+   "experience": 0.595,
+   "liveLearner": 0.433,
+   "record": 0.58,
+   "call": "UP",
+   "last400": {
+    "call": 0.207,
+    "bounceOrRollover": 0.013
+   },
+   "backtest": {
+    "calls": 149,
+    "right": 0.55
+   }
+  },
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
@@ -17623,7 +17653,41 @@
     "calls": 164,
     "right": 0.543
    }
+  },
+  "XRP": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 1.2868,
+   "experience": 0.595,
+   "liveLearner": 0.857,
+   "record": 0.7,
+   "call": "UP",
+   "last400": {
+    "call": 0.182,
+    "bounceOrRollover": 0.005
+   },
+   "backtest": {
+    "calls": 157,
+    "right": 0.535
+   }
+  },
+  "DOGE": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 0.07488,
+   "experience": 0.6,
+   "liveLearner": 0.538,
+   "record": 0.69,
+   "call": "UP",
+   "last400": {
+    "call": 0.223,
+    "bounceOrRollover": 0.015
+   },
+   "backtest": {
+    "calls": 164,
+    "right": 0.53
+   }
   }
  },
- "lastRun": 1793890395836
+ "lastRun": 1793890702372
 }
