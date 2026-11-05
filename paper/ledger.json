@@ -17768,6 +17768,18 @@
   {
    "t": 1793899884160,
    "value": 7.74
+  },
+  {
+   "t": 1793900190249,
+   "value": 7.74
+  },
+  {
+   "t": 1793900494913,
+   "value": 7.74
+  },
+  {
+   "t": 1793900799424,
+   "value": 7.74
   }
  ],
  "config": {
@@ -17794,13 +17806,13 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 75937.09,
-   "experience": 0.59,
-   "liveLearner": 0.518,
+   "price": 75978.1,
+   "experience": 0.58,
+   "liveLearner": 0.439,
    "record": 0.44,
    "call": "UP",
    "last400": {
-    "call": 0.29,
+    "call": 0.292,
     "bounceOrRollover": 0.02
    },
    "backtest": {
@@ -17811,13 +17823,13 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 89.66,
-   "experience": 0.573,
-   "liveLearner": 0.488,
+   "price": 89.52,
+   "experience": 0.59,
+   "liveLearner": 0.494,
    "record": 0.59,
    "call": "UP",
    "last400": {
-    "call": 0.26,
+    "call": 0.263,
     "bounceOrRollover": 0.018
    },
    "backtest": {
@@ -17826,5 +17838,5 @@
    }
   }
  },
- "lastRun": 1793899884160
+ "lastRun": 1793900799424
 }
