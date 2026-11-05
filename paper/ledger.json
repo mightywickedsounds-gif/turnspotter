@@ -17849,6 +17849,18 @@
   {
    "t": 1793905376002,
    "value": 6.94
+  },
+  {
+   "t": 1793905682236,
+   "value": 6.94
+  },
+  {
+   "t": 1793905986729,
+   "value": 6.94
+  },
+  {
+   "t": 1793906290992,
+   "value": 6.94
   }
  ],
  "config": {
@@ -17875,13 +17887,13 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 76134.48,
-   "experience": 0.59,
-   "liveLearner": 0.691,
-   "record": 0.48,
+   "price": 76218.37,
+   "experience": 0.575,
+   "liveLearner": 0.673,
+   "record": 0.49,
    "call": "UP",
    "last400": {
-    "call": 0.305,
+    "call": 0.307,
     "bounceOrRollover": 0.02
    },
    "backtest": {
@@ -17892,14 +17904,14 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2252.05,
-   "experience": 0.598,
-   "liveLearner": 0.677,
-   "record": 0.51,
+   "price": 2260.15,
+   "experience": 0.57,
+   "liveLearner": 0.685,
+   "record": 0.52,
    "call": "UP",
    "last400": {
-    "call": 0.242,
-    "bounceOrRollover": 0.018
+    "call": 0.245,
+    "bounceOrRollover": 0.02
    },
    "backtest": {
     "calls": 150,
@@ -17909,14 +17921,14 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 89.72,
-   "experience": 0.569,
-   "liveLearner": 0.567,
-   "record": 0.58,
+   "price": 89.73,
+   "experience": 0.573,
+   "liveLearner": 0.586,
+   "record": 0.59,
    "call": "UP",
    "last400": {
-    "call": 0.275,
-    "bounceOrRollover": 0.028
+    "call": 0.278,
+    "bounceOrRollover": 0.03
    },
    "backtest": {
     "calls": 165,
@@ -17926,14 +17938,14 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2349,
-   "experience": 0.587,
-   "liveLearner": 0.548,
+   "price": 1.2352,
+   "experience": 0.586,
+   "liveLearner": 0.571,
    "record": 0.64,
    "call": "UP",
    "last400": {
-    "call": 0.215,
-    "bounceOrRollover": 0.01
+    "call": 0.217,
+    "bounceOrRollover": 0.013
    },
    "backtest": {
     "calls": 159,
@@ -17943,14 +17955,14 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07192,
-   "experience": 0.579,
-   "liveLearner": 0.719,
+   "price": 0.07209,
+   "experience": 0.558,
+   "liveLearner": 0.717,
    "record": 0.64,
    "call": "UP",
    "last400": {
-    "call": 0.258,
-    "bounceOrRollover": 0.03
+    "call": 0.26,
+    "bounceOrRollover": 0.033
    },
    "backtest": {
     "calls": 166,
@@ -17958,5 +17970,5 @@
    }
   }
  },
- "lastRun": 1793905376002
+ "lastRun": 1793906290992
 }
