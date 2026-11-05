@@ -8,30 +8,18 @@
   "feePct": 1,
   "minStake": 1
  },
- "lastT": 1793865060000,
+ "lastT": 1793865660000,
  "bots": {
   "scalper": {
    "name": "Scalper",
    "desc": "Goes with a strong 3-minute swing (over 2× normal)",
-   "balance": 25.5156,
-   "trades": 462,
-   "wins": 166,
+   "balance": 25.4156,
+   "trades": 464,
+   "wins": 167,
    "busts": 0,
    "best": 2.193,
    "worst": -3.5767,
    "recent": [
-    {
-     "t": 1793840280000,
-     "dir": -1,
-     "pnl": -0.1197,
-     "busted": false
-    },
-    {
-     "t": 1793841420000,
-     "dir": -1,
-     "pnl": -0.0446,
-     "busted": false
-    },
     {
      "t": 1793841660000,
      "dir": -1,
@@ -138,6 +126,18 @@
      "t": 1793863980000,
      "dir": -1,
      "pnl": 0.0184,
+     "busted": false
+    },
+    {
+     "t": 1793865420000,
+     "dir": -1,
+     "pnl": 0.0016,
+     "busted": false
+    },
+    {
+     "t": 1793865480000,
+     "dir": -1,
+     "pnl": -0.1016,
      "busted": false
     }
    ],
@@ -7825,25 +7825,27 @@
     {
      "t": 1793865158206,
      "v": 25.52
+    },
+    {
+     "t": 1793865460055,
+     "v": 25.52
+    },
+    {
+     "t": 1793865760315,
+     "v": 25.42
     }
    ]
   },
   "fader": {
    "name": "Streak Fader",
    "desc": "Bets against 5 same-colour candles in a row",
-   "balance": 32.9105,
-   "trades": 269,
+   "balance": 32.8426,
+   "trades": 270,
    "wins": 90,
    "busts": 0,
    "best": 0.7747,
    "worst": -0.9902,
    "recent": [
-    {
-     "t": 1793842500000,
-     "dir": -1,
-     "pnl": -0.0028,
-     "busted": false
-    },
     {
      "t": 1793842920000,
      "dir": -1,
@@ -7956,6 +7958,12 @@
      "t": 1793863920000,
      "dir": 1,
      "pnl": -0.1424,
+     "busted": false
+    },
+    {
+     "t": 1793865420000,
+     "dir": 1,
+     "pnl": -0.0679,
      "busted": false
     }
    ],
@@ -15643,6 +15651,14 @@
     {
      "t": 1793865158206,
      "v": 32.91
+    },
+    {
+     "t": 1793865460055,
+     "v": 32.91
+    },
+    {
+     "t": 1793865760315,
+     "v": 32.84
     }
    ]
   },
@@ -23461,25 +23477,27 @@
     {
      "t": 1793865158206,
      "v": 33.79
+    },
+    {
+     "t": 1793865460055,
+     "v": 33.79
+    },
+    {
+     "t": 1793865760315,
+     "v": 33.79
     }
    ]
   },
   "bull": {
    "name": "Always Bullish",
    "desc": "Bets UP every 30 minutes, no matter what",
-   "balance": 32.0765,
-   "trades": 321,
+   "balance": 32.0521,
+   "trades": 322,
    "wins": 104,
    "busts": 0,
    "best": 1.1101,
    "worst": -1.0556,
    "recent": [
-    {
-     "t": 1793829600000,
-     "dir": 1,
-     "pnl": 0.1193,
-     "busted": false
-    },
     {
      "t": 1793831400000,
      "dir": 1,
@@ -23593,6 +23611,12 @@
      "dir": 1,
      "pnl": -0.296,
      "busted": false
+    },
+    {
+     "t": 1793865600000,
+     "dir": 1,
+     "pnl": -0.0244,
+     "busted": false
     }
    ],
    "equity": [
@@ -31279,25 +31303,27 @@
     {
      "t": 1793865158206,
      "v": 32.08
+    },
+    {
+     "t": 1793865460055,
+     "v": 32.08
+    },
+    {
+     "t": 1793865760315,
+     "v": 32.05
     }
    ]
   },
   "flipper": {
    "name": "Coin Flipper",
    "desc": "Random direction every 30 minutes: the control",
-   "balance": 39.1262,
-   "trades": 321,
+   "balance": 39.0777,
+   "trades": 322,
    "wins": 132,
    "busts": 0,
    "best": 0.7512,
    "worst": -1.7316,
    "recent": [
-    {
-     "t": 1793829600000,
-     "dir": 1,
-     "pnl": 0.1449,
-     "busted": false
-    },
     {
      "t": 1793831400000,
      "dir": -1,
@@ -31411,6 +31437,12 @@
      "dir": -1,
      "pnl": 0.2769,
      "busted": false
+    },
+    {
+     "t": 1793865600000,
+     "dir": -1,
+     "pnl": -0.0485,
+     "busted": false
     }
    ],
    "equity": [
@@ -39097,11 +39129,19 @@
     {
      "t": 1793865158206,
      "v": 39.13
+    },
+    {
+     "t": 1793865460055,
+     "v": 39.13
+    },
+    {
+     "t": 1793865760315,
+     "v": 39.08
     }
    ]
   }
  },
- "lastRun": 1793865158206,
- "price": 80351.66,
+ "lastRun": 1793865760315,
+ "price": 80322.6,
  "src": "Coinbase"
 }
