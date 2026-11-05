@@ -17042,6 +17042,18 @@
   {
    "t": 1793868346790,
    "value": 14.1
+  },
+  {
+   "t": 1793868654162,
+   "value": 14.1
+  },
+  {
+   "t": 1793868959424,
+   "value": 14.1
+  },
+  {
+   "t": 1793869264408,
+   "value": 14.1
   }
  ],
  "config": {
@@ -17064,24 +17076,6 @@
   "conf": 0.55,
   "need": 2000
  },
- "status": {
-  "SOL": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 96.7,
-   "experience": 0.468,
-   "liveLearner": 0.418,
-   "record": 0.6,
-   "call": "WAIT",
-   "last400": {
-    "call": 0.245,
-    "bounceOrRollover": 0.01
-   },
-   "backtest": {
-    "calls": 164,
-    "right": 0.53
-   }
-  }
- },
- "lastRun": 1793868346790
+ "status": {},
+ "lastRun": 1793869264408
 }
