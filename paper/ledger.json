@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 2.2157,
+ "balance": 1.2157,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -7038,6 +7038,22 @@
    "openedAt": 1793920748528,
    "expiresAt": 1793924348528,
    "experience": 0.566,
+   "source": "Binance US",
+   "status": "open"
+  },
+  {
+   "id": "SOL-1793921670166",
+   "coin": "SOL",
+   "dir": 1,
+   "entry": 89.3,
+   "spread": 0.000336,
+   "stake": 1,
+   "mult": 30,
+   "fee": 0.01,
+   "bustPrice": 86.323333,
+   "openedAt": 1793921670166,
+   "expiresAt": 1793925270166,
+   "experience": 0.53,
    "source": "Binance US",
    "status": "open"
   }
@@ -18174,6 +18190,18 @@
   {
    "t": 1793920748528,
    "value": 6.22
+  },
+  {
+   "t": 1793921057132,
+   "value": 6.22
+  },
+  {
+   "t": 1793921363311,
+   "value": 6.22
+  },
+  {
+   "t": 1793921670166,
+   "value": 6.22
   }
  ],
  "config": {
@@ -18197,33 +18225,16 @@
   "need": 2000
  },
  "status": {
-  "ETH": {
-   "src": "Binance US",
-   "candles": 1999,
-   "price": 2217.16,
-   "experience": 0.566,
-   "liveLearner": 0.471,
-   "record": 0.46,
-   "call": "UP",
-   "last400": {
-    "call": 0.27,
-    "bounceOrRollover": 0.022
-   },
-   "backtest": {
-    "calls": 150,
-    "right": 0.54
-   }
-  },
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 88.72,
-   "experience": 0.583,
-   "liveLearner": 0.53,
+   "price": 89.18,
+   "experience": 0.53,
+   "liveLearner": 0.488,
    "record": 0.58,
-   "call": "UP",
+   "call": "WAIT",
    "last400": {
-    "call": 0.265,
+    "call": 0.263,
     "bounceOrRollover": 0.03
    },
    "backtest": {
@@ -18232,5 +18243,5 @@
    }
   }
  },
- "lastRun": 1793920748528
+ "lastRun": 1793921670166
 }
