@@ -6814,7 +6814,10 @@
    "expiresAt": 1793892771391,
    "experience": 0.546,
    "source": "Binance US",
-   "status": "open"
+   "status": "busted",
+   "exitPrice": 93.4038,
+   "pnl": -1.08,
+   "closedAt": 1793890260000
   },
   {
    "id": "XRP-1793889171391",
@@ -17577,6 +17580,10 @@
   {
    "t": 1793890087900,
    "value": 13.36
+  },
+  {
+   "t": 1793890395836,
+   "value": 12.28
   }
  ],
  "config": {
@@ -17599,6 +17606,24 @@
   "conf": 0.55,
   "need": 2000
  },
- "status": {},
- "lastRun": 1793890087900
+ "status": {
+  "SOL": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 94.06,
+   "experience": 0.598,
+   "liveLearner": 0.674,
+   "record": 0.6,
+   "call": "UP",
+   "last400": {
+    "call": 0.245,
+    "bounceOrRollover": 0.01
+   },
+   "backtest": {
+    "calls": 164,
+    "right": 0.543
+   }
+  }
+ },
+ "lastRun": 1793890395836
 }
