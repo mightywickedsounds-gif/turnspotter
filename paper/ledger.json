@@ -18630,6 +18630,18 @@
   {
    "t": 1793945036514,
    "value": 6.79
+  },
+  {
+   "t": 1793945344860,
+   "value": 6.79
+  },
+  {
+   "t": 1793945651245,
+   "value": 6.79
+  },
+  {
+   "t": 1793945957907,
+   "value": 6.79
   }
  ],
  "config": {
@@ -18656,9 +18668,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 89.43,
-   "experience": 0.51,
-   "liveLearner": 0.34,
+   "price": 89.27,
+   "experience": 0.533,
+   "liveLearner": 0.396,
    "record": 0.58,
    "call": "WAIT",
    "last400": {
@@ -18673,13 +18685,13 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07149,
-   "experience": 0.538,
-   "liveLearner": 0.426,
+   "price": 0.07121,
+   "experience": 0.557,
+   "liveLearner": 0.419,
    "record": 0.64,
-   "call": "WAIT",
+   "call": "UP",
    "last400": {
-    "call": 0.24,
+    "call": 0.242,
     "bounceOrRollover": 0.028
    },
    "backtest": {
@@ -18688,5 +18700,5 @@
    }
   }
  },
- "lastRun": 1793945036514
+ "lastRun": 1793945957907
 }
