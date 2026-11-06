@@ -18522,6 +18522,18 @@
   {
    "t": 1793940430910,
    "value": 6.79
+  },
+  {
+   "t": 1793940739710,
+   "value": 6.79
+  },
+  {
+   "t": 1793941045965,
+   "value": 6.79
+  },
+  {
+   "t": 1793941351701,
+   "value": 6.79
   }
  ],
  "config": {
@@ -18548,9 +18560,9 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 75739.69,
-   "experience": 0.519,
-   "liveLearner": 0.45,
+   "price": 75772.14,
+   "experience": 0.513,
+   "liveLearner": 0.447,
    "record": 0.5,
    "call": "WAIT",
    "last400": {
@@ -18565,9 +18577,9 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2231.59,
-   "experience": 0.51,
-   "liveLearner": 0.47,
+   "price": 2233.32,
+   "experience": 0.502,
+   "liveLearner": 0.448,
    "record": 0.46,
    "call": "WAIT",
    "last400": {
@@ -18582,9 +18594,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 89.45,
-   "experience": 0.508,
-   "liveLearner": 0.444,
+   "price": 89.58,
+   "experience": 0.497,
+   "liveLearner": 0.42,
    "record": 0.58,
    "call": "WAIT",
    "last400": {
@@ -18592,17 +18604,17 @@
     "bounceOrRollover": 0.025
    },
    "backtest": {
-    "calls": 165,
-    "right": 0.539
+    "calls": 164,
+    "right": 0.537
    }
   },
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2049,
-   "experience": 0.528,
-   "liveLearner": 0.418,
-   "record": 0.57,
+   "price": 1.2046,
+   "experience": 0.54,
+   "liveLearner": 0.401,
+   "record": 0.56,
    "call": "WAIT",
    "last400": {
     "call": 0.245,
@@ -18617,8 +18629,8 @@
    "src": "Binance US",
    "candles": 1999,
    "price": 0.07173,
-   "experience": 0.492,
-   "liveLearner": 0.445,
+   "experience": 0.5,
+   "liveLearner": 0.436,
    "record": 0.64,
    "call": "WAIT",
    "last400": {
@@ -18626,10 +18638,10 @@
     "bounceOrRollover": 0.028
    },
    "backtest": {
-    "calls": 166,
-    "right": 0.524
+    "calls": 165,
+    "right": 0.521
    }
   }
  },
- "lastRun": 1793940430910
+ "lastRun": 1793941351701
 }
