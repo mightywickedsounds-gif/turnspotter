@@ -19075,6 +19075,18 @@
   {
    "t": 1793964015461,
    "value": 7.14
+  },
+  {
+   "t": 1793964321849,
+   "value": 7.14
+  },
+  {
+   "t": 1793964626114,
+   "value": 7.14
+  },
+  {
+   "t": 1793964930619,
+   "value": 7.14
   }
  ],
  "config": {
@@ -19101,13 +19113,13 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 90.08,
-   "experience": 0.479,
-   "liveLearner": 0.47,
+   "price": 90.3,
+   "experience": 0.443,
+   "liveLearner": 0.445,
    "record": 0.57,
-   "call": "WAIT",
+   "call": "DOWN",
    "last400": {
-    "call": 0.253,
+    "call": 0.255,
     "bounceOrRollover": 0.025
    },
    "backtest": {
@@ -19118,9 +19130,9 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.192,
-   "experience": 0.536,
-   "liveLearner": 0.468,
+   "price": 1.1919,
+   "experience": 0.523,
+   "liveLearner": 0.484,
    "record": 0.51,
    "call": "WAIT",
    "last400": {
@@ -19137,11 +19149,11 @@
    "candles": 1999,
    "price": 0.07233,
    "experience": 0.466,
-   "liveLearner": 0.458,
+   "liveLearner": 0.46,
    "record": 0.64,
    "call": "WAIT",
    "last400": {
-    "call": 0.242,
+    "call": 0.24,
     "bounceOrRollover": 0.028
    },
    "backtest": {
@@ -19150,5 +19162,5 @@
    }
   }
  },
- "lastRun": 1793964015461
+ "lastRun": 1793964930619
 }
