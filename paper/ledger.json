@@ -19569,6 +19569,18 @@
   {
    "t": 1793984529249,
    "value": 6.73
+  },
+  {
+   "t": 1793984836211,
+   "value": 6.73
+  },
+  {
+   "t": 1793985141289,
+   "value": 6.73
+  },
+  {
+   "t": 1793985446613,
+   "value": 6.73
   }
  ],
  "config": {
@@ -19595,13 +19607,13 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2236.33,
-   "experience": 0.461,
-   "liveLearner": 0.346,
+   "price": 2234.98,
+   "experience": 0.498,
+   "liveLearner": 0.495,
    "record": 0.52,
    "call": "WAIT",
    "last400": {
-    "call": 0.275,
+    "call": 0.273,
     "bounceOrRollover": 0.02
    },
    "backtest": {
@@ -19610,5 +19622,5 @@
    }
   }
  },
- "lastRun": 1793984529249
+ "lastRun": 1793985446613
 }
