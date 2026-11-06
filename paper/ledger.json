@@ -18375,6 +18375,18 @@
   {
    "t": 1793930609622,
    "value": 6.85
+  },
+  {
+   "t": 1793930918984,
+   "value": 6.85
+  },
+  {
+   "t": 1793931225279,
+   "value": 6.85
+  },
+  {
+   "t": 1793931531561,
+   "value": 6.85
   }
  ],
  "config": {
@@ -18401,13 +18413,13 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 76119.82,
-   "experience": 0.504,
-   "liveLearner": 0.537,
+   "price": 76138.32,
+   "experience": 0.497,
+   "liveLearner": 0.503,
    "record": 0.5,
    "call": "WAIT",
    "last400": {
-    "call": 0.328,
+    "call": 0.325,
     "bounceOrRollover": 0.022
    },
    "backtest": {
@@ -18418,9 +18430,9 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2240.62,
-   "experience": 0.51,
-   "liveLearner": 0.562,
+   "price": 2241.51,
+   "experience": 0.499,
+   "liveLearner": 0.566,
    "record": 0.46,
    "call": "WAIT",
    "last400": {
@@ -18429,19 +18441,19 @@
    },
    "backtest": {
     "calls": 151,
-    "right": 0.543
+    "right": 0.55
    }
   },
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 90.31,
-   "experience": 0.475,
-   "liveLearner": 0.565,
+   "price": 90.1,
+   "experience": 0.494,
+   "liveLearner": 0.58,
    "record": 0.58,
    "call": "WAIT",
    "last400": {
-    "call": 0.258,
+    "call": 0.255,
     "bounceOrRollover": 0.025
    },
    "backtest": {
@@ -18452,9 +18464,9 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.2176,
-   "experience": 0.525,
-   "liveLearner": 0.556,
+   "price": 1.2205,
+   "experience": 0.512,
+   "liveLearner": 0.647,
    "record": 0.58,
    "call": "WAIT",
    "last400": {
@@ -18469,9 +18481,9 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.0721,
-   "experience": 0.499,
-   "liveLearner": 0.513,
+   "price": 0.07211,
+   "experience": 0.504,
+   "liveLearner": 0.521,
    "record": 0.64,
    "call": "WAIT",
    "last400": {
@@ -18484,5 +18496,5 @@
    }
   }
  },
- "lastRun": 1793930609622
+ "lastRun": 1793931531561
 }
