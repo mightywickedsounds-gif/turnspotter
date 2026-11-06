@@ -1,7 +1,7 @@
 {
  "version": 2,
  "start": 50,
- "balance": 2.7325,
+ "balance": 4.3275,
  "startedAt": 1793055464169,
  "trades": [
   {
@@ -7542,7 +7542,10 @@
    "expiresAt": 1793986293042,
    "experience": 0.48,
    "source": "Binance US",
-   "status": "open"
+   "status": "lost",
+   "exitPrice": 75784.53,
+   "pnl": -0.0917,
+   "closedAt": 1793986293042
   },
   {
    "id": "SOL-1793982693042",
@@ -7558,7 +7561,10 @@
    "expiresAt": 1793986293042,
    "experience": 0.498,
    "source": "Binance US",
-   "status": "open"
+   "status": "lost",
+   "exitPrice": 90.13,
+   "pnl": -0.3133,
+   "closedAt": 1793986293042
   },
   {
    "id": "XRP-1793983610769",
@@ -19581,6 +19587,18 @@
   {
    "t": 1793985446613,
    "value": 6.73
+  },
+  {
+   "t": 1793985753633,
+   "value": 6.73
+  },
+  {
+   "t": 1793986058925,
+   "value": 6.73
+  },
+  {
+   "t": 1793986364287,
+   "value": 6.33
   }
  ],
  "config": {
@@ -19604,23 +19622,57 @@
   "need": 2000
  },
  "status": {
+  "BTC": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 75861.88,
+   "experience": 0.504,
+   "liveLearner": 0.474,
+   "record": 0.53,
+   "call": "WAIT",
+   "last400": {
+    "call": 0.297,
+    "bounceOrRollover": 0.022
+   },
+   "backtest": {
+    "calls": 164,
+    "right": 0.53
+   }
+  },
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2234.98,
-   "experience": 0.498,
-   "liveLearner": 0.495,
+   "price": 2229.96,
+   "experience": 0.518,
+   "liveLearner": 0.518,
    "record": 0.52,
    "call": "WAIT",
    "last400": {
-    "call": 0.273,
+    "call": 0.27,
     "bounceOrRollover": 0.02
    },
    "backtest": {
     "calls": 151,
     "right": 0.556
    }
+  },
+  "SOL": {
+   "src": "Binance US",
+   "candles": 1999,
+   "price": 90.33,
+   "experience": 0.538,
+   "liveLearner": 0.464,
+   "record": 0.58,
+   "call": "WAIT",
+   "last400": {
+    "call": 0.24,
+    "bounceOrRollover": 0.025
+   },
+   "backtest": {
+    "calls": 164,
+    "right": 0.537
+   }
   }
  },
- "lastRun": 1793985446613
+ "lastRun": 1793986364287
 }
