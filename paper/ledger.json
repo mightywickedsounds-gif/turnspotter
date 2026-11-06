@@ -7655,18 +7655,6 @@
  ],
  "equity": [
   {
-   "t": 1793059744448,
-   "value": 50
-  },
-  {
-   "t": 1793060049631,
-   "value": 50
-  },
-  {
-   "t": 1793060354864,
-   "value": 50
-  },
-  {
    "t": 1793060661340,
    "value": 50
   },
@@ -19653,6 +19641,18 @@
   {
    "t": 1793990367161,
    "value": 6.94
+  },
+  {
+   "t": 1793990673478,
+   "value": 6.94
+  },
+  {
+   "t": 1793990978072,
+   "value": 6.94
+  },
+  {
+   "t": 1793991282442,
+   "value": 6.94
   }
  ],
  "config": {
@@ -19679,9 +19679,9 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 75824.3,
-   "experience": 0.501,
-   "liveLearner": 0.443,
+   "price": 75893.61,
+   "experience": 0.487,
+   "liveLearner": 0.42,
    "record": 0.53,
    "call": "WAIT",
    "last400": {
@@ -19696,9 +19696,9 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07296,
-   "experience": 0.478,
-   "liveLearner": 0.422,
+   "price": 0.07311,
+   "experience": 0.468,
+   "liveLearner": 0.4,
    "record": 0.67,
    "call": "WAIT",
    "last400": {
@@ -19711,5 +19711,5 @@
    }
   }
  },
- "lastRun": 1793990367161
+ "lastRun": 1793991282442
 }
