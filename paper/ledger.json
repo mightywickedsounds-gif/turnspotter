@@ -7759,18 +7759,6 @@
  ],
  "equity": [
   {
-   "t": 1793124654219,
-   "value": 58.71
-  },
-  {
-   "t": 1793124959762,
-   "value": 58.71
-  },
-  {
-   "t": 1793125267339,
-   "value": 58.71
-  },
-  {
    "t": 1793125572746,
    "value": 58.71
   },
@@ -19757,6 +19745,18 @@
   {
    "t": 1794050746878,
    "value": 7.95
+  },
+  {
+   "t": 1794051053914,
+   "value": 7.95
+  },
+  {
+   "t": 1794051359770,
+   "value": 7.95
+  },
+  {
+   "t": 1794051665312,
+   "value": 7.95
   }
  ],
  "config": {
@@ -19784,10 +19784,10 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 75977.92,
-   "experience": 0.527,
-   "liveLearner": 0.536,
-   "record": 0.5,
+   "price": 75971.76,
+   "experience": 0.531,
+   "liveLearner": 0.555,
+   "record": 0.51,
    "call": "WAIT",
    "last400": {
     "call": 0.242,
@@ -19801,9 +19801,9 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2246.76,
-   "experience": 0.489,
-   "liveLearner": 0.426,
+   "price": 2244.61,
+   "experience": 0.533,
+   "liveLearner": 0.565,
    "record": 0.53,
    "call": "WAIT",
    "last400": {
@@ -19818,9 +19818,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 89.94,
-   "experience": 0.503,
-   "liveLearner": 0.404,
+   "price": 89.89,
+   "experience": 0.526,
+   "liveLearner": 0.502,
    "record": 0.57,
    "call": "WAIT",
    "last400": {
@@ -19835,9 +19835,9 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.1719,
-   "experience": 0.477,
-   "liveLearner": 0.403,
+   "price": 1.171,
+   "experience": 0.501,
+   "liveLearner": 0.435,
    "record": 0.51,
    "call": "WAIT",
    "last400": {
@@ -19853,8 +19853,8 @@
    "src": "Binance US",
    "candles": 1999,
    "price": 0.07195,
-   "experience": 0.486,
-   "liveLearner": 0.457,
+   "experience": 0.495,
+   "liveLearner": 0.558,
    "record": 0.65,
    "call": "WAIT",
    "last400": {
@@ -19867,6 +19867,6 @@
    }
   }
  },
- "lastRun": 1794050746878,
+ "lastRun": 1794051665312,
  "paused": true
 }
