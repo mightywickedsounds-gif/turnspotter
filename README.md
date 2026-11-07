@@ -762,6 +762,24 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   camera, the HQ office still works, no page errors. About 20 ms of JavaScript per second while the City tab is open,
   the same as the smaller city.
 
+### Round 39: Echo, a Jarvis-style phone assistant
+
+- You connected Bland (bland.ai, AI phone calls) and named your phone agent **Echo** on a test call. You asked for it to
+  act like Jarvis: a receptionist that calls you to tell you things.
+- New `paper/echo.mjs`, run every ~5 minutes inside the meme bot's GitHub loop (`meme.yml`), right after the bots:
+  - **Evening briefing** at 7:30 pm Central: Echo (Bland's "Max" voice, a warm British accent, written as a calm, dry-witted
+    AI butler) phones you with the team's result today, the best and worst bot, trades, rug bail-outs, the Rug Desk, the
+    trend bot and the Arena. You can ask it questions about those numbers; anything else it leaves for Claude Code.
+    No answer = a short voicemail.
+  - **Heads-up calls** when something big happens: the whole meme team up or down 5% in a day, a single trade
+    making or losing $5+, or the bots going quiet for an hour.
+  - Limits: no calls 10 pm–8 am (big trades overnight wait for the morning), at most 3 calls a day, briefing capped
+    at 3 minutes and heads-ups at 2. A call costs about $0.14 a minute plus $0.015 per attempt.
+  - It only calls when two GitHub Actions secrets exist, `BLAND_API_KEY` and `MY_PHONE`; without them it does nothing.
+    `paper/echo.json` (public) logs only call times, kinds, whether they were answered and the price: never the phone
+    number or what was said. `ECHO_DRY=1` prints what it would say instead of calling.
+- Tested: dry runs on the live bot data, and one real briefing call placed by the same code.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
@@ -770,5 +788,6 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)
 - `research/experiments*.py`: tests of candidate upgrades; `research/train.py`: trains the Experience brain
 - `research/data/`: 2023–2026 candles for all five coins, plus the last 45 days of 1-minute candles (refreshed weekly)
+- `paper/echo.mjs`: Echo, the phone assistant (evening briefing and heads-up calls through Bland)
 - `paper/`: the paper bots and their files: `trader.mjs` (AI calls, paused), `trend.mjs` (50-day trends), `arena.mjs` (Bot Arena), `meme.mjs` (the 16-bot rug-checked meme team)
 - `research/btc_1h_2011_2017.csv`: the hourly BTC data used for testing

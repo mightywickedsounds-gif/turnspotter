@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [paper/meme.mjs, .github/workflows/meme.yml]   # settings.json changes are read each loop, no restart needed
+    paths: [paper/meme.mjs, paper/echo.mjs, .github/workflows/meme.yml]   # settings.json changes are read each loop, no restart needed
 permissions:
   contents: write
   actions: write      # lets each run queue the next one (GitHub's cron timer skips hours at a time)
@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NTFY_TOPIC: turnspotter-1808cf83ce14   # phone alerts: subscribe to this topic in the free ntfy app
+      BLAND_API_KEY: ${{ secrets.BLAND_API_KEY }}   # Echo, the phone assistant (paper/echo.mjs): calls only when both secrets are set
+      MY_PHONE: ${{ secrets.MY_PHONE }}
     timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
@@ -27,18 +29,19 @@ jobs:
         run: |
           git config user.name "turnspotter-bot"
           git config user.email "turnspotter-bot@users.noreply.github.com"
-          # This job writes ONE file, paper/meme.json, and nothing else. To save, it resets to the newest main and
+          # This job writes TWO files, paper/meme.json and paper/echo.json (Echo's call log), and nothing else. To save, it resets to the newest main and
           # puts only its own file back, so it can never overwrite the other bots' files (or anything else).
           save() {
-            mkdir -p "$RUNNER_TEMP/keep"; cp paper/meme.json "$RUNNER_TEMP/keep/meme.json" || return 0
+            mkdir -p "$RUNNER_TEMP/keep"; cp paper/meme.json "$RUNNER_TEMP/keep/meme.json" || return 0; cp paper/echo.json "$RUNNER_TEMP/keep/echo.json" 2>/dev/null || true
             for i in 1 2 3; do
               if timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD \
-                 && cp "$RUNNER_TEMP/keep/meme.json" paper/meme.json && git add paper/meme.json \
+                 && cp "$RUNNER_TEMP/keep/meme.json" paper/meme.json && { cp "$RUNNER_TEMP/keep/echo.json" paper/echo.json 2>/dev/null || true; } \
+                 && git add paper/meme.json && { git add paper/echo.json 2>/dev/null || true; } \
                  && { git diff --cached --quiet || git commit -qm "Meme bot update"; } \
                  && timeout 60 git push -q origin HEAD:main; then echo "saved"; return 0; fi
               echo "save attempt $i failed"; sleep 10
             done
-            cp "$RUNNER_TEMP/keep/meme.json" paper/meme.json
+            cp "$RUNNER_TEMP/keep/meme.json" paper/meme.json; cp "$RUNNER_TEMP/keep/echo.json" paper/echo.json 2>/dev/null || true
           }
           # start from the newest meme file, never a stale copy
           timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD
@@ -47,7 +50,8 @@ jobs:
             # pick up the owner's latest settings (on/off, risk, goal/brake: paper/settings.json, set from the City tab)
             timeout 30 git fetch -q origin main && git checkout -q FETCH_HEAD -- paper/settings.json 2>/dev/null || true
             out=$(timeout 200 node paper/meme.mjs 2>&1) || true; echo "$out"
-            if echo "$out" | grep -q TRADES_CHANGED || [ $((SECONDS - saved)) -ge 900 ] || [ $SECONDS -ge $end ]; then
+            eout=$(timeout 90 node paper/echo.mjs 2>&1) || true; echo "$eout"   # Echo: evening briefing / heads-up calls
+            if echo "$out" | grep -q TRADES_CHANGED || echo "$eout" | grep -q "call placed" || [ $((SECONDS - saved)) -ge 900 ] || [ $SECONDS -ge $end ]; then
               save; saved=$SECONDS
             fi
             [ $SECONDS -ge $end ] && break
