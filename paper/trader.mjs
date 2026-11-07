@@ -18,6 +18,9 @@ const CFG = {
   maxMult: 50,
   coins: ["BTC", "ETH", "SOL", "XRP", "DOGE"],
   tf: "15m", tfMin: 15, lookMin: 60, conf: 0.55, need: 2000,   // same as the site's defaults
+  // Paused on 2026-11-07 (README round 34): $50 -> ~$8 live, and research/experiments14.mjs showed no version of
+  // the rules (trend filters, lower leverage, even hindsight DOWN-only) made money after costs. Open trades still settle.
+  paused: true,
 };
 const H = CFG.lookMin / CFG.tfMin;
 const LEDGER = new URL("./ledger.json", import.meta.url);
@@ -113,7 +116,7 @@ for(const coin of CFG.coins){
       // over the last 400 candles (~4 days): how often a call was on
       last400: {call: share(p => p.modelUp || p.modelDown), bounceOrRollover: share(p => p.up || p.down)},
       backtest: {calls: done.length, right: done.length ? +(done.filter(s => s.win).length / done.length).toFixed(3) : null}}; }
-  if(!fresh) continue;
+  if(!fresh || CFG.paused) continue;
   const p = A.P[n-1] || A.P[fresh.i];
   const stake = +Math.max(CFG.minStake, L.balance * CFG.stakePct).toFixed(2);
   if(L.balance < stake) continue;
@@ -133,6 +136,8 @@ const openStake = L.trades.filter(t => t.status === "open").reduce((s,t) => s + 
 L.equity.push({t: now, value: +(L.balance + openStake).toFixed(2)});
 if(L.equity.length > 3000) L.equity.splice(0, L.equity.length - 3000);
 L.lastRun = now;
+L.paused = !!CFG.paused;
+L.config = CFG;
 fs.writeFileSync(LEDGER, JSON.stringify(L, null, 1));
 if(L.trades.map(t => t.status).join() !== before) console.log("TRADES_CHANGED");   // the workflow saves right away when a trade opens or closes
 const closed = L.trades.filter(t => t.status !== "open");

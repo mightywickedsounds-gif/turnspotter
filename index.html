@@ -285,6 +285,16 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 #mvTxt b{font-family:var(--mono)}
 .arenaBanner{margin:0 0 12px;font:700 15px var(--body)}
 .arenaList{display:grid;gap:10px}
+.scoreTbl{display:grid;gap:6px}
+.scoreRow{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.04)}
+.scoreRow.bench{border-style:dashed;background:transparent}
+.scoreRow b{font:600 14px var(--body)} .scoreRow span{display:block;font:500 11px var(--mono);color:var(--muted)}
+.scoreRow .money{text-align:right;font:600 15px var(--mono)} .scoreRow .money span{text-align:right}
+.verdict{font:600 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:4px 7px;border-radius:999px;white-space:nowrap;font-style:normal}
+.verdict.good{color:var(--up);border:1px solid color-mix(in srgb,var(--up) 50%,transparent)}
+.verdict.bad{color:var(--down);border:1px solid color-mix(in srgb,var(--down) 50%,transparent)}
+.verdict.meh{color:var(--muted);border:1px solid var(--edge)}
+@media (max-width:460px){ .scoreRow{grid-template-columns:1fr auto} .scoreRow .verdict{grid-column:1/-1;justify-self:start} }
 .arenaRow{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;border:1px solid var(--edge);background:rgba(140,155,255,.04);position:relative;overflow:hidden;animation:rise .4s both}
 .arenaRow.first{border-color:color-mix(in srgb,var(--warn) 55%,transparent);box-shadow:0 0 30px -12px var(--warn)}
 .arenaRow.control{border-style:dashed}
@@ -518,7 +528,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   </header>
 
   <nav class="pages" id="pages" aria-label="Sections">
-    <button type="button" data-page="live" aria-current="page">Live</button><button type="button" data-page="bot">Scalper bot</button><button type="button" data-page="arena">Arena</button>
+    <button type="button" data-page="live" aria-current="page">Live</button><button type="button" data-page="bot">Scalper bot</button><button type="button" data-page="arena">Bots</button>
   </nav>
 
   <nav class="watch" id="watch" aria-label="Pick a coin"></nav>
@@ -549,6 +559,11 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </details>
   </section>
 
+  <section class="card" id="scoreCard" data-page="arena" hidden>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Scoreboard</h2><span class="record" id="scoreMeta">loading…</span></div>
+    <div class="scoreTbl" id="scoreTbl"></div>
+    <p class="note">Every bot started with $50 of fake money. The test that matters: did it beat simply buying Bitcoin on the same day and holding it?</p>
+  </section>
   <section class="card" id="arenaCard" data-page="arena" hidden>
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Bot Arena</h2><span class="record" id="arenaMeta">loading…</span></div>
     <p class="arenaBanner" id="arenaBanner"></p>
@@ -2653,6 +2668,48 @@ async function loadArena(){
   }catch(e){ $("arenaMeta").textContent = "starting up"; $("arenaList").innerHTML = `<p class="acctSub">The arena's first round is on its way from GitHub. Check back in a few minutes.</p>`; }
 }
 setInterval(loadArena, 60000);
+// ───────── Scoreboard: every bot vs. just holding Bitcoin over the same days (README round 34) ─────────
+const BTCDAY = {};   // day (ms, UTC midnight) -> BTC close, from Coinbase daily candles
+async function btcOn(t){
+  const day = Math.floor(t / 864e5) * 864e5;
+  if(!(day in BTCDAY)){
+    const end = Date.now(), start = Math.min(day, end - 864e5 * 2);
+    const d = await (await fetch(`https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=86400&start=${new Date(start).toISOString()}&end=${new Date(end).toISOString()}`)).json();
+    for(const r of d) BTCDAY[r[0] * 1000] = r[4];
+  }
+  return BTCDAY[day];
+}
+async function loadScore(){
+  if(document.body.dataset.on !== "arena") return;
+  const get = f => fetch(`paper/${f}.json?` + Date.now(), {cache:"no-store"}).then(r => r.json()).catch(() => null);
+  const [L, T, A] = await Promise.all([get("ledger"), get("trend"), get("arena")]);
+  const rows = [];
+  if(L){ const open = L.trades.filter(t => t.status === "open").reduce((s, t) => s + t.stake, 0);
+    rows.push({name:"AI calls", note:L.paused ? "paused: no edge after costs" : "5 coins, 1-hour calls", start:L.start, now:L.balance + open, t0:L.startedAt}); }
+  if(T){ const v = T.equity.length ? T.equity.at(-1).value : T.start, held = Object.keys(T.holdings);
+    rows.push({name:"Trend bot", note:held.length ? "holding " + held.join(", ") : "in cash: every coin below its 50-day average", start:T.start, now:v, t0:T.startedAt}); }
+  if(A) for(const [id, b] of Object.entries(A.bots))
+    rows.push({name:b.name, note:id === "flipper" ? "random picks (the control)" : "Bot Arena · BTC ×100", start:A.start, now:b.balance, t0:A.startedAt});
+  if(!rows.length){ $("scoreMeta").textContent = "no results yet"; return; }
+  let nowBtc = NaN;
+  try{ const t = await (await fetch("https://api.exchange.coinbase.com/products/BTC-USD/ticker")).json(); nowBtc = +t.price; }catch(e){}
+  if(!(nowBtc > 0) && T && T.status && T.status.BTC) nowBtc = T.status.BTC.close;
+  for(const r of rows){ try{ const p0 = await btcOn(r.t0); r.hold = p0 > 0 && nowBtc > 0 ? r.start * nowBtc / p0 : NaN; }catch(e){ r.hold = NaN; } }
+  rows.sort((a, b) => b.now - a.now);
+  const pct = v => (v >= 0 ? "▲ " : "▼ ") + Math.abs(v * 100).toFixed(1) + "%";
+  const beat = rows.filter(r => r.hold > 0 && r.now > r.hold).length, made = rows.filter(r => r.now > r.start).length;
+  $("scoreMeta").textContent = `${made} of ${rows.length} up · ${beat} beat holding BTC`;
+  const ref = rows.filter(r => r.hold > 0).sort((a, b) => a.t0 - b.t0)[0];
+  $("scoreTbl").innerHTML = rows.map(r => {
+    const chg = r.now / r.start - 1, vs = r.hold > 0 ? r.now - r.hold : NaN;
+    const verdict = isNaN(vs) ? `<i class="verdict meh">no benchmark</i>` : Math.abs(vs) < .25 ? `<i class="verdict meh">same as holding</i>`
+      : vs > 0 ? `<i class="verdict good">beat holding by $${vs.toFixed(2)}</i>` : `<i class="verdict bad">$${(-vs).toFixed(2)} worse than holding</i>`;
+    return `<div class="scoreRow"><div><b>${r.name}</b><span>${r.note} · since ${new Date(r.t0).toLocaleDateString(undefined, {month:"short", day:"numeric"})}</span></div>
+      <div class="money">$${r.now.toFixed(2)}<span class="${chg >= 0 ? "win" : "loss"}">${pct(chg)}</span></div>${verdict}</div>`; }).join("")
+    + (ref ? `<div class="scoreRow bench"><div><b>Just hold Bitcoin</b><span>$50 of BTC bought ${new Date(ref.t0).toLocaleDateString(undefined, {month:"short", day:"numeric"})}</span></div><div class="money">$${ref.hold.toFixed(2)}<span class="${ref.hold >= 50 ? "win" : "loss"}">${pct(ref.hold / 50 - 1)}</span></div><i class="verdict meh">benchmark</i></div>` : "");
+}
+setInterval(loadScore, 120000);
+
 // ───────── Multiverse: 100 possible next minutes, coloured by how a Trench trade from here would end ─────────
 // Each future is a random walk with this coin's normal 1-minute move (no edge added: the measured follow-through is
 // far too small to see). Green = it reached the bot's take-profit (+30% of the stake) first, red = it hit the bust
@@ -3276,7 +3333,7 @@ function showPage(name){
   try{ localStorage.setItem("turnspotter-page", name); }catch(e){}
   if(name === "practice" && !$("pane-whatif").hidden) runWhatIf();
   if(name === "bot") tableInit();
-  if(name === "arena") loadArena();
+  if(name === "arena"){ loadArena(); loadScore(); }
   window.scrollTo({top:0, behavior:reduceMotion ? "auto" : "smooth"});
 }
 $("pages").addEventListener("click", e => { const b = e.target.closest("button[data-page]"); if(b) showPage(b.dataset.page); });
