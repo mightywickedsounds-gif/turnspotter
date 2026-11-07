@@ -726,10 +726,46 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   19 buys, all of them rug-checked), and the site in Chrome with that data: 19 buildings, roster of 16, tapping a bot
   flies to it, HQ screens show the team, no page errors.
 
+### Round 38: an open-world Bot City, plus Crew, the pipeline, building tags and team chat
+
+- You watched two reels (StarNet's "crew" app and the GrokBot trading terminal) and asked for their best ideas in a
+  city that feels like an open-world video game. (Watched with the new Composio plugin: its Instagram reader needed
+  credits, so the reels were downloaded on Composio's own cloud computer instead.)
+- **The city is now 15×15 blocks (was 7×7)**, with districts you can tell apart: Bot Row downtown (every bot's tower
+  around HQ), Midtown skyscrapers with neon roof outlines, the **Neon River** with lit bridges and boats, the
+  Waterfront with a turning **Ferris wheel**, the **Shipyard** (containers and cranes), the **Arena District** (the
+  Arena bot is now a stadium with parking lots), Central Park with a pond, suburbs with trees, four gas stations,
+  cafés, two **Neon Square** billboards showing the team live, mountains on the horizon, stars and a **Turn Spotter
+  blimp**. 260 AI citizens (up from 110) and 72 cars (up from 32).
+- **Open-world controls:** drag to move around (it pans now instead of spinning), two fingers or right-drag to spin
+  and tilt, pinch or scroll to zoom, WASD/Q/E on a keyboard. A **minimap** in the corner: tap it to go anywhere.
+  **🎥 Follow** any person or car you tap; the camera rides along and the info line says where they're going.
+  **🚗 Drive** your own car: on-screen pedals and steering (or arrow keys), a speedometer, "Now entering Midtown"
+  as you cross districts, buildings and the river block you (the bridges don't), and a fill-up at the gas pumps.
+- **The Rug Desk** is now a building of its own in Bot Row: the security office every coin has to pass. Its
+  searchlight turns red when it has just rejected a coin.
+- From the reels:
+  1. **Crew panel** (StarNet): every bot with its own robot face, a green light when it's working, what it's doing
+     right now ("holding PIRATE −6%", "scanning: no rug-checked coin fits") and for how long. Tap one to fly to it.
+  2. **Pipeline strip** (GrokBot's assembly line) across the top of the city: "60 found → 19 checked → 12 passed →
+     6 bought" from the bots' last run.
+  3. **Building tags** (StarNet's desk tags): zoom in and every building shows "4 trades · 3 won · 1 rug dodged".
+  4. **Team chat**: the trade tape written by the bots ("Bought NIO for $3.65. Up 4.3% this hour, $137K pool,
+     passed all 12 rug checks ✅"), plus the Rug Desk posting what it rejected and why ("one whale owns too much").
+- `paper/meme.mjs` now records each bot's current task (`doing`), the pipeline (`funnel`) and chat messages
+  (`tape` entries with `bot`, `kind`, `say`). Trading rules are unchanged: no signal logic changed, so there's
+  nothing new to backtest.
+- Honest note on the reels: "$1,000 → $101,607 in 10 days" is the hook of a "comment GROKBOT for the guide" sales
+  video, with no trade records shown. Our bots stay on paper money until their results show an edge.
+- Tested in Chrome (software 3D, phone and desktop sizes): the city renders, crew/chat/pipeline/tags fill from a
+  live bot run, driving reaches ~95 km/h and stops at buildings, following a citizen works, the minimap moves the
+  camera, the HQ office still works, no page errors. About 20 ms of JavaScript per second while the City tab is open,
+  the same as the smaller city.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
-- `city.js`: the 3D Bot City (streets, citizens, cars, HQ office), loaded by the City tab
+- `city.js`: the open-world 3D Bot City (districts, citizens, cars, driving, minimap, HQ office), loaded by the City tab
 - `tradingview/TrenchAI_Direction.pine`: the indicator (paste into TradingView)
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)
 - `research/experiments*.py`: tests of candidate upgrades; `research/train.py`: trains the Experience brain

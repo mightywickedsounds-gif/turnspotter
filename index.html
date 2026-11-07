@@ -309,6 +309,44 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .cityLbl i{font:700 11px var(--mono);font-style:normal} .cityLbl.off{filter:saturate(.35) brightness(.8)} .cityLbl.sel{outline:2px solid #fff}
 .cityStage.flat .cityLabels{position:static;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:56px 10px 10px}
 .cityStage.flat .cityLbl{position:static;transform:none!important;max-width:none;opacity:1!important} .cityStage.flat .hqLbl{display:none}
+.cityStage canvas.cityMap{position:absolute;inset:auto;left:10px;top:92px;width:108px;height:108px;z-index:3;border-radius:12px;border:1.5px solid rgba(69,212,255,.6);
+  box-shadow:0 0 14px rgba(69,212,255,.35);background:#0b0826;touch-action:none;cursor:crosshair}
+.cityPipe{position:absolute;left:8px;right:8px;top:52px;z-index:3;display:flex;gap:3px;justify-content:center;pointer-events:none}
+.cityPipe span{font:800 10px var(--body);padding:4px 6px;border-radius:8px;background:rgba(14,10,48,.86);border:1px solid var(--c);color:var(--c);white-space:nowrap}
+.cityPipe i{color:#b9bfe8;font-style:normal;align-self:center;font-size:10px}
+.cityPipe em{font-style:normal} @media (max-width:430px){ .cityPipe em{display:none} .cityPipe span{padding:4px 5px} }
+.cityToast{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);z-index:4;font:800 16px var(--body);letter-spacing:.06em;color:#fff;max-width:92%;
+  text-shadow:0 0 14px #ff4fa3,0 2px 0 #000;opacity:0;transition:opacity .4s;pointer-events:none;text-align:center}
+.cityToast.show{opacity:1}
+.cityBtns{position:absolute;left:10px;bottom:10px;z-index:3;display:flex;gap:6px}
+.cityBtns button{padding:9px 13px;border-radius:999px;border:1.5px solid #ffc44d;background:rgba(14,10,48,.88);color:#ffe08a;font:800 12px var(--body);cursor:pointer;box-shadow:0 0 14px rgba(255,196,77,.4)}
+.cityBtns button#followBtn{border-color:#ff4fa3;color:#ffc0dc;box-shadow:0 0 14px rgba(255,79,163,.4)}
+.drivePad{position:absolute;left:10px;right:10px;bottom:58px;z-index:3;display:none;justify-content:space-between;pointer-events:none}
+.cityStage.driving .drivePad{display:flex} .drivePad div{display:flex;gap:8px;pointer-events:auto}
+.drivePad button{width:60px;height:60px;border-radius:16px;border:1.5px solid rgba(255,255,255,.35);background:rgba(14,10,48,.62);color:#fff;font:800 20px var(--body);
+  touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer}
+.drivePad button.on{background:rgba(255,196,77,.55)}
+.speedo{position:absolute;right:12px;top:92px;z-index:3;display:none;font:800 26px var(--mono);color:#ffc44d;text-shadow:0 0 10px #ffc44d;text-align:right;pointer-events:none}
+.speedo small{display:block;font:700 10px var(--body);color:#d8dcff;letter-spacing:.1em} .cityStage.driving .speedo{display:block}
+.cityTag{position:absolute;left:0;top:0;pointer-events:auto;padding:3px 7px;border-radius:7px;background:rgba(14,10,48,.84);border:1px solid var(--c);color:#d8dcff;
+  font:700 9.5px var(--body);white-space:nowrap;cursor:pointer;transition:opacity .25s;opacity:0}
+.cityTag b{color:var(--c);letter-spacing:.06em;margin-right:5px}
+.cityStage.flat canvas.cityMap,.cityStage.flat .cityBtns,.cityStage.flat .cityPipe,.cityStage.flat .cityTag{display:none}
+.crew{display:grid;gap:6px}
+.crewRow{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;padding:8px 10px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.04);cursor:pointer}
+.crewRow:hover{border-color:var(--c)} .crewRow.busy{background:color-mix(in srgb,var(--c) 9%,transparent);border-color:color-mix(in srgb,var(--c) 45%,transparent)}
+.ava{position:relative;display:grid;place-items:center;width:40px;height:40px;border-radius:11px;border:1.5px solid var(--c);background:rgba(10,8,34,.8)}
+.ava svg{width:28px;height:28px} .ava i{position:absolute;right:-3px;top:-3px;width:10px;height:10px;border-radius:50%;background:#5a6080;border:2px solid #0a0d18}
+.ava i.on{background:#3ee6a2;box-shadow:0 0 8px #3ee6a2}
+.crewRow b{display:block;font:800 13px var(--body);letter-spacing:.06em;color:var(--c);text-transform:uppercase}
+.crewRow .doing{display:block;font:600 12px var(--body);color:var(--ink)} .crewRow .tmr{display:block;font:500 11px var(--mono);color:var(--muted)}
+.crewRow .val{text-align:right;font:700 13px var(--mono)} .crewRow .val span{display:block;font:600 11px var(--mono)}
+.chat{display:grid;gap:10px;max-height:460px;overflow:auto;padding-right:4px}
+.msg{display:grid;grid-template-columns:32px 1fr;gap:8px;cursor:pointer} .msg .ava{width:32px;height:32px;border-radius:9px} .msg .ava svg{width:22px;height:22px}
+.msg b{font:800 12px var(--body);color:var(--c);letter-spacing:.04em} .msg time{font:500 10px var(--mono);color:var(--muted);margin-left:6px}
+.msg p{margin:3px 0 0;font:500 13px/1.45 var(--body);color:var(--ink);background:rgba(140,155,255,.06);border:1px solid var(--edge);padding:7px 10px;border-radius:4px 12px 12px 12px}
+.msg.rug p,.msg.reject p,.msg.brake p{border-color:color-mix(in srgb,var(--down) 60%,transparent)} .msg.locked p,.msg.clear p{border-color:color-mix(in srgb,var(--up) 55%,transparent)}
+.msg.buy p{border-color:color-mix(in srgb,#ffc44d 45%,transparent)}
 .cityDetail{margin:10px 2px 0;font:500 13px var(--body);color:var(--muted);min-height:18px} .cityDetail b{color:var(--ink)}
 .cityCtl{display:grid;grid-template-columns:auto 1fr auto;gap:8px;margin-top:12px}
 .cityCtl .seg{display:flex;gap:4px;padding:4px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.05)}
@@ -615,9 +653,13 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   <section class="card cityCard" id="cityCard" data-page="city" hidden>
     <div class="cityHead"><div><b>BOT CITY</b><span id="cityWorkers">loading…</span></div><span class="cityMode" id="cityMode">PAPER MONEY</span></div>
     <div class="cityStage" id="cityStage"><canvas id="cityCanvas" aria-label="Bot City: each bot is a tower"></canvas>
-      <div class="cityBanner" id="cityBanner">Bot City is starting up</div><div class="cityLabels" id="cityLabels"></div>
+      <div class="cityBanner" id="cityBanner">Bot City is starting up</div><div class="cityPipe" id="cityPipe"></div><div class="cityLabels" id="cityLabels"></div>
+      <canvas class="cityMap" id="cityMap" width="216" height="216" aria-label="City map: tap to go there"></canvas><div class="cityToast" id="cityToast"></div>
+      <div class="speedo" id="speedo">0<small>KM/H</small></div>
+      <div class="cityBtns"><button type="button" id="driveBtn">🚗 Drive</button><button type="button" id="followBtn" hidden>🎥 Follow</button></div>
+      <div class="drivePad" id="drivePad" aria-label="Driving controls"><div><button type="button" data-k="left" aria-label="Steer left">◀</button><button type="button" data-k="right" aria-label="Steer right">▶</button></div><div><button type="button" data-k="down" aria-label="Brake or reverse">▼</button><button type="button" data-k="up" aria-label="Gas">▲</button></div></div>
       <button type="button" class="hqBtn" id="hqBtn">🏢 Visit HQ</button></div>
-    <div class="cityDetail" id="cityDetail">Everything runs by itself. Tap a building, a person or a car.</div>
+    <div class="cityDetail" id="cityDetail">Everything runs by itself. Drag to move around, two fingers to spin, pinch to zoom. Tap a building, a person or a car, or take a car for a drive.</div>
     <div class="cityCtl" id="cityCtl">
       <div class="seg" aria-label="Bots on or off"><button type="button" data-set="on:true">On</button><button type="button" data-set="on:false">Off</button></div>
       <div class="seg" aria-label="Risk"><button type="button" data-set="risk:low">Low risk</button><button type="button" data-set="risk:normal">Normal</button><button type="button" data-set="risk:high">High</button></div>
@@ -636,9 +678,14 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <p class="note">Checks the coin live on RugCheck and DexScreener: can the dev print or freeze coins, is the liquidity locked, do whales or insiders hold too much, can people sell. Passing rules out the obvious rugs. It doesn't make a coin safe, and most meme coins still go to zero.</p>
   </section>
   <section class="card" id="memeBotCard" data-page="city" hidden>
-    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg>The bots</h2><span class="record" id="memeMeta">loading…</span></div>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 4.5a3.2 3.2 0 0 1 0 6.4M21 20c0-2.8-1.6-5-4-5.7"/></svg>Crew</h2><span class="record" id="memeMeta">loading…</span></div>
     <p class="note" id="rugLine">Every bot rug-checks a coin before it buys.</p>
-    <div class="memeList" id="roster"></div>
+    <div class="crew" id="roster"></div>
+  </section>
+  <section class="card" id="chatCard" data-page="city" hidden>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>Team chat</h2><span class="record" id="chatMeta"></span></div>
+    <div class="chat" id="chat"><p class="note">The bots' first messages are on their way from GitHub.</p></div>
+    <p class="note">The bots post here whenever they buy, sell, bail out of a rug or clock out, and the Rug Desk posts the coins it rejects or clears. Paper money.</p>
   </section>
   <section class="card" id="scoreCard" data-page="city" hidden>
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Scoreboard</h2><span class="record" id="scoreMeta">loading…</span></div>
@@ -2901,25 +2948,47 @@ function memeTeamOf(M){
     closed:M.closed || [], equity:(M.equity || []).map(e => [e.t, e.v]), day:M.day, shift:M.shift || "on"}}, scan:M.scan || [], tape:[], rugStats:null,
     settings:M.settings, startedAt:M.startedAt, lastRun:M.lastRun};
 }
+const cityAgo = ms => { const m = Math.max(0, Math.round(ms / 60000)); return m < 1 ? "just now" : m < 60 ? `${m}m` : m < 1440 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${Math.floor(m / 1440)}d`; };
+// little robot faces for the Crew panel and the chat (the Rug Desk gets a shield)
+function botAvatar(id){
+  const c = cityColor(id);
+  if(id === "rugdesk") return `<svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.2-8 11-4.6-1.8-8-6-8-11V5z" fill="#3ee6a2"/><path d="M8.5 12l2.4 2.4 4.6-4.8" stroke="#0a0d18" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>`;
+  const k = Math.max(0, CITY_TEAM.findIndex(t => t[0] === id)), ear = k % 3, eye = k % 2;
+  return `<svg viewBox="0 0 24 24"><rect x="11.2" y="0.8" width="1.6" height="3" fill="${c}"/><circle cx="12" cy="1.2" r="1.3" fill="${c}"/>
+    <rect x="4" y="4" width="16" height="12" rx="${ear ? 4 : 2}" fill="${c}"/>${ear === 2 ? `<rect x="1.5" y="8" width="2.5" height="4" rx="1" fill="${c}"/><rect x="20" y="8" width="2.5" height="4" rx="1" fill="${c}"/>` : ""}
+    <rect x="6.5" y="7" width="11" height="5" rx="2.5" fill="#0a0d18"/>${eye ? `<rect x="8" y="8.6" width="8" height="1.8" rx=".9" fill="${c}"/>` : `<circle cx="9.6" cy="9.5" r="1.3" fill="${c}"/><circle cx="14.4" cy="9.5" r="1.3" fill="${c}"/>`}
+    <rect x="7" y="17" width="10" height="6" rx="2" fill="${c}" opacity=".75"/></svg>`;
+}
+const cityNameOf = (M, id) => id === "rugdesk" ? "Rug Desk" : M && M.bots[id] ? M.bots[id].name : (CITY_OTHERS.find(o => o[0] === id) || [, id])[1];
 async function loadMeme(){
   if(document.body.dataset.on !== "city") return;
   try{
-    const raw = await (await fetch("paper/meme.json?" + Date.now(), {cache:"no-store"})).json(), M = memeTeamOf(raw);
-    const team = Object.entries(M.bots).sort((a, b) => b[1].value - a[1].value), total = team.reduce((a, [, b]) => a + b.value, 0);
-    const trades = team.reduce((a, [, b]) => a + b.closed.length, 0), mins = Math.round((Date.now() - M.lastRun) / 60000);
-    $("memeMeta").textContent = `${team.length} bots · $${total.toFixed(2)} · ${trades} trades · ${mins < 1 ? "just now" : mins + " min ago"}`;
+    const raw = await (await fetch("paper/meme.json?" + Date.now(), {cache:"no-store"})).json(), M = memeTeamOf(raw), now = Date.now();
+    // Crew: who's working, what each bot is doing right now, and for how long
+    const doingOf = b => b.doing || {busy:b.positions.length > 0, since:b.positions.length ? Math.max(...b.positions.map(p => p.openedAt)) : M.lastRun,
+      txt:b.shift === "locked" ? "profit locked, off duty" : b.shift === "brake" ? "hit the loss brake, off duty" : b.shift === "off" ? "switched off by the owner"
+        : b.shift === "asleep" ? "asleep" : b.positions.length ? "holding " + b.positions.map(p => p.sym).join(", ") : "scanning for a rug-checked coin"};
+    const team = Object.entries(M.bots).map(([id, b]) => [id, b, doingOf(b)]).sort((a, b) => (b[2].busy - a[2].busy) || b[1].value - a[1].value);
+    const total = team.reduce((a, [, b]) => a + b.value, 0), working = team.filter(t => t[2].busy).length, mins = Math.round((now - M.lastRun) / 60000);
+    $("memeMeta").textContent = `${working} working · ${team.length - working} idle · $${total.toFixed(2)} · ${mins < 1 ? "just now" : mins + " min ago"}`;
     const rs = M.rugStats;
-    $("rugLine").innerHTML = rs ? `Rug checks on the last scan: <b class="win">${rs.passed} coins passed</b> · <b class="loss">${rs.rejected} rejected</b>${rs.checked - rs.passed - rs.rejected > 0 ? ` · ${rs.checked - rs.passed - rs.rejected} skipped as too new or too quiet` : ""}. No bot can buy a coin that fails.`
+    $("rugLine").innerHTML = rs ? `Rug Desk, last scan: <b class="win">${rs.passed} coins passed</b> · <b class="loss">${rs.rejected} rejected</b>${rs.checked - rs.passed - rs.rejected > 0 ? ` · ${rs.checked - rs.passed - rs.rejected} parked as too new or too quiet` : ""}. No bot can buy a coin that fails.`
       : "Every bot rug-checks a coin before it buys.";
-    $("roster").innerHTML = team.map(([id, b]) => { const r = b.value / b.start - 1, today = b.day ? b.day.pnl || 0 : 0, col = cityColor(id);
-      const chip = b.shift === "locked" ? `<i class="verdict good">profit locked</i>` : b.shift === "brake" ? `<i class="verdict bad">profit brake</i>`
-        : b.shift === "off" ? `<i class="verdict meh">off</i>` : b.shift === "asleep" ? `<i class="verdict meh">asleep</i>` : "";
-      return `<div class="memeRow" data-bot="${memeEsc(id)}"><div><b><i class="botDot" style="background:${col}"></i>${memeEsc(b.name)}</b>
-        <span>${memeEsc(b.desc || "")} · ${b.positions.length ? "holding " + memeEsc(b.positions.map(p => p.sym).slice(0, 3).join(", ")) : "nothing held"} · today ${cityMoney(today)}</span>${chip}</div>
-        <div class="money">$${b.value.toFixed(2)}<span class="${r >= 0 ? "win" : "loss"}">${r >= 0 ? "▲" : "▼"} ${Math.abs(r * 100).toFixed(1)}%</span></div></div>`; }).join("");
+    $("roster").innerHTML = team.map(([id, b, d]) => { const r = b.value / b.start - 1, today = b.day ? b.day.pnl || 0 : 0;
+      return `<div class="crewRow ${d.busy ? "busy" : ""}" data-bot="${memeEsc(id)}" style="--c:${cityColor(id)}"><span class="ava">${botAvatar(id)}<i class="${d.busy ? "on" : ""}"></i></span>
+        <div><b>${memeEsc(b.name)}</b><span class="doing">${memeEsc(d.txt)}</span><span class="tmr">${d.busy ? "working" : "idle"} for ${cityAgo(now - d.since)} · today ${cityMoney(today)}</span></div>
+        <div class="val">$${b.value.toFixed(2)}<span class="${r >= 0 ? "win" : "loss"}">${r >= 0 ? "▲" : "▼"} ${Math.abs(r * 100).toFixed(1)}%</span></div></div>`; }).join("");
+    // Team chat: the trade tape, written by the bots themselves
+    const byName = Object.fromEntries(Object.entries(M.bots).map(([id, b]) => [b.name, id]));
+    const tape = (raw.tape || []).map(e => ({...e, bot:e.bot || byName[Object.keys(byName).find(n => (e.txt || "").startsWith(n + " ")) || ""] || "hunter",
+      say:e.say || e.txt, kind:e.kind || (/ sold /.test(e.txt || "") ? "sell" : "buy")})).slice(0, 40);
+    $("chatMeta").textContent = tape.length ? `${tape.length} messages` : "";
+    $("chat").innerHTML = tape.length ? tape.map(e => `<div class="msg ${memeEsc(e.kind)}" data-bot="${memeEsc(e.bot)}" style="--c:${e.bot === "rugdesk" ? "#3ee6a2" : cityColor(e.bot)}">
+      <span class="ava">${botAvatar(e.bot)}</span><div><b>${memeEsc(cityNameOf(M, e.bot))}</b><time>${cityAgo(now - e.t)}${cityAgo(now - e.t) === "just now" ? "" : " ago"}</time><p>${memeEsc(e.say)}</p></div></div>`).join("")
+      : `<p class="note">No messages yet: the bots post when they trade.</p>`;
   }catch(e){ $("memeMeta").textContent = "starting up"; $("roster").innerHTML = `<p class="note">The bots' first shift report is on its way from GitHub.</p>`; }
 }
-document.addEventListener("click", e => { const r = e.target.closest(".memeRow[data-bot]"); if(!r) return;
+document.addEventListener("click", e => { const r = e.target.closest(".crewRow[data-bot], .msg[data-bot]"); if(!r) return;
   citySelect(r.dataset.bot); $("cityCard").scrollIntoView({behavior:reduceMotion ? "auto" : "smooth", block:"start"}); });
 setInterval(loadMeme, 60000);
 // ───────── Bot City: every bot is a tower in a neon city; owner-only controls (README round 35) ─────────
@@ -2939,29 +3008,61 @@ async function cityInit(){
   catch(e){ stage.classList.add("flat"); return; }
   try{
     CITY.world = mod.createCity(T, {stage, canvas:$("cityCanvas"), reduceMotion, isActive:() => document.body.dataset.on === "city",
-      onPick:cityPicked, onFrame:cityPlaceLabels, bots:cityBots()});
+      onPick:cityPicked, onFrame:cityPlaceLabels, onToast:cityToast, minimap:$("cityMap"), bots:cityBots()});
   }catch(e){ stage.classList.add("flat"); return; }
   CITY.ready = true; cityRender();
 }
 // labels float above their buildings; overlapping ones stack; hidden while we're inside the HQ office
-function cityPlaceLabels(project, inOffice){
-  const stage = $("cityStage"), W = stage.clientWidth, placed = [];
+function cityPlaceLabels(project, inOffice, info){
+  const stage = $("cityStage"), W = stage.clientWidth, H = stage.clientHeight, placed = [], tags = [];
   $("cityLabels").classList.toggle("away", inOffice);
+  if(info){ $("speedo").firstChild.nodeValue = info.speed;
+    if(info.mode === "follow" && info.follow && performance.now() - (CITY.followAt || 0) > 800){ CITY.followAt = performance.now(); $("cityDetail").innerHTML = "🎥 " + info.follow; } }
   if(inOffice) return;
-  for(const el of $("cityLabels").children){ const q = project(el.dataset.tower); if(!q || q.behind){ el.style.opacity = 0; continue; }
-    el.style.opacity = 1; placed.push({el, x:q.x, y:q.y, w:el.offsetWidth, h:el.offsetHeight}); }
+  for(const el of $("cityLabels").children){ const q = project(el.dataset.tower);
+    const off = !q || q.behind || q.x < -40 || q.x > W + 40 || q.y < 0 || q.y > H + 60;
+    if(el.classList.contains("cityTag")){ if(off || q.d > 42){ el.style.opacity = 0; el.style.pointerEvents = "none"; } else tags.push({el, q}); continue; }
+    if(off){ el.style.opacity = 0; el.style.pointerEvents = "none"; continue; }
+    el.style.opacity = 1; el.style.pointerEvents = ""; placed.push({el, x:q.x, y:q.y, w:el.offsetWidth, h:el.offsetHeight}); }
   placed.sort((a, b) => a.y - b.y);
-  placed.forEach((a, i) => { a.x = Math.max(4, Math.min(W - a.w - 4, a.x - a.w / 2)); a.y = Math.max(50, a.y - a.h - 6);
+  const mm = $("cityMap"), map = {x:mm.offsetLeft, y:mm.offsetTop, w:mm.offsetWidth, h:mm.offsetHeight};   // keep labels off the minimap
+  placed.forEach((a, i) => { a.x = Math.max(4, Math.min(W - a.w - 4, a.x - a.w / 2)); a.y = Math.max(84, a.y - a.h - 6);
+    if(a.x < map.x + map.w + 4 && a.y < map.y + map.h + 4 && a.y + a.h > map.y) a.x = Math.min(W - a.w - 4, map.x + map.w + 4);
     for(let j = 0; j < i; j++){ const o = placed[j]; if(a.x < o.x + o.w + 4 && a.x + a.w + 4 > o.x && a.y < o.y + o.h + 4 && a.y + a.h > o.y) a.y = o.y + o.h + 4; }
     a.el.style.transform = `translate(${a.x.toFixed(0)}px,${a.y.toFixed(0)}px)`; });
+  // the little stat tags over every nearby building: closest first, skipped where they'd overlap something
+  tags.sort((a, b) => a.q.d - b.q.d); placed.push(map);
+  for(const {el, q} of tags){ const w = el.offsetWidth, h = el.offsetHeight, x = Math.max(4, Math.min(W - w - 4, q.x - w / 2)), y = q.y - h - 4;
+    if(y < 84 || placed.some(o => x < o.x + o.w + 3 && x + w + 3 > o.x && y < o.y + o.h + 3 && y + h + 3 > o.y)){ el.style.opacity = 0; el.style.pointerEvents = "none"; continue; }
+    el.style.opacity = 1; el.style.pointerEvents = ""; el.style.transform = `translate(${x.toFixed(0)}px,${y.toFixed(0)}px)`; placed.push({x, y, w, h}); }
 }
+let cityToastT = 0;
+function cityToast(text){ const el = $("cityToast"); el.textContent = text; el.classList.add("show"); clearTimeout(cityToastT); cityToastT = setTimeout(() => el.classList.remove("show"), 2400); }
+const CITY_HELP = "Everything runs by itself. Drag to move around, two fingers to spin, pinch to zoom. Tap a building, a person or a car, or take a car for a drive.";
 function cityPicked(e){
-  if(e.kind === "tower") citySelect(e.id);
-  else if(e.kind === "person" || e.kind === "car") $("cityDetail").innerHTML = e.text;
+  if(e.kind === "tower") citySelect(e.id, !CITY.world || CITY.world.mode !== "drive");
+  else if(e.kind === "person" || e.kind === "car"){ $("cityDetail").innerHTML = e.text; CITY.pickRef = e.ref;
+    if(CITY.world.mode !== "drive"){ $("followBtn").hidden = false; $("followBtn").textContent = `🎥 Follow this ${e.kind === "car" ? "car" : "person"}`; } }
+  else if(e.kind === "landmark") $("cityDetail").innerHTML = e.text;
   else if(e.kind === "view"){ $("hqBtn").textContent = e.office ? "← Back to the city" : "🏢 Visit HQ";
     $("cityDetail").innerHTML = e.office ? "<b>HQ penthouse</b>: the boss is watching the whole meme bot team live. His screens mirror the real paper trades: team money, the leaderboard, the trade tape, every rug check and today's shifts."
-      : "Everything runs by itself. Tap a building, a person or a car."; }
+      : CITY_HELP; }
+  else if(e.kind === "mode"){ const m = e.mode;
+    $("cityStage").classList.toggle("driving", m === "drive");
+    $("driveBtn").textContent = m === "drive" ? "🅿️ Park" : "🚗 Drive";
+    $("followBtn").hidden = m !== "follow"; if(m === "follow") $("followBtn").textContent = "✋ Stop following";
+    if(m === "drive") $("cityDetail").innerHTML = "<b>You're driving.</b> ▲ gas, ▼ brake or reverse, ◀ ▶ steer (or the arrow keys / WASD). Cross the bridges, fill up at a gas station, find every bot's building. Tap 🅿️ Park to get out.";
+    else if(e.was === "drive" || e.was === "follow") $("cityDetail").innerHTML = CITY_HELP;
+    if(m !== "drive") for(const b of $("drivePad").querySelectorAll("button")){ b.classList.remove("on"); }
+    if(CITY.world && m !== "drive") CITY.world.setInput({up:false, down:false, left:false, right:false}); }
 }
+$("driveBtn").addEventListener("click", () => { if(CITY.world) CITY.world.drive(CITY.world.mode !== "drive"); });
+$("followBtn").addEventListener("click", () => { const w = CITY.world; if(!w) return;
+  if(w.mode === "follow"){ w.unfollow(); $("followBtn").hidden = true; } else if(CITY.pickRef) w.follow(CITY.pickRef); });
+for(const b of $("drivePad").querySelectorAll("button")){ const k = b.dataset.k, set = on => { b.classList.toggle("on", on); if(CITY.world) CITY.world.setInput({[k]:on}); };
+  b.addEventListener("pointerdown", e => { e.preventDefault(); b.setPointerCapture(e.pointerId); set(true); });
+  for(const ev of ["pointerup", "pointercancel", "lostpointercapture"]) b.addEventListener(ev, () => set(false));
+  b.addEventListener("contextmenu", e => e.preventDefault()); }
 async function loadCity(){
   if(document.body.dataset.on !== "city") return;
   const get = f => fetch(`paper/${f}.json?` + Date.now(), {cache:"no-store"}).then(r => r.json()).catch(() => null);
@@ -2993,32 +3094,45 @@ function cityRender(){
   if(L){ const val = L.balance + L.trades.filter(t => t.status === "open").reduce((a, t) => a + t.stake, 0);
     st.ai = {on:false, value:val, earned:val - L.start, line:"closed · no edge after costs",
       detail:"<b>AI calls</b>: closed for good. Tested every fix; none beat the fees."}; }
+  if(M){ const rs = M.rugStats, lastRej = (d.M.tape || []).find(e => e.bot === "rugdesk" && e.kind === "reject");
+    st.rugdesk = {on:true, alarm:!!(lastRej && Date.now() - lastRej.t < 15 * 60e3), value:0, earned:0, line:"checks every coin first",
+      tag:rs ? `${rs.checked} checked · ${rs.rejected} rejected` : "checking coins",
+      detail:`<b>Rug Desk</b>: the security office every coin has to get past before any bot may buy it: can the dev print or freeze coins, is the liquidity locked, do whales or insiders hold too much, can people sell. ${rs ? `Last scan: ${rs.passed} passed, ${rs.rejected} rejected.` : ""} Its searchlight turns red when it rejects a coin.`}; }
+  for(const [id, b] of team){ const won = b.closed.filter(c => c.pnl > 0).length, rugs = b.closed.filter(c => /^rug/.test(c.reason || "")).length;
+    st[id].tag = b.closed.length ? `${b.closed.length} trade${b.closed.length === 1 ? "" : "s"} · ${won} won${rugs ? ` · ${rugs} rug${rugs === 1 ? "" : "s"} dodged` : ""}`
+      : b.positions.length ? `holding ${b.positions.length} · no trades closed yet` : "no trades yet"; }
+  for(const id of ["trend", "arena", "ai"]) if(st[id]) st[id].tag = st[id].line;
   if(CITY.world){ CITY.world.setStates(st); if(M) CITY.world.setMeme(M); }
+  const f = M && (M.funnel || (M.rugStats && {checked:M.rugStats.checked, passed:M.rugStats.passed}));
+  $("cityPipe").innerHTML = f ? [["🔎", f.found, "found", "#45d4ff"], ["🛡", f.checked, "checked", "#7dffc2"], ["✅", f.passed, "passed", "#3ee6a2"], ["🛒", f.bought, "bought", "#ffc44d"]]
+    .filter(x => x[1] != null).map(([e, v, l, c]) => `<span style="--c:${c}"><em>${e} </em>${v} ${l}</span>`).join("<i>→</i>") : "";
   CITY.state = st;
   // labels: HQ, the 3 richest bots, and whichever building you tapped (19 labels at once would bury the city)
   const top = team.map(([id]) => id).sort((a, b) => st[b].value - st[a].value).slice(0, 3);
   const show = [...new Set([...top, CITY.sel].filter(id => id && st[id]))];
-  const nameOf = id => (team.find(t => t[0] === id) || [, {name:(CITY_OTHERS.find(o => o[0] === id) || [, id])[1]}])[1].name;
+  const nameOf = id => id === "rugdesk" ? "Rug Desk" : (team.find(t => t[0] === id) || [, {name:(CITY_OTHERS.find(o => o[0] === id) || [, id])[1]}])[1].name;
   $("cityLabels").innerHTML = `<button type="button" class="cityLbl on hqLbl" id="cl-hq" data-tower="hq" style="--c:#45d4ff"><b>★ HQ · THE BOSS</b><span>watching the whole team</span><i>tap to visit</i></button>`
     + show.map(id => { const s2 = st[id];
       return `<button type="button" class="cityLbl ${s2.on ? "on" : "off"} ${CITY.sel === id ? "sel" : ""}" id="cl-${id}" data-tower="${id}" style="--c:${cityColor(id)}">
-        <b>${top[0] === id ? "👑 " : ""}${memeEsc(nameOf(id).toUpperCase())}</b><span>${memeEsc(s2.line)}</span><i class="${s2.earned >= 0 ? "win" : "loss"}">earned ${cityMoney(s2.earned)}</i></button>`; }).join("");
+        <b>${top[0] === id ? "👑 " : ""}${memeEsc(nameOf(id).toUpperCase())}</b><span>${memeEsc(s2.line)}</span><i class="${s2.earned >= 0 ? "win" : "loss"}">earned ${cityMoney(s2.earned)}</i></button>`; }).join("")
+    + Object.keys(st).filter(id => !show.includes(id) && st[id].tag).map(id => `<button type="button" class="cityTag" data-tower="${id}" style="--c:${id === "rugdesk" ? "#7dffc2" : cityColor(id)}"><b>${memeEsc(nameOf(id).toUpperCase())}</b>${memeEsc(st[id].tag)}</button>`).join("");
   const tv = team.map(([, b]) => b), n = k => tv.filter(b => (b.shift || "on") === k).length, today = tv.reduce((a, b) => a + (b.day ? b.day.pnl || 0 : 0), 0);
   const allOff = tv.length && n("off") === tv.length;
   $("cityBanner").className = "cityBanner " + (allOff ? "off" : n("brake") > n("locked") ? "brake" : n("locked") ? "locked" : "");
   $("cityBanner").textContent = !tv.length ? "Bot City is starting up" : allOff ? "⏻ BOTS SWITCHED OFF"
     : `TEAM TODAY ${cityMoney(today)} · ${n("on")} ON SHIFT` + (n("locked") ? ` · ${n("locked")} 🔒` : "") + (n("brake") ? ` · ${n("brake")} 🛑` : "");
-  const working = Object.values(st).filter(x => x.on).length;
-  $("cityWorkers").textContent = `${Object.keys(st).length} bots · ${working} on shift · ${CITY.world ? CITY.world.stats.people : 110} AI citizens · paper money`;
+  const bots = Object.keys(st).filter(id => id !== "rugdesk"), working = bots.filter(id => st[id].on).length, ws = CITY.world ? CITY.world.stats : null;
+  $("cityWorkers").textContent = `${bots.length} bots · ${working} on shift · ${ws ? `${ws.people} AI citizens · ${ws.cars} cars · ${ws.blocks} blocks` : "loading the city"}`;
   if(CITY.sel && st[CITY.sel]) $("cityDetail").innerHTML = st[CITY.sel].detail;
   cityControls();
 }
-function citySelect(id){
+function citySelect(id, fly = true){
   if(!id) return;
   if(id === "hq"){ if(CITY.world) CITY.world.flyTo("office"); return; }
-  CITY.sel = id; cityRender();   // stay in the 3D scene: the info line under it says what the bot is doing
+  CITY.sel = id; cityRender();   // the info line under the city says what the bot is doing
+  if(fly && CITY.world) CITY.world.focus(id);
 }
-document.addEventListener("click", e => { const b = e.target.closest(".cityLbl[data-tower]"); if(b) citySelect(b.dataset.tower); });
+document.addEventListener("click", e => { const b = e.target.closest(".cityLbl[data-tower], .cityTag[data-tower]"); if(b) citySelect(b.dataset.tower); });
 $("hqBtn").addEventListener("click", () => { if(CITY.world) CITY.world.flyTo(CITY.world.inOffice ? "city" : "office"); });
 setInterval(loadCity, 60000);
 

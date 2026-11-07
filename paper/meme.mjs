@@ -9,6 +9,9 @@
 // gone from DexScreener). Prices are seen every ~5 minutes, so exits fill at the price seen then, not the stop level.
 // Shifts: a new shift at midnight UTC; up the daily goal = sell all, PROFIT LOCKED, off duty; down the daily limit =
 // PROFIT BRAKE, sell all, off duty. Owner settings (paper/settings.json): on/off, risk, goal/brake.
+// Round 38: each bot also reports what it is doing (b.doing), every run records the whole pipeline (L.funnel:
+// found → priced → rug-checked → passed → bought), and the tape is a team chat ({t, bot, kind, txt, say}) with a
+// Rug Desk that announces coins it rejects or clears.
 // Writes only paper/meme.json. Phone alerts (ntfy.sh, NTFY_TOPIC) only for big events, so 16 bots don't spam.
 import fs from "node:fs";
 
@@ -50,6 +53,7 @@ async function alert(title, msg, tags){
   try{ await fetch(`https://ntfy.sh/${NTFY}`, {method:"POST", body:msg, headers:{Title:title, Tags:tags || "coin"}, signal:AbortSignal.timeout(15000)}); }
   catch(e){ console.log("alert failed:", e.message); }
 }
+const memeUsdK = v => v >= 1e6 ? `$${(v / 1e6).toFixed(1)}M` : `$${Math.round(v / 1e3)}K`;
 const impact = (usd, liq) => liq > 0 ? usd / (liq / 2 + usd) : 1;
 const now = Date.now(), today = new Date(now).toISOString().slice(0, 10), hourUTC = new Date(now).getUTCHours();
 
@@ -109,7 +113,7 @@ for(const m of mints){ const pair = pairOf[m]; if(!pair) continue;
     liq:Math.round(pair.liquidity.usd), vol24:Math.round(pair.volume.h24 || 0),
     chg:{h1:pair.priceChange.h1 || 0, h6:pair.priceChange.h6 || 0, h24:pair.priceChange.h24 || 0},
     h1:pair.txns.h1 || {buys:0, sells:0}, ageH:+((now - pair.pairCreatedAt) / 36e5).toFixed(1), checked:!!rep,
-    passed:res.passed, failed:res.failed, warnings:res.warnings, fails:res.checks.filter(c => !c.pass).map(c => c.label)}); }
+    passed:res.passed, failed:res.failed, warnings:res.warnings, nChecks:res.checks.length, failIds:res.checks.filter(c => !c.pass).map(c => c.id), fails:res.checks.filter(c => !c.pass).map(c => c.label)}); }
 L.scan = scored.sort((a, b) => (b.checked - a.checked) || (b.passed - a.passed) || (a.failed - b.failed) || b.vol24 - a.vol24).slice(0, 40);
 const clean = L.scan.filter(c => c.checked && c.passed && !c.warnings);
 L.rugStats = {checked:L.scan.filter(c => c.checked).length, passed:clean.length, rejected:L.scan.filter(c => c.checked && !c.passed).length, t:now};
@@ -117,12 +121,23 @@ L.rugStats = {checked:L.scan.filter(c => c.checked).length, passed:clean.length,
 // 5) each bot: manage positions, run its shift, then look for entries
 const sellValue = (p, pair) => { const v = p.qty * +pair.priceUsd; return v * (1 - impact(v, pair.liquidity.usd)) * (1 - CFG.feePct / 100); };
 const tape = [];
+const say = (bot, kind, txt, msg) => tape.push({t:now, bot, kind, txt, say:msg});
+const money = v => `${v >= 0 ? "+" : "-"}$${Math.abs(v).toFixed(2)}`;
+const WHY_NOT = {liquidity:"pool too small to sell into", sells:"nobody has been able to sell", rugcheck:"no RugCheck report yet",
+  mint:"dev can still print coins", freeze:"dev can freeze wallets (honeypot)", lp:"liquidity isn't locked", top10:"top 10 wallets own too much",
+  whale:"one whale owns too much", creator:"dev is sitting on a big bag", insiders:"insider wallets hold too much", risks:"RugCheck danger flags",
+  age:"brand new", volume:"thin trading volume"};
+const whyNot = c => (c.failIds || []).map(id => WHY_NOT[id] || id);
+const SAY_SELL = {"take profit":"take-profit hit 🎯", "stop loss":"stop loss, cutting it", "time limit":"held long enough, out",
+  "rug: pool drained":"🚨 the pool got drained, bailed out", "rug: RugCheck flagged it":"🚨 RugCheck flagged it as rugged, bailed out",
+  "rug check failed":"🚨 it started failing the rug check, bailed out", "rug: coin vanished from the market":"🚨 the coin vanished from the market"};
 async function sell(b, s, p, reason, pair, proceeds){
   const pnl = proceeds - p.stake;
   b.cash = +(b.cash + proceeds).toFixed(4); b.positions.splice(b.positions.indexOf(p), 1);
   b.closed.push({mint:p.mint, sym:p.sym, stake:p.stake, openedAt:p.openedAt, closedAt:now, proceeds:+proceeds.toFixed(4), pnl:+pnl.toFixed(4), reason});
   if(b.closed.length > CFG.keepClosed) b.closed.splice(0, b.closed.length - CFG.keepClosed);
-  tape.push(`${s.name} sold ${p.sym} ${pnl >= 0 ? "+" : "-"}$${Math.abs(pnl).toFixed(2)} (${reason})`);
+  say(s.id, reason.startsWith("rug") ? "rug" : "sell", `${s.name} sold ${p.sym} ${money(pnl)} (${reason})`,
+    `Sold ${p.sym} ${money(pnl)} (${(pnl / p.stake * 100).toFixed(0)}%): ${SAY_SELL[reason] || reason}`);
   if(reason.startsWith("rug") || Math.abs(pnl) >= CFG.bigTradeUsd)
     await alert(`${pnl >= 0 ? "✅" : "🔻"} ${s.name} sold ${p.sym}: ${pnl >= 0 ? "+" : "-"}$${Math.abs(pnl).toFixed(2)}`, `${reason} · paper trade`, pnl >= 0 ? "white_check_mark" : "small_red_triangle_down");
 }
@@ -153,6 +168,9 @@ for(const s of STRATS){
     if(why){ b.day.status = why.startsWith("daily goal") ? "locked" : "brake";
       for(const p of [...b.positions]){ const pair = pairOf[p.mint]; await sell(b, s, p, why, pair, pair ? sellValue(p, pair) : 0); }
       b.day.result = +(eq() - b.day.startEq).toFixed(2);
+      say(s.id, b.day.status, `${s.name} ${b.day.status === "locked" ? "PROFIT LOCKED" : "profit brake"} ${money(b.day.result)}`,
+        b.day.status === "locked" ? `Daily goal hit (${money(b.day.result)}) 🔒 locking profit and clocking out till midnight UTC`
+          : `Down ${money(b.day.result)} today 🛑 hitting the brake, off duty till midnight UTC`);
       await alert(b.day.status === "locked" ? `🔒 ${s.name}: PROFIT LOCKED +$${b.day.result.toFixed(2)}` : `🛑 ${s.name}: profit brake $${b.day.result.toFixed(2)}`,
         `off duty until midnight UTC · paper money`, b.day.status === "locked" ? "lock" : "octagonal_sign"); }
   }
@@ -175,14 +193,40 @@ for(const s of STRATS){
     b.positions.push({mint:c.mint, sym:c.sym, url:c.url, stake, qty:afterFee / eff, entryPrice:+pair.priceUsd, entryLiq:pair.liquidity.usd, openedAt:now,
       why:`1h ${c.chg.h1 >= 0 ? "+" : ""}${c.chg.h1}% · ${c.h1.buys} buys vs ${c.h1.sells} sells · passed every rug check`});
     b.rug.passed++;
-    tape.push(`${s.name} bought ${c.sym} $${stake.toFixed(2)}`);
+    say(s.id, "buy", `${s.name} bought ${c.sym} $${stake.toFixed(2)}`,
+      `Bought ${c.sym} for $${stake.toFixed(2)}. ${c.chg.h1 >= 0 ? "Up" : "Down"} ${Math.abs(c.chg.h1).toFixed(1)}% this hour, ${memeUsdK(c.liq)} pool, passed all ${c.nChecks} rug checks ✅`);
   }
   b.equity.push([now, +eq().toFixed(2)]); if(b.equity.length > CFG.keepEquity) b.equity.splice(0, b.equity.length - CFG.keepEquity);
   b.day.pnl = +(eq() - b.day.startEq).toFixed(2);
   b.shift = !SET.on ? "off" : b.day.status !== "on" ? b.day.status : s.hours && !can ? "asleep" : "on";
   b.value = +eq().toFixed(2);
+  // what this bot is doing right now (the Crew panel shows it, with how long it's been at it)
+  const mine = tape.filter(e => e.bot === s.id), lastMine = mine[mine.length - 1];
+  const held = b.positions.map(p => `${p.sym}${p.last ? ` ${p.last.ret >= 0 ? "+" : ""}${(p.last.ret * 100).toFixed(0)}%` : ""}`);
+  const [key, txt, busy] = b.shift === "off" ? ["off", "switched off by the owner", false]
+    : b.shift === "locked" ? ["locked", `profit locked (${money(b.day.result || 0)}), off duty`, false]
+    : b.shift === "brake" ? ["brake", "hit the loss brake, off duty", false]
+    : b.shift === "asleep" ? ["asleep", `asleep till ${String(s.hours[0]).padStart(2, "0")}:00 UTC`, false]
+    : lastMine && lastMine.kind === "buy" ? [`hold:${b.positions.map(p => p.sym).join()}`, `just bought ${mine.filter(e => e.kind === "buy").map(e => e.txt.split(" bought ")[1].split(" ")[0]).join(", ")}`, true]
+    : held.length ? [`hold:${b.positions.map(p => p.sym).join()}`, `holding ${held.join(", ")}`, true]
+    : b.signals ? ["wait", "found a coin, waiting for cash or a free slot", false]
+    : ["scan", s.random ? "waiting to flip a coin" : `scanning: no rug-checked coin fits (${s.desc})`, false];
+  if(!b.doing || b.doing.key !== key)   // same task as last run: keep counting from when it started
+    b.doing = {key, since:now};
+  Object.assign(b.doing, {txt, busy});
 }
-L.tape = [...tape.map(t => ({t:now, txt:t})), ...(L.tape || [])].slice(0, 40);
+// the Rug Desk: announces coins it rejected or cleared this run (only freshly checked ones, so it doesn't repeat itself)
+const freshDesk = L.scan.filter(c => c.checked && L.reports[c.mint] && L.reports[c.mint].t === now && !allPos().some(p => p.mint === c.mint));
+for(const c of freshDesk.filter(c => !c.passed).slice(0, 3))
+  say("rugdesk", "reject", `Rug Desk rejected ${c.sym}`, `Rejected ${c.sym} ❌ ${whyNot(c).slice(0, 2).join(", ")}. No bot may buy it.`);
+for(const c of freshDesk.filter(c => c.passed && !c.warnings).slice(0, 2))
+  say("rugdesk", "clear", `Rug Desk cleared ${c.sym}`, `Cleared ${c.sym} ✅ passed all ${c.nChecks} checks. It's on the buy list.`);
+for(const c of freshDesk.filter(c => c.passed && c.warnings).slice(0, 1))
+  say("rugdesk", "warn", `Rug Desk parked ${c.sym}`, `Parked ${c.sym} ⚠️ safe so far, but ${whyNot(c).join(" and ")}. Not buying yet.`);
+const buys = tape.filter(e => e.kind === "buy").length;
+L.funnel = {found:mints.length, priced:scored.length, checked:L.rugStats.checked, fresh:fetched, passed:clean.length, bought:buys,
+  sold:tape.filter(e => ["sell", "rug"].includes(e.kind)).length, t:now};
+L.tape = [...tape.reverse(), ...(L.tape || []).map(e => e.say ? e : {...e, say:e.txt})].slice(0, 80);
 L.settings = SET; L.rules = MEME_RULES; L.config = CFG; L.lastRun = now;
 fs.writeFileSync(FILE, JSON.stringify(L));
 if(Object.values(L.bots).map(b => b.positions.length + ":" + b.closed.length).join() !== before) console.log("TRADES_CHANGED");
