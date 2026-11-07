@@ -699,6 +699,33 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   the boss and all five live screens, no page errors. The simulation costs ~19 ms of JavaScript per second while the
   City tab is open and stops when it isn't. Without WebGL the City tab falls back to flat cards.
 
+### Round 37: a whole meme bot workforce, with the rug check built in
+
+- You asked for the rug check to live inside the bots instead of on its own tab, and for a lot more bots.
+- The **Rug check tab is gone**; the menu is just City · Live. Rug checking now happens inside every bot: before any of
+  them can buy a coin, it has to pass the full checklist (liquidity, sells work, mint and freeze authority revoked,
+  liquidity locked, no whale or insider holding too much, not flagged by RugCheck), and coins that are brand new or
+  barely traded are skipped too. The City page shows how the last scan went, e.g. "12 passed · 4 rejected · 3 skipped".
+- `paper/meme.mjs` is now a **team of 16 bots**, $50 each in paper money, all sharing one scan and one rug check per
+  run but each with its own style: Rug Hunter (the original bot, keeps its coins), Sniper, Trend Surfer, Dip Buyer,
+  Quick Flip, Moonshot, Diamond Hands, Whale Watcher, Volume Hunter, Early Bird, Old Money, Crowd Follower, Steady Eddie,
+  YOLO, Night Owl and Coin Flipper (random rug-checked picks: the control, so we can tell if any style beats luck).
+  Each bot has its own daily goal and loss brake from your Risk switch, and its own shift (on shift, profit locked,
+  profit brake, asleep).
+- Phone alerts stay quiet: only rug exits, trades of $5 or more, and bots locking profit or hitting the brake.
+- The city: every bot gets its own company building in its own colour (16 meme buildings plus Trend, Arena and AI
+  calls), 110 citizens (each meme bot employs a rug-checker and a trader) and 32 cars. Labels show HQ, the top three
+  bots (👑 on the leader) and whichever one you tap. The boss's five monitors now show the team: total money and
+  chart, the leaderboard, the trade tape, every rug check, and today's shifts.
+- Under the city, **The bots** lists all 16 with their money and today's result; tap one to fly to its building.
+  The scoreboard counts them as one line, "Meme bot team (16)", against holding BTC.
+- Honest caveat: meme coins can't be backtested on our data (no history of rug-check results), so this is a paper
+  experiment. Sixteen styles side by side, plus a random control, is how we'll find out which (if any) has an edge.
+  Real money stays locked.
+- Tested: two runs of the new bot on a copy of the live file (the old bot's 4 coins carried over to the Rug Hunter,
+  19 buys, all of them rug-checked), and the site in Chrome with that data: 19 buildings, roster of 16, tapping a bot
+  flies to it, HQ screens show the team, no page errors.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
@@ -707,5 +734,5 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)
 - `research/experiments*.py`: tests of candidate upgrades; `research/train.py`: trains the Experience brain
 - `research/data/`: 2023–2026 candles for all five coins, plus the last 45 days of 1-minute candles (refreshed weekly)
-- `paper/`: the paper bots and their files: `trader.mjs` (AI calls, paused), `trend.mjs` (50-day trends), `arena.mjs` (Bot Arena), `meme.mjs` (rug-checked meme coins)
+- `paper/`: the paper bots and their files: `trader.mjs` (AI calls, paused), `trend.mjs` (50-day trends), `arena.mjs` (Bot Arena), `meme.mjs` (the 16-bot rug-checked meme team)
 - `research/btc_1h_2011_2017.csv`: the hourly BTC data used for testing

@@ -337,7 +337,7 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .chk b{font:600 13px var(--body)} .chk span{display:block;font:500 11px var(--mono);color:var(--muted)}
 .memeRow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:9px 12px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.04);cursor:pointer}
 .memeRow:hover{border-color:var(--muted)} .memeRow b{font:600 14px var(--body)} .memeRow span{display:block;font:500 11px var(--mono);color:var(--muted)}
-.memeList{display:grid;gap:6px} .memeSub{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+.memeList{display:grid;gap:6px} .botDot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px} .memeSub{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
 .scoreTbl{display:grid;gap:6px}
 .scoreRow{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.04)}
 .scoreRow.bench{border-style:dashed;background:transparent}
@@ -581,7 +581,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   </header>
 
   <nav class="pages" id="pages" aria-label="Sections">
-    <button type="button" data-page="city" aria-current="page">City</button><button type="button" data-page="live">Live</button><button type="button" data-page="meme">Rug check</button>
+    <button type="button" data-page="city" aria-current="page">City</button><button type="button" data-page="live">Live</button>
   </nav>
 
   <nav class="watch" id="watch" aria-label="Pick a coin"></nav>
@@ -636,11 +636,9 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     <p class="note">Checks the coin live on RugCheck and DexScreener: can the dev print or freeze coins, is the liquidity locked, do whales or insiders hold too much, can people sell. Passing rules out the obvious rugs. It doesn't make a coin safe, and most meme coins still go to zero.</p>
   </section>
   <section class="card" id="memeBotCard" data-page="city" hidden>
-    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Meme bot</h2><span class="record" id="memeMeta">loading…</span></div>
-    <div class="scoreRow"><div><b>Paper balance</b><span id="memeSub">$50 of fake money · buys only coins that pass every rug check and are rising</span></div><div class="money" id="memeBal">—</div></div>
-    <p class="memeSub">Holding</p><div class="memeList" id="memePos"></div>
-    <p class="memeSub">Recent trades</p><div class="memeList" id="memeHist"></div>
-    <p class="memeSub">Trending coins it just checked · tap one to see why</p><div class="memeList" id="memeScan"></div>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg>The bots</h2><span class="record" id="memeMeta">loading…</span></div>
+    <p class="note" id="rugLine">Every bot rug-checks a coin before it buys.</p>
+    <div class="memeList" id="roster"></div>
   </section>
   <section class="card" id="scoreCard" data-page="city" hidden>
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Scoreboard</h2><span class="record" id="scoreMeta">loading…</span></div>
@@ -2834,8 +2832,9 @@ async function loadScore(){
     rows.push({name:"AI calls", note:L.paused ? "paused: no edge after costs" : "5 coins, 1-hour calls", start:L.start, now:L.balance + open, t0:L.startedAt}); }
   if(T){ const v = T.equity.length ? T.equity.at(-1).value : T.start, held = Object.keys(T.holdings);
     rows.push({name:"Trend bot", note:held.length ? "holding " + held.join(", ") : "in cash: every coin below its 50-day average", start:T.start, now:v, t0:T.startedAt}); }
-  if(M){ const v = M.balance + M.positions.reduce((s, p) => s + (p.last ? p.last.value : p.stake), 0);
-    rows.push({name:"Meme bot", note:"Solana meme coins, rug-checked", start:M.start, now:v, t0:M.startedAt}); }
+  if(M){ const team = Object.values(memeTeamOf(M).bots);
+    rows.push({name:`Meme bot team (${team.length})`, note:"Solana meme coins, every buy rug-checked", start:team.reduce((a, b) => a + b.start, 0),
+      now:team.reduce((a, b) => a + b.value, 0), t0:M.startedAt}); }
   if(A) for(const [id, b] of Object.entries(A.bots))
     rows.push({name:b.name, note:id === "flipper" ? "random picks (the control)" : "Bot Arena · BTC ×100", start:A.start, now:b.balance, t0:A.startedAt});
   if(!rows.length){ $("scoreMeta").textContent = "no results yet"; return; }
@@ -2893,37 +2892,45 @@ async function memeCheck(text){
   }catch(e){ box.innerHTML = `<div class="memeVerdict bad">${memeEsc(e.message || "Couldn't reach RugCheck or DexScreener. Try again in a minute.")}</div>`; }
 }
 $("memeForm").addEventListener("submit", e => { e.preventDefault(); memeCheck($("memeIn").value.trim()); });
+// the meme bot team from paper/meme.json; an old single-bot file shows up as a team of one (the Rug Hunter)
+function memeTeamOf(M){
+  if(!M) return null;
+  if(M.bots) return M;
+  const val = M.balance + (M.positions || []).reduce((a, p) => a + (p.last ? p.last.value : p.stake), 0);
+  return {bots:{hunter:{name:"Rug Hunter", desc:"the original: rising coins, not vertical", cash:M.balance, start:M.start, value:val, positions:M.positions || [],
+    closed:M.closed || [], equity:(M.equity || []).map(e => [e.t, e.v]), day:M.day, shift:M.shift || "on"}}, scan:M.scan || [], tape:[], rugStats:null,
+    settings:M.settings, startedAt:M.startedAt, lastRun:M.lastRun};
+}
 async function loadMeme(){
   if(document.body.dataset.on !== "city") return;
   try{
-    const L = await (await fetch("paper/meme.json?" + Date.now(), {cache:"no-store"})).json();
-    const openVal = L.positions.reduce((s, p) => s + (p.last ? p.last.value : p.stake), 0), value = L.balance + openVal, chg = value / L.start - 1;
-    const won = L.closed.filter(c => c.pnl > 0).length, mins = Math.round((Date.now() - L.lastRun) / 60000);
-    $("memeBal").innerHTML = `$${value.toFixed(2)}<span class="${chg >= 0 ? "win" : "loss"}">${chg >= 0 ? "▲" : "▼"} ${Math.abs(chg * 100).toFixed(1)}%</span>`;
-    $("memeMeta").textContent = `${L.closed.length} trades · ${won} won · updated ${mins < 1 ? "just now" : mins + " min ago"}`;
-    $("memePos").innerHTML = L.positions.map(p => { const r = p.last ? p.last.ret : 0;
-      return `<div class="memeRow" data-mint="${memeEsc(p.mint)}"><div><b>${memeEsc(p.sym)}</b><span>${memeEsc(p.why || "")}</span></div>
-        <div class="money">$${(p.last ? p.last.value : p.stake).toFixed(2)}<span class="${r >= 0 ? "win" : "loss"}">${r >= 0 ? "▲" : "▼"} ${Math.abs(r * 100).toFixed(1)}%</span></div></div>`; }).join("")
-      || `<p class="note">Nothing right now. It only buys when a coin passes every check and is rising.</p>`;
-    $("memeHist").innerHTML = L.closed.slice(-6).reverse().map(c => `<div class="memeRow" data-mint="${memeEsc(c.mint)}"><div><b>${memeEsc(c.sym)}</b><span>${memeEsc(c.reason)} · ${fmtT(c.closedAt)}</span></div>
-      <div class="money ${c.pnl >= 0 ? "win" : "loss"}">${c.pnl >= 0 ? "+" : "−"}$${Math.abs(c.pnl).toFixed(2)}</div></div>`).join("")
-      || `<p class="note">No finished trades yet.</p>`;
-    $("memeScan").innerHTML = L.scan.slice(0, 12).map(c => `<div class="memeRow" data-mint="${memeEsc(c.mint)}"><div><b>${memeEsc(c.sym)}</b>
-      <span>${memeUsd(c.liq)} liquidity · ${memeUsd(c.vol24)} 24h · 1h ${c.chg.h1 >= 0 ? "+" : ""}${c.chg.h1}%</span></div>
-      <i class="verdict ${!c.checked ? "meh" : c.passed ? (c.warnings ? "meh" : "good") : "bad"}">${!c.checked ? "not checked yet" : c.passed ? (c.warnings ? "passed · " + c.warnings + " warning" : "passed") : c.failed + " red flag" + (c.failed > 1 ? "s" : "")}</i></div>`).join("");
-  }catch(e){ $("memeMeta").textContent = "starting up"; $("memeScan").innerHTML = `<p class="note">The meme bot's first scan is on its way from GitHub. Meanwhile, paste any coin above to check it yourself.</p>`; }
+    const raw = await (await fetch("paper/meme.json?" + Date.now(), {cache:"no-store"})).json(), M = memeTeamOf(raw);
+    const team = Object.entries(M.bots).sort((a, b) => b[1].value - a[1].value), total = team.reduce((a, [, b]) => a + b.value, 0);
+    const trades = team.reduce((a, [, b]) => a + b.closed.length, 0), mins = Math.round((Date.now() - M.lastRun) / 60000);
+    $("memeMeta").textContent = `${team.length} bots · $${total.toFixed(2)} · ${trades} trades · ${mins < 1 ? "just now" : mins + " min ago"}`;
+    const rs = M.rugStats;
+    $("rugLine").innerHTML = rs ? `Rug checks on the last scan: <b class="win">${rs.passed} coins passed</b> · <b class="loss">${rs.rejected} rejected</b>${rs.checked - rs.passed - rs.rejected > 0 ? ` · ${rs.checked - rs.passed - rs.rejected} skipped as too new or too quiet` : ""}. No bot can buy a coin that fails.`
+      : "Every bot rug-checks a coin before it buys.";
+    $("roster").innerHTML = team.map(([id, b]) => { const r = b.value / b.start - 1, today = b.day ? b.day.pnl || 0 : 0, col = cityColor(id);
+      const chip = b.shift === "locked" ? `<i class="verdict good">profit locked</i>` : b.shift === "brake" ? `<i class="verdict bad">profit brake</i>`
+        : b.shift === "off" ? `<i class="verdict meh">off</i>` : b.shift === "asleep" ? `<i class="verdict meh">asleep</i>` : "";
+      return `<div class="memeRow" data-bot="${memeEsc(id)}"><div><b><i class="botDot" style="background:${col}"></i>${memeEsc(b.name)}</b>
+        <span>${memeEsc(b.desc || "")} · ${b.positions.length ? "holding " + memeEsc(b.positions.map(p => p.sym).slice(0, 3).join(", ")) : "nothing held"} · today ${cityMoney(today)}</span>${chip}</div>
+        <div class="money">$${b.value.toFixed(2)}<span class="${r >= 0 ? "win" : "loss"}">${r >= 0 ? "▲" : "▼"} ${Math.abs(r * 100).toFixed(1)}%</span></div></div>`; }).join("");
+  }catch(e){ $("memeMeta").textContent = "starting up"; $("roster").innerHTML = `<p class="note">The bots' first shift report is on its way from GitHub.</p>`; }
 }
-document.addEventListener("click", e => { const r = e.target.closest(".memeRow[data-mint]"); if(!r) return;
-  showPage("meme"); $("memeIn").value = r.dataset.mint; memeCheck(r.dataset.mint); $("memeCheckCard").scrollIntoView({behavior:reduceMotion ? "auto" : "smooth"}); });
+document.addEventListener("click", e => { const r = e.target.closest(".memeRow[data-bot]"); if(!r) return;
+  citySelect(r.dataset.bot); $("cityCard").scrollIntoView({behavior:reduceMotion ? "auto" : "smooth", block:"start"}); });
 setInterval(loadMeme, 60000);
 // ───────── Bot City: every bot is a tower in a neon city; owner-only controls (README round 35) ─────────
 const CITY = {loading:false, ready:false, towers:{}, data:null, set:null, sel:null};
-const CITY_BOTS = [
-  {id:"meme",  name:"MEME BOT",  color:0xffc44d, css:"#ffc44d", pos:[0, 0],      h:4.4},
-  {id:"trend", name:"TREND BOT", color:0x45d4ff, css:"#45d4ff", pos:[-2.6, 1.4], h:3.3},
-  {id:"arena", name:"ARENA",     color:0xb07bff, css:"#b07bff", pos:[2.6, 1.2],  h:2.9},
-  {id:"ai",    name:"AI CALLS",  color:0x6b7299, css:"#8b95bd", pos:[1.5, -2.6], h:2.1},
-];
+const CITY_TEAM = [["hunter", "Rug Hunter"], ["sniper", "Sniper"], ["surfer", "Trend Surfer"], ["dip", "Dip Buyer"], ["flip", "Quick Flip"], ["moon", "Moonshot"],
+  ["diamond", "Diamond Hands"], ["whale", "Whale Watcher"], ["volume", "Volume Hunter"], ["early", "Early Bird"], ["oldmoney", "Old Money"],
+  ["crowd", "Crowd Follower"], ["steady", "Steady Eddie"], ["yolo", "YOLO"], ["owl", "Night Owl"], ["flipper", "Coin Flipper"]];
+const CITY_PAL = ["#ffc44d", "#ff4fa3", "#7dffc2", "#ff8a3d", "#5ad1ff", "#c38bff", "#ffe14d", "#ff6b6b", "#4dffb8", "#9db4ff", "#ffa3d9", "#b6ff5c", "#ffd28a", "#6bf0ff", "#ff9e6b", "#d0d6ff"];
+const CITY_OTHERS = [["trend", "Trend Bot", "#45d4ff"], ["arena", "Arena", "#b07bff"], ["ai", "AI Calls", "#8b95bd"]];
+const cityColor = id => { const k = CITY_TEAM.findIndex(t => t[0] === id); if(k >= 0) return CITY_PAL[k % CITY_PAL.length]; const o = CITY_OTHERS.find(t => t[0] === id); return o ? o[2] : "#8b95bd"; };
+const cityBots = () => [...CITY_TEAM.map(([id, name]) => ({id, name, css:cityColor(id)})), ...CITY_OTHERS.map(([id, name, css]) => ({id, name, css}))];
 async function cityInit(){
   if(CITY.loading) return; CITY.loading = true;
   const stage = $("cityStage");
@@ -2932,7 +2939,7 @@ async function cityInit(){
   catch(e){ stage.classList.add("flat"); return; }
   try{
     CITY.world = mod.createCity(T, {stage, canvas:$("cityCanvas"), reduceMotion, isActive:() => document.body.dataset.on === "city",
-      onPick:cityPicked, onFrame:cityPlaceLabels});
+      onPick:cityPicked, onFrame:cityPlaceLabels, bots:cityBots()});
   }catch(e){ stage.classList.add("flat"); return; }
   CITY.ready = true; cityRender();
 }
@@ -2952,7 +2959,7 @@ function cityPicked(e){
   if(e.kind === "tower") citySelect(e.id);
   else if(e.kind === "person" || e.kind === "car") $("cityDetail").innerHTML = e.text;
   else if(e.kind === "view"){ $("hqBtn").textContent = e.office ? "← Back to the city" : "🏢 Visit HQ";
-    $("cityDetail").innerHTML = e.office ? "<b>HQ penthouse</b>: the boss is watching the meme bot live. His screens mirror the real paper trades: money, open positions, the trade tape, the rug scanner and today's goal."
+    $("cityDetail").innerHTML = e.office ? "<b>HQ penthouse</b>: the boss is watching the whole meme bot team live. His screens mirror the real paper trades: team money, the leaderboard, the trade tape, every rug check and today's shifts."
       : "Everything runs by itself. Tap a building, a person or a car."; }
 }
 async function loadCity(){
@@ -2965,36 +2972,44 @@ async function loadCity(){
 const cityMoney = v => (v >= 0 ? "+$" : "−$") + Math.abs(v).toFixed(2);
 function cityRender(){
   const d = CITY.data; if(!d) return;
-  const {M, T, A, L} = d, st = {};
-  if(M){ const val = M.balance + M.positions.reduce((s, p) => s + (p.last ? p.last.value : p.stake), 0), shift = M.shift || "on";
-    const lastC = M.closed.at(-1), lastOpen = Math.max(0, ...M.positions.map(p => p.openedAt)), lt = Math.max(lastC ? lastC.closedAt : 0, lastOpen);
-    st.meme = {on:shift === "on", value:val, earned:val - M.start, today:M.day ? M.day.pnl || 0 : 0, shift, beamUntil:lt ? lt + 15 * 60e3 : 0,
+  const {T, A, L} = d, M = memeTeamOf(d.M), st = {};
+  const team = M ? Object.entries(M.bots) : [];
+  for(const [id, b] of team){
+    const lastC = b.closed.at(-1), lastOpen = Math.max(0, ...b.positions.map(p => p.openedAt)), lt = Math.max(lastC ? lastC.closedAt : 0, lastOpen), shift = b.shift || "on";
+    st[id] = {on:shift === "on", team:true, value:b.value, earned:b.value - b.start, today:b.day ? b.day.pnl || 0 : 0, shift, beamUntil:lt ? lt + 15 * 60e3 : 0,
       beamGood:!(lastC && lastC.closedAt === lt && lastC.pnl < 0),
-      line:shift === "locked" ? "profit locked · off duty" : shift === "brake" ? "profit brake hit · off duty" : shift === "off" ? "switched off"
-        : M.positions.length ? "holding " + M.positions.map(p => p.sym).slice(0, 3).join(", ") : "on shift · watching",
-      detail:`<b>Meme bot</b>: ${M.positions.length} coin${M.positions.length === 1 ? "" : "s"} held, ${M.closed.length} trades done, ${cityMoney(val - M.start)} since it started. It buys only coins that pass every rug check.`}; }
+      line:shift === "locked" ? "profit locked · off duty" : shift === "brake" ? "profit brake · off duty" : shift === "off" ? "switched off"
+        : shift === "asleep" ? "asleep · trades 00–08 UTC" : b.positions.length ? "holding " + b.positions.map(p => p.sym).slice(0, 3).join(", ") : "on shift · watching",
+      detail:`<b>${memeEsc(b.name)}</b>: ${memeEsc(b.desc || "")}. $${b.value.toFixed(2)} (${cityMoney(b.value - b.start)} since it started), today ${cityMoney(b.day ? b.day.pnl || 0 : 0)}, `
+        + `${b.positions.length} coin${b.positions.length === 1 ? "" : "s"} held, ${b.closed.length} trades done. Every coin it buys passed all the rug checks first.`};
+  }
   if(T){ const val = T.equity.length ? T.equity.at(-1).value : T.start, held = Object.keys(T.holdings), lt = T.trades.length ? T.trades.at(-1).t : 0;
     st.trend = {on:held.length > 0, value:val, earned:val - T.start, beamUntil:lt ? lt + 30 * 60e3 : 0,
       line:held.length ? "holding " + held.join(", ") : "waiting · coins in a downtrend",
       detail:`<b>Trend bot</b>: holds coins only while they're above their 50-day average. ${held.length ? "Holding " + held.join(", ") : "Every coin is below it, so it's sitting in cash"}.`}; }
-  if(A){ const bots = Object.values(A.bots), val = bots.reduce((s, b) => s + b.balance, 0), best = [...bots].sort((a, b) => b.balance - a.balance)[0];
-    st.arena = {on:true, value:val, earned:val - A.start * bots.length, line:"5 workers · leader " + best.name,
+  if(A){ const bots = Object.values(A.bots), val = bots.reduce((a, b) => a + b.balance, 0), best = [...bots].sort((a, b) => b.balance - a.balance)[0];
+    st.arena = {on:true, value:val, earned:val - A.start * bots.length, line:"5 strategies · leader " + best.name,
       detail:`<b>Arena</b>: 5 one-minute Bitcoin strategies racing each other. Leader: ${best.name} at $${best.balance.toFixed(2)}.`}; }
-  if(L){ const val = L.balance + L.trades.filter(t => t.status === "open").reduce((s, t) => s + t.stake, 0);
+  if(L){ const val = L.balance + L.trades.filter(t => t.status === "open").reduce((a, t) => a + t.stake, 0);
     st.ai = {on:false, value:val, earned:val - L.start, line:"closed · no edge after costs",
       detail:"<b>AI calls</b>: closed for good. Tested every fix; none beat the fees."}; }
   if(CITY.world){ CITY.world.setStates(st); if(M) CITY.world.setMeme(M); }
   CITY.state = st;
-  $("cityLabels").innerHTML = `<button type="button" class="cityLbl on hqLbl" id="cl-hq" data-tower="hq" style="--c:#45d4ff"><b>★ HQ · THE BOSS</b><span>watching 5 screens</span><i>tap to visit</i></button>`
-    + CITY_BOTS.filter(b => st[b.id]).map(b => { const s = st[b.id];
-    return `<button type="button" class="cityLbl ${s.on ? "on" : "off"} ${CITY.sel === b.id ? "sel" : ""}" id="cl-${b.id}" data-tower="${b.id}" style="--c:${b.css}">
-      <b>${b.id === "meme" ? "★ " : ""}${b.name}</b><span>${memeEsc(s.line)}</span><i class="${s.earned >= 0 ? "win" : "loss"}">earned ${cityMoney(s.earned)}</i></button>`; }).join("");
-  const m = st.meme, goal = M && M.settings ? M.settings.dailyGoalPct : 10, workers = Object.values(st).filter(s => s.on).length;
-  $("cityBanner").className = "cityBanner " + (m ? m.shift : "");
-  $("cityBanner").textContent = !m ? "Bot City is starting up" : m.shift === "locked" ? `🔒 PROFIT LOCKED ${cityMoney(m.today)} · OFF DUTY`
-    : m.shift === "brake" ? `🛑 PROFIT BRAKE ${cityMoney(m.today)} · OFF DUTY` : m.shift === "off" ? "⏻ MEME BOT SWITCHED OFF"
-    : M.day ? `DAILY GOAL ${cityMoney(m.today)} / +$${(M.day.startEq * goal / 100).toFixed(2)} · ON SHIFT` : `DAILY GOAL +${goal}% · ON SHIFT`;
-  $("cityWorkers").textContent = `${workers} worker${workers === 1 ? "" : "s"} on shift · paper money`;
+  // labels: HQ, the 3 richest bots, and whichever building you tapped (19 labels at once would bury the city)
+  const top = team.map(([id]) => id).sort((a, b) => st[b].value - st[a].value).slice(0, 3);
+  const show = [...new Set([...top, CITY.sel].filter(id => id && st[id]))];
+  const nameOf = id => (team.find(t => t[0] === id) || [, {name:(CITY_OTHERS.find(o => o[0] === id) || [, id])[1]}])[1].name;
+  $("cityLabels").innerHTML = `<button type="button" class="cityLbl on hqLbl" id="cl-hq" data-tower="hq" style="--c:#45d4ff"><b>★ HQ · THE BOSS</b><span>watching the whole team</span><i>tap to visit</i></button>`
+    + show.map(id => { const s2 = st[id];
+      return `<button type="button" class="cityLbl ${s2.on ? "on" : "off"} ${CITY.sel === id ? "sel" : ""}" id="cl-${id}" data-tower="${id}" style="--c:${cityColor(id)}">
+        <b>${top[0] === id ? "👑 " : ""}${memeEsc(nameOf(id).toUpperCase())}</b><span>${memeEsc(s2.line)}</span><i class="${s2.earned >= 0 ? "win" : "loss"}">earned ${cityMoney(s2.earned)}</i></button>`; }).join("");
+  const tv = team.map(([, b]) => b), n = k => tv.filter(b => (b.shift || "on") === k).length, today = tv.reduce((a, b) => a + (b.day ? b.day.pnl || 0 : 0), 0);
+  const allOff = tv.length && n("off") === tv.length;
+  $("cityBanner").className = "cityBanner " + (allOff ? "off" : n("brake") > n("locked") ? "brake" : n("locked") ? "locked" : "");
+  $("cityBanner").textContent = !tv.length ? "Bot City is starting up" : allOff ? "⏻ BOTS SWITCHED OFF"
+    : `TEAM TODAY ${cityMoney(today)} · ${n("on")} ON SHIFT` + (n("locked") ? ` · ${n("locked")} 🔒` : "") + (n("brake") ? ` · ${n("brake")} 🛑` : "");
+  const working = Object.values(st).filter(x => x.on).length;
+  $("cityWorkers").textContent = `${Object.keys(st).length} bots · ${working} on shift · ${CITY.world ? CITY.world.stats.people : 110} AI citizens · paper money`;
   if(CITY.sel && st[CITY.sel]) $("cityDetail").innerHTML = st[CITY.sel].detail;
   cityControls();
 }

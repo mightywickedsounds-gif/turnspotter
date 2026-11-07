@@ -3,7 +3,7 @@
 // cars drive the grid and stop for gas; each paper bot has its company building; HQ's glass penthouse holds the boss,
 // whose monitors mirror the real meme bot (paper/meme.json). Everything is procedural (no model files) and the layout
 // is the same on every visit (seeded random).
-export function createCity(T, {stage, canvas, reduceMotion, isActive, onPick, onFrame}){
+export function createCity(T, {stage, canvas, reduceMotion, isActive, onPick, onFrame, bots}){   // bots: [{id, name, css}], one building each
   const rand = (() => { let a = 20261107; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
     t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; })();
   const pick = arr => arr[Math.floor(rand() * arr.length)];
@@ -52,7 +52,12 @@ export function createCity(T, {stage, canvas, reduceMotion, isActive, onPick, on
   instanced(unit, new T.MeshStandardMaterial({color:0x3a3560}), lamps);
 
   // ── zones ──
-  const BOTS = {"0,-1":"meme", "-1,0":"trend", "1,0":"arena", "0,1":"ai"};
+  // every bot gets a company building: first the ring around HQ, then the next ring out (not the gas station, café,
+  // park or shop blocks)
+  const BOTS = {};
+  { const ring = r => blocks.filter(([i, j]) => Math.max(Math.abs(i), Math.abs(j)) === r).sort((a, b) => Math.atan2(a[1], a[0]) - Math.atan2(b[1], b[0]));
+    const spots = [...ring(1), ...ring(2).filter(([i, j]) => !["2,-2", "-2,2", "-2,-2", "2,2"].includes(`${i},${j}`))];
+    (bots || []).forEach((b, k) => { if(spots[k]) BOTS[`${spots[k][0]},${spots[k][1]}`] = b; }); }
   const zone = (i, j) => { const r = Math.max(Math.abs(i), Math.abs(j));
     if(!i && !j) return "hq"; if(BOTS[`${i},${j}`]) return "bot"; if(r === 1) return "office";
     if(i === 2 && j === -2) return "gas"; if(i === -2 && j === 2) return "park"; if(i === -2 && j === -2) return "cafe"; if(i === 2 && j === 2) return "shop";
@@ -92,7 +97,7 @@ export function createCity(T, {stage, canvas, reduceMotion, isActive, onPick, on
       const s = signMesh(sign("GAS ⛽", "#7dffc2"), 1.4, .38); s.position.set(-1.6, 2.1, 1.6); g.add(s);
       const pole = new T.Mesh(new T.BoxGeometry(.06, 1.9, .06), new T.MeshStandardMaterial({color:0x8a85b0})); pole.position.set(-1.6, .95, 1.6); g.add(pole);
       places.gas.push(door(cx, cz)); places.pumps = [[cx - .6, cz + .6 + .5], [cx + .6, cz + .6 + .5]]; places.gasNode = door(cx + 2, cz + 2); }
-    else if(z === "bot"){ const id = BOTS[`${i},${j}`], col = {meme:0xffc44d, trend:0x45d4ff, arena:0xb07bff, ai:0x6b7299}[id], H = {meme:6.5, trend:5.2, arena:4.6, ai:3.6}[id];
+    else if(z === "bot"){ const bot = BOTS[`${i},${j}`], id = bot.id, col = new T.Color(bot.css).getHex(), H = (Math.max(Math.abs(i), Math.abs(j)) === 1 ? 4.8 : 3.6) + rand() * 2.2;
       const g = new T.Group(); g.position.set(cx, .12, cz); scene.add(g);
       const mat = new T.MeshStandardMaterial({map:winOffice, emissiveMap:winOffice, emissive:col, emissiveIntensity:1.4, color:0x1c1850, roughness:.6});
       let y = 0; const parts = [];
@@ -161,11 +166,11 @@ export function createCity(T, {stage, canvas, reduceMotion, isActive, onPick, on
     while(x !== tx){ x = NODES[idx(x) + Math.sign(idx(tx) - idx(x))]; path.push([x, z]); }
     while(z !== tz){ z = NODES[idx(z) + Math.sign(idx(tz) - idx(z))]; path.push([x, z]); }
     return path; };
-  const JOBS = [["meme", "Meme bot rug-checker"], ["meme", "Meme bot trader"], ["trend", "Trend bot analyst"], ["arena", "Arena referee"],
-    ["ai", "AI calls archivist"], ["office", "office worker"], ["cafe", "barista"], ["shop", "shopkeeper"], ["gas", "gas station clerk"], ["hq", "HQ assistant"]];
+  const JOBS = [...(bots || []).flatMap(b => [[b.id, `${b.name} rug-checker`], [b.id, `${b.name} trader`]]),
+    ["office", "office worker"], ["cafe", "barista"], ["shop", "shopkeeper"], ["gas", "gas station clerk"], ["hq", "HQ assistant"]];
   const NAMES = ["Nova", "Echo", "Pixel", "Byte", "Juno", "Atlas", "Iris", "Kai", "Luma", "Orion", "Vega", "Zed", "Rio", "Sky", "Neo", "Ada"];
   const doorOf = k => k === "hq" ? places.hq : places.bot[k] || pick(places[k]);
-  const NP = 72, people = [];
+  const NP = 110, people = [];
   for(let k = 0; k < NP; k++){ const [jobKey, jobName] = pick(JOBS), home = pick(places.home);
     people.push({name:`${pick(NAMES)}-${10 + k}`, job:jobName, jobDoor:doorOf(jobKey), home, at:home.slice(), path:[], goal:"work", wait:rand() * 6,
       speed:.9 + rand() * .5, side:rand() < .5 ? -1 : 1, x:home[0], z:home[1], doing:"at home" }); }
@@ -197,7 +202,7 @@ export function createCity(T, {stage, canvas, reduceMotion, isActive, onPick, on
   people.forEach(p => { p.wait = rand() * 4; });
 
   // ── traffic ──
-  const NC = 26, cars = [];
+  const NC = 32, cars = [];
   const carBody = new T.BoxGeometry(.8, .26, .42); carBody.translate(0, .25, 0);
   const carTop = new T.BoxGeometry(.42, .2, .38); carTop.translate(-.05, .48, 0);
   const lightGeo = new T.BoxGeometry(.04, .07, .32); lightGeo.translate(.41, .26, 0);
@@ -237,39 +242,42 @@ export function createCity(T, {stage, canvas, reduceMotion, isActive, onPick, on
   const screenHead = (g, title, color) => { g.fillStyle = "#06101e"; g.fillRect(0, 0, SW, SH); g.fillStyle = color; g.fillRect(0, 0, SW, 26);
     g.fillStyle = "#06101e"; g.font = "bold 15px monospace"; g.textBaseline = "middle"; g.fillText(title, 10, 14); g.font = "13px monospace"; };
   const drawScreens = (tick = 0) => {
-    const M = MDATA; if(!M) return;
-    const val = M.balance + M.positions.reduce((s, p) => s + (p.last ? p.last.value : p.stake), 0), up = val >= M.start;
-    { const t = screens[0], g = t.userData.g; screenHead(g, "MEME BOT · PAPER $", "#ffc44d");
-      g.fillStyle = up ? "#3ee6a2" : "#ff4f7d"; g.font = "bold 34px monospace"; g.fillText("$" + val.toFixed(2), 12, 56);
-      g.font = "14px monospace"; g.fillText(money(val - M.start) + " since start", 12, 84);
-      const eq = M.equity.slice(-160).map(e => e.v); if(eq.length > 1){ const lo = Math.min(...eq, M.start), hi = Math.max(...eq, M.start);
-        g.strokeStyle = up ? "#3ee6a2" : "#ff4f7d"; g.lineWidth = 2; g.beginPath();
+    const M = MDATA; if(!M || !M.bots) return;
+    const team = Object.values(M.bots), total = team.reduce((a, b) => a + (b.value ?? b.cash), 0), start = team.reduce((a, b) => a + b.start, 0), up = total >= start;
+    { const t = screens[0], g = t.userData.g; screenHead(g, `BOT TEAM · ${team.length} BOTS · PAPER`, "#ffc44d");
+      g.fillStyle = up ? "#3ee6a2" : "#ff4f7d"; g.font = "bold 32px monospace"; g.fillText("$" + total.toFixed(2), 12, 56);
+      g.font = "14px monospace"; g.fillText(money(total - start) + " since start", 12, 84);
+      // team equity: sum of every bot's history, by time
+      const pts = new Map(); for(const b of team) for(const [tt, v] of b.equity.slice(-160)) pts.set(Math.round(tt / 3e5), (pts.get(Math.round(tt / 3e5)) || 0) + v);
+      const eq = [...pts.entries()].sort((a, b) => a[0] - b[0]).map(e => e[1]).slice(-160);
+      if(eq.length > 1){ const lo = Math.min(...eq), hi = Math.max(...eq); g.strokeStyle = up ? "#3ee6a2" : "#ff4f7d"; g.lineWidth = 2; g.beginPath();
         eq.forEach((v, k) => { const x = 10 + k / (eq.length - 1) * (SW - 20), y = SH - 12 - (v - lo) / ((hi - lo) || 1) * 80; k ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke(); }
       t.needsUpdate = true; }
-    { const t = screens[1], g = t.userData.g; screenHead(g, "OPEN POSITIONS", "#45d4ff");
-      if(!M.positions.length){ g.fillStyle = "#8b95bd"; g.fillText("none · waiting for a clean setup", 12, 52); }
-      M.positions.slice(0, 6).forEach((p, k) => { const r = p.last ? p.last.ret : 0; g.fillStyle = "#eaf0ff"; g.fillText(p.sym.slice(0, 10), 12, 46 + k * 24);
-        g.fillStyle = r >= 0 ? "#3ee6a2" : "#ff4f7d"; g.fillText(`${r >= 0 ? "+" : ""}${(r * 100).toFixed(1)}%`, 150, 46 + k * 24); g.fillStyle = "#8b95bd"; g.fillText("$" + (p.last ? p.last.value : p.stake).toFixed(2), 230, 46 + k * 24); });
+    { const t = screens[1], g = t.userData.g; screenHead(g, "LEADERBOARD", "#45d4ff");
+      [...team].sort((a, b) => (b.value ?? b.cash) - (a.value ?? a.cash)).slice(0, 7).forEach((b, k) => { const v = b.value ?? b.cash, r = v / b.start - 1;
+        g.fillStyle = "#eaf0ff"; g.fillText(`${k + 1}. ${b.name}`.slice(0, 18), 10, 46 + k * 21);
+        g.fillStyle = r >= 0 ? "#3ee6a2" : "#ff4f7d"; g.fillText(`${r >= 0 ? "+" : ""}${(r * 100).toFixed(1)}%`, 250, 46 + k * 21); });
       t.needsUpdate = true; }
     { const t = screens[2], g = t.userData.g; screenHead(g, "TRADE TAPE", "#ff4fa3");
-      const ev = [...M.closed.slice(-10).map(c => ({t:c.closedAt, txt:`SOLD ${c.sym} ${money(c.pnl)}`, c:c.pnl >= 0 ? "#3ee6a2" : "#ff4f7d"})),
-        ...M.positions.map(p => ({t:p.openedAt, txt:`BOUGHT ${p.sym} $${p.stake.toFixed(2)}`, c:"#ffc44d"}))].sort((a, b) => b.t - a.t).slice(0, 7);
+      const ev = (M.tape || []).slice(0, 8);
       if(!ev.length){ g.fillStyle = "#8b95bd"; g.fillText("no trades yet", 12, 52); }
-      ev.forEach((e, k) => { g.fillStyle = e.c; g.fillText(e.txt.slice(0, 32), 12, 46 + k * 21); });
-      if(tick % 2) { g.fillStyle = "#ff4fa3"; g.fillRect(SW - 18, 34, 8, 8); }
+      g.font = "11px monospace";
+      ev.forEach((e, k) => { g.fillStyle = / sold /.test(e.txt) ? (/ \+\$/.test(e.txt) ? "#3ee6a2" : "#ff4f7d") : "#ffc44d"; g.fillText(e.txt.slice(0, 44), 8, 44 + k * 19); });
+      if(tick % 2) { g.fillStyle = "#ff4fa3"; g.fillRect(SW - 18, 9, 8, 8); }
       t.needsUpdate = true; }
-    { const t = screens[3], g = t.userData.g; screenHead(g, "RUG SCANNER", "#7dffc2");
-      (M.scan || []).slice(0, 7).forEach((c, k) => { g.fillStyle = "#eaf0ff"; g.fillText(c.sym.slice(0, 10), 12, 46 + k * 21);
-        g.fillStyle = !c.checked ? "#8b95bd" : c.passed ? "#3ee6a2" : "#ff4f7d"; g.fillText(!c.checked ? "…" : c.passed ? "PASS" : `FAIL ${c.failed}`, 150, 46 + k * 21); });
+    { const t = screens[3], g = t.userData.g, rs = M.rugStats || {checked:0, passed:0, rejected:0};
+      screenHead(g, `RUG CHECKS · ${rs.passed} OK · ${rs.rejected} REJECTED`, "#7dffc2");
+      (M.scan || []).filter(c => c.checked).slice(0, 7).forEach((c, k) => { g.fillStyle = "#eaf0ff"; g.fillText(c.sym.slice(0, 10), 12, 46 + k * 21);
+        g.fillStyle = c.passed && !c.warnings ? "#3ee6a2" : c.passed ? "#ffc44d" : "#ff4f7d";
+        g.fillText(c.passed && !c.warnings ? "PASS" : c.passed ? "WARN" : (c.fails[0] || "FAIL").slice(0, 20), 120, 46 + k * 21); });
       t.needsUpdate = true; }
-    { const t = screens[4], g = t.userData.g, s = M.settings || {dailyGoalPct:10, dailyLossPct:10}, d = M.day || {pnl:0, startEq:val}, shift = M.shift || "on";
-      screenHead(g, "DAILY GOAL", shift === "on" ? "#ffc44d" : shift === "locked" ? "#3ee6a2" : "#ff4f7d");
-      const goal = d.startEq * s.dailyGoalPct / 100, brake = d.startEq * s.dailyLossPct / 100, x0 = 20, w = SW - 40, mid = x0 + w * brake / (goal + brake);
-      g.fillStyle = "#1b2240"; g.fillRect(x0, 70, w, 18); const pos = Math.max(x0, Math.min(x0 + w, mid + (d.pnl || 0) / (goal + brake) * w));
-      g.fillStyle = (d.pnl || 0) >= 0 ? "#3ee6a2" : "#ff4f7d"; g.fillRect(Math.min(mid, pos), 70, Math.abs(pos - mid), 18);
-      g.fillStyle = "#eaf0ff"; g.fillRect(mid - 1, 64, 2, 30); g.font = "12px monospace"; g.fillStyle = "#ff4f7d"; g.fillText("brake", x0, 104); g.fillStyle = "#3ee6a2"; g.fillText("goal", x0 + w - 30, 104);
-      g.font = "bold 22px monospace"; g.fillStyle = "#eaf0ff"; g.fillText("today " + money(d.pnl || 0), 20, 140);
-      g.font = "14px monospace"; g.fillStyle = shift === "on" ? "#ffc44d" : "#ff8fae"; g.fillText(shift === "on" ? "ON SHIFT" : shift === "locked" ? "PROFIT LOCKED · OFF DUTY" : shift === "brake" ? "PROFIT BRAKE · OFF DUTY" : "SWITCHED OFF", 20, 172);
+    { const t = screens[4], g = t.userData.g, today = team.reduce((a, b) => a + (b.day ? b.day.pnl || 0 : 0), 0);
+      const n = k => team.filter(b => b.shift === k).length;
+      screenHead(g, "TODAY", "#ffc44d");
+      g.font = "bold 26px monospace"; g.fillStyle = today >= 0 ? "#3ee6a2" : "#ff4f7d"; g.fillText(money(today), 14, 62);
+      g.font = "14px monospace";
+      [[`on shift`, n("on"), "#ffc44d"], [`profit locked`, n("locked"), "#3ee6a2"], [`profit brake`, n("brake"), "#ff4f7d"], [`asleep / off`, n("asleep") + n("off"), "#8b95bd"]]
+        .forEach(([label, v, c], k) => { g.fillStyle = c; g.fillText(`${String(v).padStart(2)}  ${label}`, 14, 100 + k * 22); });
       t.needsUpdate = true; } };
 
   // ── camera: drag to spin, pinch/scroll to zoom, tap to inspect; can fly into the HQ office ──
