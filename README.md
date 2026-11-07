@@ -842,6 +842,22 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - Fixed: a code comment from round 40 had swallowed the lines that hide your chair's backrest and stop the rain
   indoors; looking behind you showed a grey wall.
 
+### Round 42: office fixes from your phone
+
+- You sent a phone screenshot: the picture frame faced the wall, and dragging to look around turned the 3D view into a
+  blank purple box. Checked it ourselves with the new browser tool (playwright-cli) in phone mode.
+- **Blank purple view:** the classic sign of a phone's graphics memory running out and the browser wiping the 3D view
+  (round 41 added furniture, a 360° lighting photo and shadows on top of the glow). Phones now get a lighter setup:
+  slightly lower resolution, no edge smoothing, half-size shadows and no 360° lighting photo. If the 3D view still
+  crashes, a "Restart lighter" button replaces the purple box (no glow, no downloads, no shadows; remembered on that
+  phone), with a "Switch back to full graphics" link under the controls.
+- **Fixed:** the picture frame now faces you; the robot was rebuilt with hips, knees, shoulders, elbows and shoes,
+  holding his coffee in a bent arm; the flat grey ceiling is now concrete with nine recessed downlights; the
+  pole-and-ball lamp is now an arc floor lamp. A guard stops the view from ever going blank from a bad camera angle.
+- Tested in phone mode (touch dragging all the way round, a forced graphics-memory crash shows the restart button),
+  memory steady at ~15–20 MB over 80 seconds in the office; no page errors. We can't run a real iPhone here, so if the
+  purple screen still shows up, tap "Restart lighter" and tell me.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

@@ -6,7 +6,7 @@
 // Round 41: real furniture, wood and concrete textures and a night-city light probe (HDRI) from Poly Haven (CC0, in
 // assets/hq), loaded the first time you visit (loadAssets); a ceiling spotlight casts real shadows. Until they arrive
 // (or if they can't load) the hand-built stand-ins below are shown.
-export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
+export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R, mobile = false, lite = false}){
   const g = new T.Group(); g.position.y = OY; parent.add(g);
   const W = 5.6, D = 5.6, H = 2.7, hw = W / 2, hd = D / 2;
   const add = (geo, mat, x, y, z, ry = 0, rx = 0, rz = 0) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); g.add(m); return m; };
@@ -36,8 +36,10 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
   for(const [x, z, w, d] of [[0, hd + .16, W + .3, .03], [0, -hd - .16, W + .3, .03], [hw + .16, 0, .03, D + .3], [-hw - .16, 0, .03, D + .3]])
     add(new T.BoxGeometry(w, .04, d), new T.MeshBasicMaterial({color:0x45d4ff}), x, -.18, z);
   // ceiling with light strips
-  add(new T.BoxGeometry(W, .1, D), std({color:0x0d0d14, roughness:.8}), 0, H + .05, 0);
-  for(const x of [-1.6, 0, 1.6]) add(new T.BoxGeometry(.05, .02, D - .8), new T.MeshBasicMaterial({color:0xcfe9ff}), x, H - .01, 0);
+  const ceilMat = std({color:0x1a1a20, roughness:.95});
+  add(new T.BoxGeometry(W, .1, D), ceilMat, 0, H + .05, 0);
+  for(const x of [-1.6, 0, 1.6]) for(const z of [-1.5, .2, 1.8]){ const d = add(new T.CircleGeometry(.07, 20), new T.MeshBasicMaterial({color:0xfff4e0}), x, H - .005, z, 0, Math.PI / 2);
+    const rim = add(new T.RingGeometry(.07, .095, 24), std({color:0x3a3a42, metalness:.8, roughness:.3, side:T.DoubleSide}), x, H - .004, z, 0, Math.PI / 2); }
   add(new T.BoxGeometry(W - .6, .02, .05), new T.MeshBasicMaterial({color:0xff4fa3}), 0, H - .01, -hd + .3);
   // floor-to-ceiling glass with slim mullions
   const glass = phys({color:0x9fd6ff, transparent:true, opacity:.06, roughness:.04, metalness:0, envMapIntensity:.02, specularIntensity:.15, depthWrite:false, side:T.DoubleSide});
@@ -118,28 +120,40 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
   fb("plant", add(new T.CylinderGeometry(.18, .14, .45, 16), std({color:0xd8d4e0, roughness:.4}), -2.35, .22, 2.3));
   for(let k = 0; k < 9; k++){ const l = fb("plant", add(new T.ConeGeometry(.12, .9, 6), std({color:0x1f6b3a, roughness:.6}), -2.35 + (rnd() - .5) * .3, .85 + rnd() * .3, 2.3 + (rnd() - .5) * .3));
     l.rotation.set((rnd() - .5) * .9, 0, (rnd() - .5) * .9); }
-  add(new T.CylinderGeometry(.015, .015, 1.6, 8), steel, 2.4, .8, -1.2);
-  add(new T.SphereGeometry(.14, 16, 12), new T.MeshBasicMaterial({color:0xffe2b0}), 2.4, 1.65, -1.2);
-  const lampF = new T.PointLight(0xffd8a0, 10, 6, 2); lampF.position.set(2.4, 1.6, -1.2); g.add(lampF);
+  { const lx = 2.4, lz = -1.4, arc = new T.QuadraticBezierCurve3(new T.Vector3(0, .05, 0), new T.Vector3(0, 2.45, 0), new T.Vector3(-.85, 1.85, 0));
+    add(new T.CylinderGeometry(.17, .19, .05, 32), std({color:0x111114, roughness:.15, metalness:.3}), lx, .025, lz);
+    const tube = add(new T.TubeGeometry(arc, 40, .014, 8), steel, lx, 0, lz); tube.castShadow = true;
+    const shade = add(new T.SphereGeometry(.17, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), std({color:0xd8d8dc, roughness:.25, metalness:.9, side:T.DoubleSide}), lx - .85, 1.82, lz);
+    const bulb = add(new T.SphereGeometry(.05, 12, 8), new T.MeshBasicMaterial({color:0xfff0d0}), lx - .85, 1.75, lz); }
+  const lampF = new T.PointLight(0xffd8a0, 10, 6, 2); lampF.position.set(1.55, 1.68, -1.4); g.add(lampF);
   for(const [x, z] of [[-1.4, 1.2], [1.4, 1.2], [-1.4, -1.4], [1.4, -1.4]]){ const l = new T.PointLight(0xcfe0ff, 9, 6, 2); l.position.set(x, H - .25, z); g.add(l); }
   const fill = new T.HemisphereLight(0x9fb4ff, 0x2a1830, .9); fill.position.y = 2; g.add(fill);   // soft bounce light inside the glass box
   // a warm ceiling spotlight that casts real shadows (furniture, desk, the robot)
   const key = new T.SpotLight(0xffeedd, 40, 9, 1.05, .6, 1.6); key.position.set(-.3, H - .08, -.2); key.target.position.set(-.4, 0, -.4);
-  key.castShadow = true; key.shadow.mapSize.set(1024, 1024); key.shadow.bias = -.0006; key.shadow.normalBias = .02; key.shadow.camera.near = .2; key.shadow.camera.far = 6; g.add(key, key.target);
+  key.castShadow = !lite; key.shadow.mapSize.set(mobile ? 512 : 1024, mobile ? 512 : 1024); key.shadow.bias = -.0006; key.shadow.normalBias = .02; key.shadow.camera.near = .2; key.shadow.camera.far = 6; g.add(key, key.target);
   // ── the house robot: stands at the east window looking out over the city ──
-  const bot = new T.Group(); bot.position.set(2.15, 0, .2); bot.rotation.y = Math.PI / 2; g.add(bot);
-  const suit = std({color:0x1a1c26, roughness:.45, metalness:.2}), chrome = std({color:0xc8cee0, roughness:.18, metalness:1});
-  for(const x of [-.1, .1]){ const leg = new T.Mesh(new T.CapsuleGeometry(.07, .7, 4, 10), suit); leg.position.set(x, .45, 0); bot.add(leg); }
-  const torso = new T.Mesh(new T.CapsuleGeometry(.2, .45, 6, 14), suit); torso.position.y = 1.15; torso.scale.z = .7; bot.add(torso); torso.castShadow = true;
-  const tie = new T.Mesh(new T.BoxGeometry(.05, .3, .01), std({color:0xff3d6e, emissive:0x661020})); tie.position.set(0, 1.22, .145); bot.add(tie);
-  const neck = new T.Mesh(new T.CylinderGeometry(.05, .06, .1, 12), chrome); neck.position.y = 1.52; bot.add(neck);
-  const head = new T.Group(); head.position.y = 1.68; bot.add(head);
-  head.add(new T.Mesh(new T.SphereGeometry(.14, 24, 18), chrome));
-  const visor = new T.Mesh(new T.CapsuleGeometry(.035, .14, 4, 12), new T.MeshBasicMaterial({color:0x45d4ff})); visor.rotation.z = Math.PI / 2; visor.position.set(0, .02, .12); head.add(visor);
-  const armL = new T.Group(), armR = new T.Group(); armL.position.set(-.27, 1.38, 0); armR.position.set(.27, 1.38, 0); bot.add(armL, armR);
-  for(const a of [armL, armR]){ const m = new T.Mesh(new T.CapsuleGeometry(.055, .5, 4, 10), suit); m.position.y = -.3; a.add(m);
-    const hand = new T.Mesh(new T.SphereGeometry(.05, 12, 10), chrome); hand.position.y = -.6; a.add(hand); }
-  const coffee = new T.Mesh(new T.CylinderGeometry(.035, .03, .09, 12), std({color:0xe8e4dc})); coffee.position.set(0, -.62, .06); armR.add(coffee);
+  const bot = new T.Group(); bot.position.set(2.1, 0, .2); bot.rotation.y = Math.PI / 2; g.add(bot);
+  const suit = std({color:0x1c1f2c, roughness:.5, metalness:.15}), chrome = std({color:0xd0d6e8, roughness:.15, metalness:1}), joint = std({color:0x2c2f3a, roughness:.35, metalness:.85});
+  const part = (geo, mat, x, y, z, parent2 = bot) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; parent2.add(m); return m; };
+  const hips = part(new T.CapsuleGeometry(.13, .14, 6, 12), suit, 0, .93, 0); hips.rotation.z = Math.PI / 2; hips.scale.z = .8;
+  for(const x of [-.1, .1]){ part(new T.CapsuleGeometry(.075, .3, 6, 12), suit, x, .72, 0); part(new T.SphereGeometry(.065, 14, 10), joint, x, .5, 0);
+    part(new T.CapsuleGeometry(.062, .3, 6, 12), suit, x, .3, 0); part(new T.BoxGeometry(.11, .07, .27), std({color:0x0c0c0e, roughness:.3}), x, .035, .05); }
+  const torso = part(new T.CapsuleGeometry(.19, .3, 8, 16), suit, 0, 1.22, 0); torso.scale.z = .68;
+  part(new T.BoxGeometry(.13, .24, .01), std({color:0xeef0f6, roughness:.6}), 0, 1.3, .128);
+  const tie = part(new T.BoxGeometry(.045, .22, .012), std({color:0xff3d6e, emissive:0x661020}), 0, 1.27, .136);
+  part(new T.CylinderGeometry(.045, .055, .1, 14), chrome, 0, 1.52, 0);
+  const head = new T.Group(); head.position.y = 1.67; bot.add(head);
+  const skull = part(new T.SphereGeometry(.13, 28, 20), chrome, 0, 0, 0, head); skull.scale.set(.95, 1.05, 1);
+  const visor = part(new T.CapsuleGeometry(.03, .13, 4, 12), new T.MeshBasicMaterial({color:0x45d4ff}), 0, .02, .115, head); visor.rotation.z = Math.PI / 2;
+  for(const x of [-.13, .13]) part(new T.CylinderGeometry(.03, .03, .03, 12), joint, x, 0, 0, head).rotation.z = Math.PI / 2;   // "ears"
+  const arm = side => { const sh = new T.Group(); sh.position.set(side * .245, 1.42, 0); bot.add(sh); part(new T.SphereGeometry(.07, 14, 10), joint, 0, 0, 0, sh);
+    part(new T.CapsuleGeometry(.055, .22, 6, 12), suit, 0, -.16, 0, sh);
+    const el = new T.Group(); el.position.y = -.32; sh.add(el); part(new T.SphereGeometry(.05, 12, 10), joint, 0, 0, 0, el);
+    part(new T.CapsuleGeometry(.048, .2, 6, 12), suit, 0, -.14, 0, el); part(new T.SphereGeometry(.045, 12, 10), chrome, 0, -.29, 0, el);
+    return {sh, el}; };
+  const armL = arm(-1), armR = arm(1);
+  armL.sh.rotation.z = -.08; armL.el.rotation.x = -.15;
+  const coffee = part(new T.CylinderGeometry(.035, .03, .1, 14), std({color:0xeae6de, roughness:.4}), 0, -.31, .05, armR.el);
 
   // ── the monitors' content ──
   const money = v => (v >= 0 ? "+$" : "−$") + Math.abs(v).toFixed(2);
@@ -216,17 +230,18 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
   // ── real assets (Poly Haven, CC0): night-city HDRI for reflections, wood/concrete textures, furniture models ──
   let assetsAsked = false;
   async function loadAssets(){
-    if(assetsAsked) return; assetsAsked = true;
+    if(assetsAsked || lite) return; assetsAsked = true;
     const base = new URL("assets/hq/", location.href).href, JSM = "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/";
     let GLTFLoader, RGBELoader;
     try{ [{GLTFLoader}, {RGBELoader}] = await Promise.all([import(JSM + "loaders/GLTFLoader.js"), import(JSM + "loaders/RGBELoader.js")]); }catch(e){ return; }
     let env = null;
-    try{ const hdr = await new RGBELoader().loadAsync(base + "night_city_1k.hdr"); const pm = new T.PMREMGenerator(R); env = pm.fromEquirectangular(hdr).texture; hdr.dispose(); pm.dispose();
+    if(!mobile) try{ const hdr = await new RGBELoader().loadAsync(base + "night_city_1k.hdr"); const pm = new T.PMREMGenerator(R); env = pm.fromEquirectangular(hdr).texture; hdr.dispose(); pm.dispose();
       g.traverse(o => { const m = o.material; if(m && m.isMeshStandardMaterial){ m.envMap = env; m.envMapIntensity = m === glass ? .02 : m.metalness > .5 ? 1.1 : .5; m.needsUpdate = true; } }); }catch(e){}
     const tl = new T.TextureLoader(), tex = (f, srgb, rx = 1, ry = 1) => { const t = tl.load(base + "tex/" + f); t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(rx, ry); t.anisotropy = aniso; if(srgb) t.colorSpace = T.SRGBColorSpace; return t; };
     Object.assign(floorMat, {map:tex("dark_wood_diffuse.jpg", true, 3, 3), normalMap:tex("dark_wood_nor_gl.jpg", false, 3, 3), roughnessMap:tex("dark_wood_rough.jpg", false, 3, 3), roughness:.9, metalness:0, envMapIntensity:.6, color:new T.Color(0xffffff)});
     floorMat.normalScale.set(.6, .6); floorMat.needsUpdate = true;
     Object.assign(deskMat, {map:tex("wood_table_001_diffuse.jpg", true, 2, .7), normalMap:tex("wood_table_001_nor_gl.jpg", false, 2, .7), roughnessMap:tex("wood_table_001_rough.jpg", false, 2, .7), roughness:.8, color:new T.Color(0xc8b8a8)}); deskMat.needsUpdate = true;
+    Object.assign(ceilMat, {map:tex("concrete_wall_008_diffuse.jpg", true, 3, 3), color:new T.Color(0x55555c)}); ceilMat.needsUpdate = true;
     Object.assign(wallMat, {map:tex("concrete_wall_008_diffuse.jpg", true, 2, 1), normalMap:tex("concrete_wall_008_nor_gl.jpg", false, 2, 1), color:new T.Color(0x77737a), roughness:.95}); wallMat.needsUpdate = true;
     const gl = new GLTFLoader();
     const put = async (name, x, y, z, ry = 0, sc = 1, hide) => { try{ const o = (await gl.loadAsync(`${base}${name}/${name}.gltf`)).scene;
@@ -241,7 +256,7 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
       put("potted_plant_02", -2.3, 0, 2.25, .6, 1.9, "plant"),
       put("potted_plant_02", 2.35, 0, -1.75, 2.1, 1.6),
       put("desk_lamp_arm_01", -1.18, .77, DZ + .32, .9, .75, "lamp"),
-      put("standing_picture_frame_01", .62, .77, DZ + .12, -.4, 1.2),
+      put("standing_picture_frame_01", .62, .77, DZ + .12, Math.PI - .4, 1.2),   // the photo faces you
       put("wooden_display_shelves_01", -2.55, 0, .9, 0, 1.15),
       put("modern_ceiling_lamp_01", -1.1, H - 1.17, -1.1, 0, 1),
     ]);
@@ -257,8 +272,8 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
       holo.rotation.y = t * .5; holoBeam.material.opacity = .1 + .05 * Math.sin(t * 3);
       rgb.material.color.setHSL((t * .08) % 1, 1, .55); kbGlow.material.color.setHSL((t * .08 + .5) % 1, 1, .55);
       head.rotation.y = Math.sin(t * .23) * .9; head.rotation.x = Math.sin(t * .5) * .06;   // looks around, now and then back at you
-      armR.rotation.x = -.6 - Math.max(0, Math.sin(t * .4)) * .9;   // sips his coffee
-      armL.rotation.x = Math.sin(t * .3) * .08; bot.position.y = Math.sin(t * 1.3) * .006;
+      const sip = Math.max(0, Math.sin(t * .4)); armR.sh.rotation.x = -.25 - sip * .35; armR.el.rotation.x = -1.35 - sip * .45;   // sips his coffee
+      armL.sh.rotation.x = Math.sin(t * .3) * .06; bot.position.y = Math.sin(t * 1.3) * .004;
     },
   };
 }

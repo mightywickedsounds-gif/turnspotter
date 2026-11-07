@@ -390,6 +390,9 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .osTerm .r{color:#ff6b8a} .osTerm .y{color:#ffd56b} .osTerm .c{color:#45d4ff} .osTerm i{display:inline-block;width:8px;height:15px;background:#7dffc2;vertical-align:-2px;animation:osPulse 1s infinite}
 .osChat .msg p{color:#eef1ff}
 .cityStage .os ~ *{}
+.cityLost{position:absolute;inset:0;z-index:8;display:grid;place-content:center;gap:10px;padding:24px;text-align:center;background:rgba(10,6,32,.94)}
+.cityLost b{font:800 16px var(--body)} .cityLost span{font:500 13px/1.5 var(--body);color:var(--muted)}
+.cityLost button{justify-self:center;padding:11px 18px;border-radius:999px;border:0;background:#45d4ff;color:#04121a;font:800 14px var(--body);cursor:pointer}
 .cityDetail{margin:10px 2px 0;font:500 13px var(--body);color:var(--muted);min-height:18px} .cityDetail b{color:var(--ink)}
 .cityCtl{display:grid;grid-template-columns:auto 1fr auto;gap:8px;margin-top:12px}
 .cityCtl .seg{display:flex;gap:4px;padding:4px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.05)}
@@ -3062,6 +3065,8 @@ async function cityInit(){
       onPick:cityPicked, onFrame:cityPlaceLabels, onToast:cityToast, minimap:$("cityMap"), bots:cityBots(), fx});
   }catch(e){ stage.classList.add("flat"); return; }
   CITY.ready = true; cityRender();
+  if(CITY.world.lite){ $("cityMsg").innerHTML = `Lighter 3D graphics are on. <button type="button" id="cityFull" style="background:none;border:0;color:var(--ink);text-decoration:underline;cursor:pointer;font:inherit">Switch back to full graphics</button>`;
+    $("cityFull").onclick = () => { try{ localStorage.removeItem("turnspotter-lite"); }catch(_){} location.reload(); }; }
 }
 // ───────── BossOS: the PC in the HQ penthouse (README round 40). Live trades with prices straight from DexScreener ─────────
 const OS = {wins:{}, z:10, live:{}, prev:{}, timer:0, liveTimer:0, n:0};
@@ -3221,6 +3226,9 @@ function cityPicked(e){
       : CITY_HELP;
     clearInterval(OS.liveTimer); if(e.office){ osLive(); OS.liveTimer = setInterval(osLive, 15000); } else osClose(); }
   else if(e.kind === "pc") osOpen();
+  else if(e.kind === "lost"){ let o = $("cityLost"); if(!o){ o = document.createElement("div"); o.id = "cityLost"; o.className = "cityLost"; $("cityStage").appendChild(o); }
+    o.innerHTML = `<b>The 3D view ran out of graphics memory</b><span>Your phone pulled the plug on it. Restart it in lighter mode: less glow, simpler furniture, everything else the same.</span><button type="button" id="cityLite">Restart lighter</button>`;
+    $("cityLite").onclick = () => { try{ localStorage.setItem("turnspotter-lite", "1"); }catch(_){} location.reload(); }; }
   else if(e.kind === "hqbot") $("cityDetail").innerHTML = e.text;
   else if(e.kind === "mode"){ const m = e.mode;
     $("cityStage").classList.toggle("driving", m === "drive");

@@ -15,10 +15,14 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
     t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; })();
   const pick = arr => arr[Math.floor(rand() * arr.length)];
   const toast = onToast || (() => {});
-  const R = new T.WebGLRenderer({canvas, antialias:true, powerPreference:"high-performance"});
-  R.setPixelRatio(Math.min(1.5, devicePixelRatio || 1)); R.outputColorSpace = T.SRGBColorSpace; R.setClearColor(0x0a0620);
+  // phones have little graphics memory: lower resolution, smaller shadows; after a crash the owner can pick "lite" (no glow, no downloads)
+  const MOBILE = matchMedia("(pointer:coarse)").matches, LITE = (() => { try{ return localStorage.getItem("turnspotter-lite") === "1"; }catch(e){ return false; } })();
+  if(LITE) fx = null;
+  const R = new T.WebGLRenderer({canvas, antialias:!MOBILE, powerPreference:"high-performance"});
+  canvas.addEventListener("webglcontextlost", e => { e.preventDefault(); onPick({kind:"lost"}); });
+  R.setPixelRatio(Math.min(LITE ? 1 : MOBILE ? 1.25 : 1.5, devicePixelRatio || 1)); R.outputColorSpace = T.SRGBColorSpace; R.setClearColor(0x0a0620);
   R.toneMapping = T.ACESFilmicToneMapping; R.toneMappingExposure = 1.2;
-  R.shadowMap.enabled = true; R.shadowMap.type = T.PCFSoftShadowMap;   // only the penthouse's ceiling spotlight casts shadows
+  R.shadowMap.enabled = !LITE; R.shadowMap.type = T.PCFSoftShadowMap;   // only the penthouse's ceiling spotlight casts shadows
   const HIGH = matchMedia("(pointer:fine)").matches && (navigator.hardwareConcurrency || 4) >= 8 && !reduceMotion;   // desktops: mirror-wet streets too
   const scene = new T.Scene(); scene.fog = new T.FogExp2(0x1c1046, .0115);
   const cam = new T.PerspectiveCamera(45, 1, .05, 600);
@@ -300,7 +304,7 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
   const hqBody = new T.Mesh(unit, hqMat); hqBody.scale.set(3.2, HQ_H, 3.2); hqBody.position.y = .12; HQ.add(hqBody);
   for(const [x, z] of [[1.62, 1.62], [-1.62, 1.62], [1.62, -1.62], [-1.62, -1.62]]){ const e = new T.Mesh(new T.BoxGeometry(.06, HQ_H, .06), new T.MeshBasicMaterial({color:0x45d4ff})); e.position.set(x, .12 + HQ_H / 2, z); HQ.add(e); }
   const OY = HQ_H + .12 + .435;   // penthouse floor
-  const hq = buildPenthouse(T, {parent:HQ, OY, glowTex, canvasTex, R});
+  const hq = buildPenthouse(T, {parent:HQ, OY, glowTex, canvasTex, R, mobile:MOBILE, lite:LITE});
   hq.group.traverse(o => { const m = o.material; if(m && m.isMeshStandardMaterial && envTex && !m.envMap){ m.envMap = envTex; if(m.envMapIntensity === 1) m.envMapIntensity = m.metalness > .5 ? 1 : .35; } });
   const antenna = new T.Mesh(new T.CylinderGeometry(.04, .07, 3, 8), new T.MeshStandardMaterial({color:0xccd2ff, metalness:.8, roughness:.3})); antenna.position.set(1.8, OY + 4.3, -1.8); HQ.add(antenna);
   const beacon = glow(0xff4f7d, 1.4); beacon.position.set(1.8, OY + 5.9, -1.8); HQ.add(beacon);
@@ -625,7 +629,7 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
     cam.position.set(view.tx + Math.sin(view.yaw) * Math.cos(view.pitch) * cd, view.ty + Math.sin(view.pitch) * cd,
       view.tz + Math.cos(view.yaw) * Math.cos(view.pitch) * cd);
     cam.lookAt(view.tx, view.ty, view.tz);
-    if(mode === "office"){ for(const k of ["yaw", "pitch", "fov"]) look[k] += (lookGoal[k] - look[k]) * Math.min(1, dt * 8);
+    if(mode === "office"){ for(const k of ["yaw", "pitch", "fov"]){ if(!isFinite(lookGoal[k])) lookGoal[k] = k === "fov" ? 60 : 0; look[k] += (lookGoal[k] - look[k]) * Math.min(1, dt * 8); if(!isFinite(look[k])) look[k] = lookGoal[k]; }
       const keyYaw = (keys.has("ArrowLeft") || keys.has("KeyA") ? 1 : 0) - (keys.has("ArrowRight") || keys.has("KeyD") ? 1 : 0); lookGoal.yaw += keyYaw * dt * 1.6;
       cam.position.copy(hq.eye); cam.lookAt(hq.eye.x + Math.sin(look.yaw) * Math.cos(look.pitch), hq.eye.y + Math.sin(look.pitch), hq.eye.z + Math.cos(look.yaw) * Math.cos(look.pitch)); }
     cam.updateProjectionMatrix();
@@ -680,6 +684,6 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
     setInput(o){ Object.assign(drv.input, o); },
     unfollow(){ if(mode === "follow"){ followRef = null; setMode("free"); } },
     flyTo, focus, follow, drive, get mode(){ return mode; }, get inOffice(){ return mode === "office"; },
-    stats:{people:NP, cars:NC, blocks:blocks.length},
+    stats:{people:NP, cars:NC, blocks:blocks.length}, lite:LITE,
   };
 }
