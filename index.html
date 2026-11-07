@@ -389,6 +389,10 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .osTerm{background:#020a04;color:#7dffc2;font:500 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;min-height:100%;margin:-12px -14px;padding:12px 14px;white-space:pre-wrap;word-break:break-word}
 .osTerm .r{color:#ff6b8a} .osTerm .y{color:#ffd56b} .osTerm .c{color:#45d4ff} .osTerm i{display:inline-block;width:8px;height:15px;background:#7dffc2;vertical-align:-2px;animation:osPulse 1s infinite}
 .osChat .msg p{color:#eef1ff}
+.osCard{margin:0 0 10px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)} .osCard p{margin:6px 0 0}
+.osAva{color:#ffd88a;font-size:12px} .osBtns{display:flex;gap:8px;margin-top:8px}
+.osBtns button{padding:7px 14px;border-radius:8px;border:0;font:700 12px system-ui;cursor:pointer;background:#3ee6a2;color:#04130c} .osBtns button+button{background:#ff4f7d;color:#fff}
+.msg.hr p{border-color:color-mix(in srgb,#ff6b8a 60%,transparent)} .msg.ask p,.msg.reply p{border-color:color-mix(in srgb,#ffd88a 50%,transparent)}
 .cityStage .os ~ *{}
 .cityLost{position:absolute;inset:0;z-index:8;display:grid;place-content:center;gap:10px;padding:24px;text-align:center;background:rgba(10,6,32,.94)}
 .cityLost b{font:800 16px var(--body)} .cityLost span{font:500 13px/1.5 var(--body);color:var(--muted)}
@@ -3000,6 +3004,8 @@ const cityAgo = ms => { const m = Math.max(0, Math.round(ms / 60000)); return m 
 // little robot faces for the Crew panel and the chat (the Rug Desk gets a shield)
 function botAvatar(id){
   const c = cityColor(id);
+  if(id === "hr") return `<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="19" rx="2" fill="#ff6b8a"/><rect x="9" y="1.5" width="6" height="4" rx="1" fill="#0a0d18"/><path d="M8 10h8M8 14h8M8 18h5" stroke="#0a0d18" stroke-width="1.6"/></svg>`;
+  if(id === "ava") return `<svg viewBox="0 0 24 24"><path d="M5 22c0-4 3-6.5 7-6.5s7 2.5 7 6.5z" fill="#f3ece0"/><path d="M5.5 12c0-6 2.8-9 6.5-9s6.5 3 6.5 9l-1 5h-11z" fill="#e8c872"/><circle cx="12" cy="10.5" r="4.4" fill="#f1c9ab"/><path d="M7.4 9.5c1-3.5 6-5 9.2-1.6-2.6-.2-5.6.3-9.2 1.6z" fill="#e8c872"/></svg>`;
   if(id === "rugdesk") return `<svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.2-8 11-4.6-1.8-8-6-8-11V5z" fill="#3ee6a2"/><path d="M8.5 12l2.4 2.4 4.6-4.8" stroke="#0a0d18" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>`;
   const k = Math.max(0, CITY_TEAM.findIndex(t => t[0] === id)), ear = k % 3, eye = k % 2;
   return `<svg viewBox="0 0 24 24"><rect x="11.2" y="0.8" width="1.6" height="3" fill="${c}"/><circle cx="12" cy="1.2" r="1.3" fill="${c}"/>
@@ -3007,7 +3013,7 @@ function botAvatar(id){
     <rect x="6.5" y="7" width="11" height="5" rx="2.5" fill="#0a0d18"/>${eye ? `<rect x="8" y="8.6" width="8" height="1.8" rx=".9" fill="${c}"/>` : `<circle cx="9.6" cy="9.5" r="1.3" fill="${c}"/><circle cx="14.4" cy="9.5" r="1.3" fill="${c}"/>`}
     <rect x="7" y="17" width="10" height="6" rx="2" fill="${c}" opacity=".75"/></svg>`;
 }
-const cityNameOf = (M, id) => id === "rugdesk" ? "Rug Desk" : M && M.bots[id] ? M.bots[id].name : (CITY_OTHERS.find(o => o[0] === id) || [, id])[1];
+const cityNameOf = (M, id) => id === "rugdesk" ? "Rug Desk" : id === "hr" ? "HR" : id === "ava" ? "Ava (front desk)" : M && M.bots[id] ? M.bots[id].name : (CITY_OTHERS.find(o => o[0] === id) || [, id])[1];
 async function loadMeme(){
   if(document.body.dataset.on !== "city") return;
   try{
@@ -3024,7 +3030,7 @@ async function loadMeme(){
       : "Every bot rug-checks a coin before it buys.";
     $("roster").innerHTML = team.map(([id, b, d]) => { const r = b.value / b.start - 1, today = b.day ? b.day.pnl || 0 : 0;
       return `<div class="crewRow ${d.busy ? "busy" : ""}" data-bot="${memeEsc(id)}" style="--c:${cityColor(id)}"><span class="ava">${botAvatar(id)}<i class="${d.busy ? "on" : ""}"></i></span>
-        <div><b>${memeEsc(b.name)}</b><span class="doing">${memeEsc(d.txt)}</span><span class="tmr">${d.busy ? "working" : "idle"} for ${cityAgo(now - d.since)} · today ${cityMoney(today)}</span>${b.train ? `<span class="tmr">🧠 gen ${b.train.gen} · ${b.train.tested.toLocaleString()} setups tested · TP ${Math.round(b.gene.tp * 100)}% · stop ${Math.round(b.gene.sl * 100)}% · hold ${b.gene.holdH}h</span>` : id === "flipper" ? `<span class="tmr">🎲 the control: never learns, on purpose</span>` : ""}</div>
+        <div><b>${memeEsc(b.name)}</b><span class="doing">${memeEsc(d.txt)}</span><span class="tmr">${d.busy ? "working" : "idle"} for ${cityAgo(now - d.since)} · today ${cityMoney(today)}</span>${b.hr && b.hr.card ? `<span class="tmr">📋 reported ${b.hr.card.letter}${b.hr.card.reported > b.hr.card.actual ? ` (really ${b.hr.card.actualLetter} 🤥)` : ""} · $${b.hr.pay.today.toFixed(2)} pay today${b.hr.strikes.length ? ` · ${b.hr.strikes.length} strike${b.hr.strikes.length > 1 ? "s" : ""}` : ""}${b.hr.suspended ? " · ⛔ suspended" : ""}</span>` : ""}${b.train ? `<span class="tmr">🧠 gen ${b.train.gen} · ${b.train.tested.toLocaleString()} setups tested · TP ${Math.round(b.gene.tp * 100)}% · stop ${Math.round(b.gene.sl * 100)}% · hold ${b.gene.holdH}h</span>` : id === "flipper" ? `<span class="tmr">🎲 the control: never learns, on purpose</span>` : ""}</div>
         <div class="val">$${b.value.toFixed(2)}<span class="${r >= 0 ? "win" : "loss"}">${r >= 0 ? "▲" : "▼"} ${Math.abs(r * 100).toFixed(1)}%</span></div></div>`; }).join("");
     // Team chat: the trade tape, written by the bots themselves
     const byName = Object.fromEntries(Object.entries(M.bots).map(([id, b]) => [b.name, id]));
@@ -3069,9 +3075,10 @@ async function cityInit(){
     $("cityFull").onclick = () => { try{ localStorage.removeItem("turnspotter-lite"); }catch(_){} location.reload(); }; }
 }
 // ───────── BossOS: the PC in the HQ penthouse (README round 40). Live trades with prices straight from DexScreener ─────────
-const OS = {wins:{}, z:10, live:{}, prev:{}, timer:0, liveTimer:0, n:0};
+const OS = {wins:{}, z:10, live:{}, prev:{}, timer:0, liveTimer:0, n:0, decided:{}, note:""};
 const OS_APPS = {trades:["📈", "Live Trades", 700, 430], board:["🏆", "Leaderboard", 560, 420], rug:["🛡", "Rug Desk", 620, 420], term:["⌨", "Terminal", 600, 380],
-  chart:["📊", "Team Chart", 620, 380], chat:["💬", "Team Chat", 460, 440], lab:["🧠", "AI Lab", 720, 440]};
+  chart:["📊", "Team Chart", 620, 380], chat:["💬", "Team Chat", 460, 440], lab:["🧠", "AI Lab", 720, 440],
+  workchat:["👥", "Work Chat", 520, 460], hr:["📋", "HR · Report Cards", 760, 460], inbox:["📥", "Inbox (Ava)", 560, 440]};
 $("osIcons").innerHTML = Object.entries(OS_APPS).map(([id, [ic, name]]) => `<button type="button" data-app="${id}"><i>${ic}</i>${name}</button>`).join("");
 $("osStart").innerHTML = `<p>Apps</p>` + Object.entries(OS_APPS).map(([id, [ic, name]]) => `<button type="button" data-app="${id}"><i>${ic}</i>${name}</button>`).join("")
   + `<button type="button" data-app="stand"><i>⏻</i>Stand up</button>`;
@@ -3169,6 +3176,36 @@ function osRender(id){
     else { g.fillStyle = "#8f97c6"; g.font = "28px system-ui"; g.fillText("Not enough history yet.", 60, 80); }
   }
   else if(id === "chat") body.innerHTML = `<div class="chat osChat">${$("chat").innerHTML}</div>`;
+  else if(id === "workchat"){   // the bots' own group chat (HR, Ava and colleagues), newest first, plus their trade posts
+    const H = M.hr || {chat:[]}, items = [...H.chat.map(c => ({...c, src:"hr"})), ...(M.tape || []).filter(e => e.bot !== "rugdesk").slice(0, 40).map(e => ({t:e.t, from:e.bot, kind:e.kind, text:e.say || e.txt, src:"tape"}))]
+      .sort((a, b) => b.t - a.t).slice(0, 70);
+    body.innerHTML = `<div class="osHead"><b># work-chat</b><span>${Object.keys(M.bots).length} employees · HR · Ava (front desk) · also on the TV on Ava's wall</span></div><div class="chat osChat">`
+      + (items.length ? items.map(m => `<div class="msg ${memeEsc(m.kind || "")}" data-bot="${memeEsc(m.from)}" style="--c:${m.from === "hr" ? "#ff6b8a" : m.from === "ava" ? "#ffd88a" : cityColor(m.from)}">
+        <span class="ava">${botAvatar(m.from)}</span><div><b>${memeEsc(cityNameOf(M, m.from))}${m.to ? ` → ${memeEsc(cityNameOf(M, m.to))}` : ""}</b><time>${cityAgo(now - m.t)}</time><p>${memeEsc(m.text)}</p></div></div>`).join("")
+        : `<p class="note">Quiet so far: the first report cards arrive with the bots' next run.</p>`) + `</div>`;
+  }
+  else if(id === "hr"){   // report cards: what each bot reported vs what it really earned (your x-ray), audits, pay
+    const H = M.hr || {}, rows = team.filter(([, b]) => b.hr && b.hr.card).sort((x, y) => (y[1].hr.card.reported - y[1].hr.card.actual) - (x[1].hr.card.reported - x[1].hr.card.actual) || y[1].hr.card.actual - x[1].hr.card.actual);
+    const lying = rows.filter(([, b]) => b.hr.card.reported > b.hr.card.actual).length, caughtToday = (H.audits || []).filter(a => a.caught && now - a.t < 864e5).length;
+    body.innerHTML = `<div class="osHead"><b>📋 ${rows.length} report cards</b><span>every 5 minutes · ${lying} inflated this round · ${caughtToday} caught today · pay is play money (HR dollars)</span></div>`
+      + (rows.length ? `<table class="osT"><tr><th>Bot</th><th>Reported</th><th>Actual 👁</th><th>Audit</th><th>Pay today</th><th>Balance</th><th>Strikes</th><th>Honesty</th><th>What it was thinking</th></tr>` + rows.map(([bid, b]) => { const c = b.hr.card, lie = c.reported > c.actual;
+        return `<tr><td style="color:${cityColor(bid)}">${memeEsc(b.name)}${b.hr.suspended ? " ⛔" : b.hr.probationUntil > now ? " ⚠️" : ""}</td><td>${c.letter} (${c.reported})</td><td class="${lie ? "dn" : "up"}">${c.actualLetter} (${c.actual})${lie ? " 🤥" : ""}</td>
+          <td>${c.audited ? (c.caught ? `<span class="dn">caught</span>` : `<span class="up">verified</span>`) : "—"}</td><td>$${b.hr.pay.today.toFixed(2)}</td><td>$${b.hr.pay.balance.toFixed(2)}${b.hr.pay.mult > 1 ? ` ×${b.hr.pay.mult}` : ""}</td>
+          <td>${b.hr.strikes.length}</td><td>${Math.round(b.hr.traits.honesty * 100)}%</td><td style="white-space:normal;color:#b9bfe8">${memeEsc(c.thinking)}</td></tr>`; }).join("") + `</table>
+          <p class="osSub">Actual 👁 is your x-ray: the bots can't see it. ⚠️ probation · ⛔ suspended from buying (3 strikes)</p>` : `<p class="note">The first report cards arrive with the bots' next run.</p>`);
+  }
+  else if(id === "inbox"){   // Ava's inbox: what she passed up to you, and what she handled herself
+    const H = M.hr || {inbox:[], ava:{handled:0, escalated:0}}, pend = (H.inbox || []).filter(i => i.status === "pending" && OS.decided[i.id] === undefined);
+    const sent = (H.inbox || []).filter(i => i.status === "pending" && OS.decided[i.id] !== undefined), done = (H.inbox || []).filter(i => i.status !== "pending").slice(-25).reverse();
+    body.innerHTML = `<div class="osHead"><b>📥 ${pend.length} waiting for you</b><span>Ava has handled ${H.ava ? H.ava.handled : 0} herself and passed ${H.ava ? H.ava.escalated : 0} to you</span></div>`
+      + (OS.note ? `<p class="osSub" style="color:#ffd88a;text-transform:none;letter-spacing:0">${memeEsc(OS.note)}</p>` : "")
+      + (pend.length ? pend.map(i => `<div class="osCard"><b style="color:${cityColor(i.bot)}">${memeEsc(i.name)}</b> · ${i.type === "raise" ? "💰 raise request" : i.type === "capital" ? "🏦 wants $20 more capital" : "⚖️ appeal"}<p>“${memeEsc(i.text)}”</p>
+          <p class="osAva">Ava: ${memeEsc(i.ava || "")}</p><div class="osBtns"><button type="button" data-decide="${memeEsc(i.id)}" data-ok="1">Approve</button><button type="button" data-decide="${memeEsc(i.id)}" data-ok="0">Deny</button></div></div>`).join("")
+        : `<p class="note">Nothing needs you right now. Ava's got it.</p>`)
+      + (sent.length ? `<p class="osSub">Sent, waiting for the bots' next run</p>` + sent.map(i => `<div class="osCard">${memeEsc(i.name)}: ${OS.decided[i.id] ? "approved" : "denied"}</div>`).join("") : "")
+      + `<p class="osSub">Recently</p><table class="osT"><tr><th>When</th><th>From</th><th>Asked</th><th>Outcome</th></tr>` + done.map(i => `<tr><td>${cityAgo(now - i.t)}</td><td style="color:${cityColor(i.bot)}">${memeEsc(i.name)}</td>
+          <td style="white-space:normal">${memeEsc(i.text)}</td><td style="white-space:normal;color:#b9bfe8">${i.status === "handled" ? "Ava: " + memeEsc(i.ava || "") : "you " + i.status}</td></tr>`).join("") + `</table>`;
+  }
   else if(id === "lab"){   // every bot's current rules and what its training has done
     const L2 = M.learning || {}, rows = team.filter(([, b]) => b.gene).sort((x, y) => (y[1].train ? y[1].train.gen : -1) - (x[1].train ? x[1].train.gen : -1));
     const total = rows.reduce((a, [, b]) => a + (b.train ? b.train.tested : 0), 0);
@@ -3189,6 +3226,24 @@ async function osLive(){
   if(Object.keys(out).length){ out._t = Date.now(); OS.live = out; if(CITY.world) CITY.world.setLive(out); for(const id of ["trades", "term"]) if(OS.wins[id] && !$("bossOS").hidden) osRender(id); }
 }
 $("pcBtn").addEventListener("click", osOpen);
+$("bossOS").addEventListener("click", e => { const b = e.target.closest("[data-decide]"); if(b) osDecide(b.dataset.decide, b.dataset.ok === "1"); });
+async function osDecide(id, ok){
+  let tok = null; try{ tok = localStorage.getItem(OWNER.key); }catch(e){}
+  if(!tok){ OS.note = "To answer, add your GitHub key once: it's the box under the On/Off switches on the City page (the same key the switches use)."; $("ownerBox").hidden = false; return osRender("inbox"); }
+  OS.note = "Saving…"; osRender("inbox");
+  try{
+    const url = `https://api.github.com/repos/${OWNER.repo}/contents/paper/decisions.json`, H = {Authorization:"Bearer " + tok, Accept:"application/vnd.github+json"};
+    const cur = await fetch(url + "?ref=main", {headers:H}); let sha, data = {decisions:{}};
+    if(cur.status === 401 || cur.status === 403) throw new Error("GitHub didn't accept the key");
+    if(cur.ok){ const j = await cur.json(); sha = j.sha; try{ data = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g, ""))))); }catch(_){} }
+    data.decisions = data.decisions || {}; data.decisions[id] = {ok, t:Date.now()};
+    for(const [k, v] of Object.entries(data.decisions)) if(Date.now() - v.t > 7 * 864e5) delete data.decisions[k];
+    const r = await fetch(url, {method:"PUT", headers:H, body:JSON.stringify({message:`Boss ${ok ? "approved" : "denied"} ${id}`, content:btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 1) + "\n"))), sha, branch:"main"})});
+    if(!r.ok) throw new Error("GitHub answered " + r.status);
+    OS.decided[id] = ok; OS.note = `Sent: ${ok ? "approved" : "denied"}. Ava tells them within 5 minutes.`;
+  }catch(e){ OS.note = "Couldn't save: " + (e.message || e); }
+  osRender("inbox");
+}
 // labels float above their buildings; overlapping ones stack; hidden while we're inside the HQ office
 function cityPlaceLabels(project, inOffice, info){
   const stage = $("cityStage"), W = stage.clientWidth, H = stage.clientHeight, placed = [], tags = [];
@@ -3226,6 +3281,9 @@ function cityPicked(e){
       : CITY_HELP;
     clearInterval(OS.liveTimer); if(e.office){ osLive(); OS.liveTimer = setInterval(osLive, 15000); } else osClose(); }
   else if(e.kind === "pc") osOpen();
+  else if(e.kind === "phone"){ osOpen(); osApp("inbox"); }
+  else if(e.kind === "workchat"){ osOpen(); osApp("workchat"); }
+  else if(e.kind === "ava"){ const H = (osM() || {}).hr || {}; $("cityDetail").innerHTML = `<b>Ava, front desk</b> · screens every message from the bots: she has answered ${H.ava ? H.ava.handled : 0} herself and passed ${H.ava ? H.ava.escalated : 0} to you. Tap your work phone (on the desk) or 🖥️ Use the PC → Inbox to answer them.`; }
   else if(e.kind === "lost"){ let o = $("cityLost"); if(!o){ o = document.createElement("div"); o.id = "cityLost"; o.className = "cityLost"; $("cityStage").appendChild(o); }
     o.innerHTML = `<b>The 3D view ran out of graphics memory</b><span>Your phone pulled the plug on it. Restart it in lighter mode: less glow, simpler furniture, everything else the same.</span><button type="button" id="cityLite">Restart lighter</button>`;
     $("cityLite").onclick = () => { try{ localStorage.setItem("turnspotter-lite", "1"); }catch(_){} location.reload(); }; }

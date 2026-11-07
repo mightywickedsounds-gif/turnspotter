@@ -4,6 +4,10 @@
 //   needs two GitHub Actions secrets: BLAND_API_KEY and MY_PHONE (+1 and ten digits). Without them it does nothing.
 //   ECHO_DRY=1 prints what it would say instead of calling.
 // Writes only paper/echo.json, which is public (GitHub Pages): it never stores the phone number or call transcripts.
+// Round 43: Echo takes requests. If the owner asks for something on a call, Echo repeats it back; Bland's after-call
+// summary lists those requests, Echo pushes them to the owner's phone (ntfy, NTFY_TOPIC) and only counts them in
+// echo.json. The full list stays in the owner's Bland call history, where Claude Code can read it in a later session.
+// Echo also briefs on the HR office (report cards, people caught cheating, requests waiting for the boss).
 import fs from "node:fs";
 
 const CFG = {
@@ -17,7 +21,8 @@ const CFG = {
   staleMin:60,                 // call (once a day) if the meme bots haven't reported for this long
   briefingMin:3, alertMin:2,   // call length caps (minutes): every minute costs about $0.14
 };
-const KEY = process.env.BLAND_API_KEY || "", PHONE = process.env.MY_PHONE || "", DRY = process.env.ECHO_DRY === "1";
+const KEY = process.env.BLAND_API_KEY || "", PHONE = process.env.MY_PHONE || "", DRY = process.env.ECHO_DRY === "1", NTFY = process.env.NTFY_TOPIC || "";
+const REQ_PROMPT = `List every task, request or instruction ${"Matt"} gave during this call for Claude Code, the bots or the business, one per line, each starting with "- ". If there were none, reply exactly NONE.`;
 const F = n => new URL(`./${n}.json`, import.meta.url);
 const read = n => { try{ return JSON.parse(fs.readFileSync(F(n), "utf8")); }catch(e){ return null; } };
 const now = Date.now();
@@ -61,6 +66,8 @@ if(M && M.bots){
     if(Math.abs(v) >= CFG.bigTradeUsd) urgent.push(`big trade: ${e.txt}`); }
   if(now - M.lastRun > CFG.staleMin * 6e4 && !day.stale){ urgent.push(`the meme bots haven't reported in for ${Math.round((now - M.lastRun) / 6e4)} minutes, so something may be stuck on GitHub`); day.stale = true; }
 }
+if(M && M.hr){ const H = M.hr, caught = (H.audits || []).filter(a => a.caught && now - a.t < 864e5), waiting = (H.inbox || []).filter(i => i.status === "pending");
+  notes.push(`HR office: ${caught.length ? `${caught.length} bots caught inflating their report cards today (${[...new Set(caught.map(a => a.name))].slice(0, 3).join(", ")})` : "nobody caught cheating on their report card today"}; ${waiting.length ? `${waiting.length} requests are waiting for the boss in Ava's inbox` : "no requests waiting for the boss"}.`); }
 if(Tr){ const h = Object.keys(Tr.holdings || {}); notes.push(`The trend bot is ${h.length ? `holding ${h.join(", ")}` : "in cash, waiting for coins to climb back above their 50-day average"}.`); }
 if(A && A.bots){ const best = Object.values(A.bots).sort((a, b) => b.balance - a.balance)[0]; notes.push(`In the Bot Arena, ${best.name} leads with $${best.balance.toFixed(2)}.`); }
 
@@ -73,7 +80,7 @@ Notes (the only facts you know; never invent numbers):
 ${notes.map(x => "- " + x).join("\n")}
 - All of this is paper money: no real money is at risk.
 
-If he asks a question, answer in one or two short spoken sentences from the notes. If the notes don't cover it, say you'll leave it for Claude Code on his computer. If he asks you to change something (the bots, the settings, call times), say you'll pass it to Claude Code, which can make the change.
+If he asks a question, answer in one or two short spoken sentences from the notes. If the notes don't cover it, say you'll leave it for Claude Code on his computer. If he asks you to change something or gives you a task (for the bots, the settings, call times, the business, anything for Claude Code), repeat the request back in one sentence so he can correct it, then confirm you've written it down and Claude Code will get it.
 After the update, ask if there's anything else. When he says no, or after about two minutes, say a short, cheeky goodbye in character and end the call.
 Speak naturally, no lists or reading out symbols, round money to the cent, no long dashes.`;
 const firstSentence = kind => kind === "briefing"
@@ -82,7 +89,7 @@ const firstSentence = kind => kind === "briefing"
 
 async function call(kind){
   const body = {phone_number:PHONE, task:brief(kind), first_sentence:firstSentence(kind), voice:CFG.voice,
-    max_duration:kind === "briefing" ? CFG.briefingMin : CFG.alertMin, wait_for_greeting:true, record:false,
+    max_duration:kind === "briefing" ? CFG.briefingMin : CFG.alertMin, wait_for_greeting:true, record:false, summary_prompt:REQ_PROMPT,
     voicemail:{action:"leave_message", message:kind === "briefing"
       ? `Good evening ${CFG.owner}, it's ${CFG.name}. Your Turn Spotter briefing: ${notes[0] || "the bots are running"} The rest is on the City page. Cheerio.`
       : `${CFG.owner}, it's ${CFG.name} with a quick heads-up: ${urgent.join("; ")}. Details are on the City page.`}};
@@ -99,7 +106,13 @@ const [bh, bm] = CFG.briefingAt.split(":").map(Number);
 try{
   // fill in how earlier calls went (answered? price?), never the transcript
   if(ready && !DRY) for(const c of S.calls.filter(c => c.id && !c.done).slice(-3)){
-    try{ const d = await bland(`calls/${c.id}`); if(d.completed) Object.assign(c, {done:true, answered:d.answered_by || "unknown", mins:+(+d.call_length || 0).toFixed(1), price:d.price}); }
+    try{ const d = await bland(`calls/${c.id}`); if(!d.completed) continue;
+      if(!d.summary && now - c.t < 15 * 6e4) continue;   // the after-call summary can take a minute: check again next run
+      Object.assign(c, {done:true, answered:d.answered_by || "unknown", mins:+(+d.call_length || 0).toFixed(1), price:d.price});
+      const reqs = String(d.summary || "").split("\n").map(l => l.trim()).filter(l => l.startsWith("- ")).map(l => l.slice(2).trim()).filter(Boolean);
+      c.requests = reqs.length;   // the count only: what was said stays private
+      if(reqs.length && NTFY) try{ await fetch(`https://ntfy.sh/${NTFY}`, {method:"POST", signal:AbortSignal.timeout(15000), headers:{Title:`📝 Echo noted ${reqs.length} request${reqs.length > 1 ? "s" : ""} for Claude Code`, Tags:"memo"},
+        body:reqs.map(r => "• " + r).join("\n") + "\n\nOpen a chat with Claude Code and say \"check Echo's requests\"."}); }catch(e){ console.log("Echo: ntfy failed:", e.message); } }
     catch(e){ console.log("Echo: status check failed:", e.message); } }
   if(!ready && !DRY) note = "not set up: add BLAND_API_KEY and MY_PHONE as GitHub Actions secrets";
   else if(quiet) note = "quiet hours";

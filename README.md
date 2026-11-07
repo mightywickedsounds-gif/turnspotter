@@ -858,6 +858,36 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   memory steady at ~15–20 MB over 80 seconds in the office; no page errors. We can't run a real iPhone here, so if the
   purple screen still shows up, tap "Restart lighter" and tell me.
 
+### Round 43: the HR office: report cards, cheating, paychecks, Ava, and Echo takes requests
+
+- **Echo takes requests.** Tell Echo on a call what you want done; he repeats it back. Bland's after-call summary
+  lists the requests, Echo pushes them to your phone (ntfy) and counts them in `paper/echo.json` (never the words);
+  the full list stays in your Bland call history, which Claude Code reads when you say "check Echo's requests".
+- **The bots run like a company** (new `paper/hr.mjs`, play money only, called by meme.mjs every ~5 minutes):
+  - every bot files a **report card** each run. Its true grade comes from today's results, win rate, activity, learning
+    and discipline. It decides what grade to report: it weighs the extra pay against what it believes the audit odds are
+    and the fine, shaped by its personality (honesty, ambition) and desperation (bad grades tempt more). It learns the
+    audit odds from its own audits and from colleagues getting caught;
+  - **HQ audits** about 1 in 10 reports (more for big jumps, probation or a tip-off). Caught: fined 3× what it tried to
+    gain + 30¢, a strike, 24 h probation; 3 strikes in 7 days = suspended from buying for 6 hours. Verified honest:
+    small bonus. Not audited: paid on what it claimed, so cheating can pay… until it doesn't;
+  - **paychecks** (HR dollars) = reported grade × 1¢ per report, × any raise; payday at midnight UTC;
+  - **learning from each other:** a few bots per run try mixing a top performer's rules into their own and keep the mix
+    only if it beats their own rules on both halves of their own trade history; they thank the mentor in the chat;
+  - **Ava, the front desk:** answers routine questions, throws out weak appeals, logs tip-offs about cheaters (raising
+    their audit odds), and passes raises, extra-capital requests and first-strike appeals to **your inbox**. You
+    approve or deny on the PC; it's saved to `paper/decisions.json` with your GitHub key and applied on the next run.
+  - In a one-day simulation: the ambitious, less honest bots inflated 11–24 reports, 6 were caught and learned to fear
+    audits; the honest ones never cheated; tips and appeals flowed through Ava.
+- **The penthouse:** Ava has a frosted-glass corner office (desk, monitor, headset; blonde, cream blouse, pencil
+  skirt; she types and lifts a hand to her headset when a message comes in), the **work-chat TV** hangs on her wall
+  facing your desk, and a **work phone** lies on your desk showing her escalations (it glows when something waits; tap
+  it to open the inbox). Max the robot moved to the east window.
+- **BossOS** got three apps: **Work Chat** (the bots, HR and Ava), **HR · Report Cards** (reported vs actual grade:
+  your x-ray, audits, pay, strikes, honesty and what each bot was thinking) and **Inbox (Ava)** with Approve / Deny.
+- Honest note: the bots' "competent human" judgement is expected-value reasoning plus personality, not a mind; and
+  the HR game never touches the trading rules except the 6-hour buying suspension.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
@@ -868,6 +898,7 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)
 - `research/experiments*.py`: tests of candidate upgrades; `research/train.py`: trains the Experience brain
 - `research/data/`: 2023–2026 candles for all five coins, plus the last 45 days of 1-minute candles (refreshed weekly)
+- `paper/hr.mjs`: the HR office (report cards, audits, paychecks, peer learning, Ava's inbox); `paper/decisions.json`: the boss's answers
 - `paper/echo.mjs`: Echo, the phone assistant (evening briefing and heads-up calls through Bland)
 - `paper/`: the paper bots and their files: `trader.mjs` (AI calls, paused), `trend.mjs` (50-day trends), `arena.mjs` (Bot Arena), `meme.mjs` (the 16-bot rug-checked meme team)
 - `research/btc_1h_2011_2017.csv`: the hourly BTC data used for testing

@@ -48,7 +48,7 @@ jobs:
           end=$((SECONDS + 20400)); saved=-900
           while true; do
             # pick up the owner's latest settings (on/off, risk, goal/brake: paper/settings.json, set from the City tab)
-            timeout 30 git fetch -q origin main && git checkout -q FETCH_HEAD -- paper/settings.json 2>/dev/null || true
+            timeout 30 git fetch -q origin main && { git checkout -q FETCH_HEAD -- paper/settings.json 2>/dev/null; git checkout -q FETCH_HEAD -- paper/decisions.json 2>/dev/null; true; }   # also the boss's answers to Ava's inbox
             out=$(timeout 200 node paper/meme.mjs 2>&1) || true; echo "$out"
             eout=$(timeout 90 node paper/echo.mjs 2>&1) || true; echo "$eout"   # Echo: evening briefing / heads-up calls
             if echo "$out" | grep -q TRADES_CHANGED || echo "$eout" | grep -q "call placed" || [ $((SECONDS - saved)) -ge 900 ] || [ $SECONDS -ge $end ]; then

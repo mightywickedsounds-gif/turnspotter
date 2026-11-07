@@ -132,7 +132,7 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R, mobile = f
   const key = new T.SpotLight(0xffeedd, 40, 9, 1.05, .6, 1.6); key.position.set(-.3, H - .08, -.2); key.target.position.set(-.4, 0, -.4);
   key.castShadow = !lite; key.shadow.mapSize.set(mobile ? 512 : 1024, mobile ? 512 : 1024); key.shadow.bias = -.0006; key.shadow.normalBias = .02; key.shadow.camera.near = .2; key.shadow.camera.far = 6; g.add(key, key.target);
   // ── the house robot: stands at the east window looking out over the city ──
-  const bot = new T.Group(); bot.position.set(2.1, 0, .2); bot.rotation.y = Math.PI / 2; g.add(bot);
+  const bot = new T.Group(); bot.position.set(2.05, 0, -.55); bot.rotation.y = Math.PI / 2; g.add(bot);   // by the east window, next to Ava's office
   const suit = std({color:0x1c1f2c, roughness:.5, metalness:.15}), chrome = std({color:0xd0d6e8, roughness:.15, metalness:1}), joint = std({color:0x2c2f3a, roughness:.35, metalness:.85});
   const part = (geo, mat, x, y, z, parent2 = bot) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; parent2.add(m); return m; };
   const hips = part(new T.CapsuleGeometry(.13, .14, 6, 12), suit, 0, .93, 0); hips.rotation.z = Math.PI / 2; hips.scale.z = .8;
@@ -155,6 +155,72 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R, mobile = f
   armL.sh.rotation.z = -.08; armL.el.rotation.x = -.15;
   const coffee = part(new T.CylinderGeometry(.035, .03, .1, 14), std({color:0xeae6de, roughness:.4}), 0, -.31, .05, armR.el);
 
+  // ── Ava's corner office (south-east): frosted glass, her desk, the work-chat TV on the outside of her wall ──
+  const frost = phys({color:0xf2f4ff, transparent:true, opacity:.32, roughness:.55, metalness:0, envMapIntensity:.05, depthWrite:false, side:T.DoubleSide});
+  const band = std({color:0x1b1b22, roughness:.4, metalness:.6});
+  const AX = 1.45, AZ = .35;   // west wall at x = AX (from z = AZ to the south glass), north wall at z = AZ (with a door gap)
+  add(new T.PlaneGeometry(hd - AZ, H), frost, AX, H / 2, (AZ + hd) / 2, Math.PI / 2);
+  add(new T.BoxGeometry(.04, .06, hd - AZ), band, AX, H - .03, (AZ + hd) / 2); add(new T.BoxGeometry(.04, .06, hd - AZ), band, AX, .03, (AZ + hd) / 2);
+  add(new T.PlaneGeometry(.75, H), frost, AX + .375, H / 2, AZ); add(new T.BoxGeometry(.75, .06, .04), band, AX + .375, H - .03, AZ); add(new T.BoxGeometry(.75, .06, .04), band, AX + .375, .03, AZ);
+  add(new T.BoxGeometry(.04, H, .04), band, AX, H / 2, AZ); add(new T.BoxGeometry(.04, H, .04), band, AX + .75, H / 2, AZ);   // door frame (the gap is the door)
+  const plate = canvasTex(512, 96, c => { c.fillStyle = "#101016"; c.fillRect(0, 0, 512, 96); c.fillStyle = "#e8d9a8"; c.font = "600 40px system-ui, sans-serif"; c.textBaseline = "middle"; c.fillText("AVA · FRONT DESK", 24, 50); });
+  add(new T.PlaneGeometry(.5, .095), new T.MeshBasicMaterial({map:plate}), AX - .025, 1.55, AZ + .35, -Math.PI / 2);
+  // the work-chat TV, mounted on the outside of her west wall, facing your desk
+  const tvTex = canvasTex(1280, 720, c => { c.fillStyle = "#05060c"; c.fillRect(0, 0, 1280, 720); }); tvTex.anisotropy = aniso;
+  const tvGrp = new T.Group(); tvGrp.position.set(AX - .05, 1.6, 1.05); tvGrp.rotation.y = -Math.PI / 2; g.add(tvGrp);
+  { const bz = new T.Mesh(new T.BoxGeometry(1.36, .79, .04), std({color:0x08080b, roughness:.3, metalness:.5})); bz.position.z = -.02; tvGrp.add(bz);
+    const sc = new T.Mesh(new T.PlaneGeometry(1.3, .73), new T.MeshBasicMaterial({map:tvTex, toneMapped:false})); sc.position.z = .001; tvGrp.add(sc); tvGrp.userData.screen = sc; }
+  // her desk, chair, monitor and plant
+  const avaDesk = std({color:0xe9e4da, roughness:.35});
+  add(new T.BoxGeometry(.6, .04, 1.1), avaDesk, 1.95, .74, 2.2).castShadow = true;
+  for(const z of [1.68, 2.7]) add(new T.BoxGeometry(.56, .72, .03), avaDesk, 1.95, .36, z);
+  { const m = new T.Group(); m.position.set(1.8, 1.0, 2.2); m.rotation.y = Math.PI / 2; g.add(m);
+    m.add(new T.Mesh(new T.BoxGeometry(.5, .3, .02), std({color:0x0b0b10, roughness:.3, metalness:.5})));
+    const s2 = new T.Mesh(new T.PlaneGeometry(.47, .27), new T.MeshBasicMaterial({color:0x2a3a7a})); s2.position.z = .011; m.add(s2);
+    const leg = new T.Mesh(new T.BoxGeometry(.03, .2, .03), steel); leg.position.y = -.24; m.add(leg); }
+  { const ch = new T.Group(); ch.position.set(2.42, 0, 2.2); g.add(ch);
+    const seat = new T.Mesh(new T.BoxGeometry(.46, .07, .44), std({color:0x3a2a30, roughness:.6})); seat.position.y = .47; ch.add(seat);
+    const back = new T.Mesh(new T.BoxGeometry(.06, .55, .42), std({color:0x3a2a30, roughness:.6})); back.position.set(.21, .8, 0); ch.add(back);
+    const st = new T.Mesh(new T.CylinderGeometry(.03, .03, .42, 10), steel); st.position.y = .22; ch.add(st); }
+  // Ava: blonde, cream sleeveless blouse, dark pencil skirt, headset; she types, and lifts a hand to the headset on a call
+  const ava = new T.Group(); ava.position.set(2.4, 0, 2.2); ava.rotation.y = -Math.PI / 2; g.add(ava);   // faces west, towards you
+  const skin = std({color:0xf1c9ab, roughness:.55}), blouse = std({color:0xf3ece0, roughness:.7}), skirt = std({color:0x1d1e2a, roughness:.6}), hair = std({color:0xe8c872, roughness:.45, metalness:.05});
+  const ap = (geo, mat, x, y, z, parent2 = ava) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; parent2.add(m); return m; };
+  { // seated legs: thighs forward, shins down, heels
+    for(const x of [-.08, .08]){ const th = ap(new T.CapsuleGeometry(.065, .32, 6, 12), skirt, x, .53, .17); th.rotation.x = Math.PI / 2;
+      const sh = ap(new T.CapsuleGeometry(.045, .36, 6, 12), skin, x, .28, .36); sh.rotation.x = .08;
+      ap(new T.BoxGeometry(.07, .05, .17), std({color:0x7a1f2a, roughness:.3}), x, .03, .42); }
+    ap(new T.CapsuleGeometry(.14, .08, 6, 14), skirt, 0, .56, 0).rotation.z = Math.PI / 2;
+    // torso: a tapered blouse (narrow waist, shoulders)
+    const prof = [[0, 0], [.12, 0], [.115, .08], [.105, .16], [.125, .26], [.15, .34], [.16, .4], [.1, .44], [.05, .46], [0, .46]].map(([r, y]) => new T.Vector2(r, y));
+    const torso2 = ap(new T.LatheGeometry(prof, 28), blouse, 0, .6, 0); torso2.scale.z = .72;
+    ap(new T.CylinderGeometry(.04, .045, .08, 14), skin, 0, 1.09, 0);
+    const avaHead = new T.Group(); avaHead.position.y = 1.22; ava.add(avaHead); ava.userData.head = avaHead;
+    ap(new T.SphereGeometry(.095, 28, 20), skin, 0, 0, 0, avaHead).scale.set(.92, 1.08, .98);
+    for(const x of [-.033, .033]) ap(new T.SphereGeometry(.011, 10, 8), std({color:0x2a3a5a, roughness:.2}), x, .018, .085, avaHead);
+    ap(new T.BoxGeometry(.032, .008, .006), std({color:0xb5555f, roughness:.4}), 0, -.045, .09, avaHead);
+    // blonde hair: crown, side-swept fringe, shoulder-length back
+    ap(new T.SphereGeometry(.102, 28, 20, 0, Math.PI * 2, 0, Math.PI * .55), hair, 0, .012, -.004, avaHead).scale.set(.96, 1.1, 1.04);
+    const back2 = ap(new T.CapsuleGeometry(.085, .17, 6, 14), hair, 0, -.1, -.05, avaHead); back2.scale.set(1.15, 1, .6);
+    for(const x of [-.085, .085]) ap(new T.CapsuleGeometry(.03, .14, 6, 10), hair, x, -.07, .01, avaHead);
+    // headset
+    const hs = std({color:0x15151a, roughness:.3, metalness:.6});
+    ap(new T.TorusGeometry(.105, .006, 6, 24, Math.PI), hs, 0, .01, 0, avaHead).rotation.y = Math.PI / 2;
+    ap(new T.CylinderGeometry(.022, .022, .015, 14), hs, -.1, -.005, 0, avaHead).rotation.z = Math.PI / 2;
+    const mic = ap(new T.CapsuleGeometry(.004, .07, 4, 6), hs, -.085, -.05, .055, avaHead); mic.rotation.x = 1.2;
+    // arms (bare, sleeveless blouse): shoulder → elbow → forearm to the keyboard
+    const arm2 = side => { const sh = new T.Group(); sh.position.set(side * .165, 1.0, 0); ava.add(sh); ap(new T.SphereGeometry(.045, 12, 10), blouse, 0, 0, 0, sh);
+      ap(new T.CapsuleGeometry(.036, .2, 6, 10), skin, 0, -.13, 0, sh); const el = new T.Group(); el.position.y = -.26; sh.add(el);
+      ap(new T.CapsuleGeometry(.032, .2, 6, 10), skin, 0, -.12, 0, el); ap(new T.SphereGeometry(.03, 10, 8), skin, 0, -.25, 0, el); return {sh, el}; };
+    ava.userData.armL = arm2(-1); ava.userData.armR = arm2(1);
+    for(const a of [ava.userData.armL, ava.userData.armR]){ a.sh.rotation.x = -.35; a.el.rotation.x = -1.15; } }
+  // ── your work phone, lying on the desk: Ava's escalations show up on it ──
+  const phoneTex = canvasTex(360, 720, c => { c.fillStyle = "#05060c"; c.fillRect(0, 0, 360, 720); }); phoneTex.anisotropy = aniso;
+  const phone = new T.Group(); phone.position.set(.78, .772, DZ - .28); phone.rotation.y = -.25; g.add(phone);
+  { const body = new T.Mesh(new T.BoxGeometry(.078, .009, .16), std({color:0x1a1a20, roughness:.25, metalness:.7})); phone.add(body);
+    const scr = new T.Mesh(new T.PlaneGeometry(.072, .152), new T.MeshBasicMaterial({map:phoneTex, toneMapped:false})); scr.rotation.x = -Math.PI / 2; scr.rotation.z = Math.PI; scr.position.y = .0051; phone.add(scr); phone.userData.screen = scr; }
+  const phoneGlow = glow(0x45d4ff, .35, 0); phoneGlow.position.set(.78, .8, DZ - .28); g.add(phoneGlow);
+
   // ── the monitors' content ──
   const money = v => (v >= 0 ? "+$" : "−$") + Math.abs(v).toFixed(2);
   const ago = ms => { const m = Math.max(0, Math.round(ms / 6e4)); return m < 60 ? `${m}m` : m < 1440 ? `${Math.floor(m / 60)}h${String(m % 60).padStart(2, "0")}` : `${Math.floor(m / 1440)}d`; };
@@ -164,6 +230,37 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R, mobile = f
     for(let x = 0; x < 1600; x += 18 + rnd() * 40){ const h = 140 + rnd() * 420, w = 20 + rnd() * 60; c.fillStyle = "#0b0620"; c.fillRect(x, 960 - h, w, h);
       for(let y = 960 - h + 8; y < 960; y += 14) for(let xx = x + 4; xx < x + w - 4; xx += 10) if(rnd() < .35){ c.fillStyle = rnd() < .5 ? "#ffb35c" : "#7fd8ff"; c.fillRect(xx, y, 4, 6); } } }
   const rr = (c, x, y, w, h, r) => { c.beginPath(); c.roundRect(x, y, w, h, r); };
+  const BOTCOL = {hr:"#ff6b8a", ava:"#ffd88a"}, colOf = (id, M) => BOTCOL[id] || ((M.bots[id] && M.bots[id].css) || "#9db4ff");
+  const nameIn = (M, id) => id === "ava" ? "Ava (front desk)" : id === "hr" ? "HR" : (M.bots[id] || {}).name || id;
+  const wrap = (c, text, maxW) => { const words = String(text).split(" "), lines = []; let cur = ""; for(const w of words){ const t2 = cur ? cur + " " + w : w; if(c.measureText(t2).width > maxW && cur){ lines.push(cur); cur = w; } else cur = t2; } if(cur) lines.push(cur); return lines; };
+  function drawTV(M){
+    const c = tvTex.userData.c.getContext("2d"), W2 = 1280, H2 = 720; c.fillStyle = "#07080f"; c.fillRect(0, 0, W2, H2);
+    c.fillStyle = "#4a154b"; c.fillRect(0, 0, W2, 64); c.fillStyle = "#fff"; c.font = "700 30px system-ui"; c.textBaseline = "middle"; c.fillText("# work-chat · Bot City HQ", 24, 33);
+    const H3 = M && M.hr; c.font = "500 22px system-ui"; c.fillStyle = "#e0c8ff";
+    if(H3 && H3.lastRound) c.fillText(`${H3.lastRound.n} report cards this round · ${H3.lastRound.audited} audited · ${H3.lastRound.caught} caught`, W2 - 560, 33);
+    const msgs = H3 ? H3.chat.slice(0, 14) : []; let y = 92;
+    if(!msgs.length){ c.fillStyle = "#8b95bd"; c.font = "28px system-ui"; c.fillText("Quiet in here… the bots' first report cards are on their way.", 30, 120); }
+    for(const m of msgs){ if(y > H2 - 30) break;
+      c.font = "700 24px system-ui"; c.fillStyle = colOf(m.from, M); const who = nameIn(M, m.from) + (m.to ? " → " + nameIn(M, m.to) : ""); c.fillText(who, 30, y);
+      c.font = "400 20px system-ui"; c.fillStyle = "#6f78a8"; c.fillText(new Date(m.t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}), 40 + c.measureText(who).width + 140, y);
+      c.font = "400 23px system-ui"; c.fillStyle = m.kind === "hr" ? "#ffb3c2" : "#e8ebff";
+      for(const line of wrap(c, m.text, W2 - 70).slice(0, 2)){ y += 30; c.fillText(line, 30, y); } y += 40; }
+    tvTex.needsUpdate = true; }
+  const phoneState = {pending:0, ringing:false, lastId:""};
+  function drawPhone(M, tick){
+    const c = phoneTex.userData.c.getContext("2d"), W2 = 360, H2 = 720, inbox = (M && M.hr && M.hr.inbox) || [], pend = inbox.filter(i => i.status === "pending");
+    phoneState.pending = pend.length; const newest = inbox.at(-1); phoneState.ringing = !!(newest && Date.now() - newest.t < 9e4);
+    const gr = c.createLinearGradient(0, 0, 0, H2); gr.addColorStop(0, "#1a1240"); gr.addColorStop(1, "#05060c"); c.fillStyle = gr; c.fillRect(0, 0, W2, H2);
+    c.fillStyle = "#fff"; c.textAlign = "center"; c.font = "200 84px system-ui"; c.textBaseline = "middle"; c.fillText(new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"}).replace(/\s?[AP]M/i, ""), W2 / 2, 110);
+    c.font = "500 22px system-ui"; c.fillText("WORK PHONE", W2 / 2, 170); c.textAlign = "left";
+    const cards = [...pend.slice(-3).reverse().map(i => ({title:`Ava · needs you`, body:`${i.name}: ${i.type === "raise" ? "asks for a raise" : i.type === "capital" ? "asks for $20 more capital" : "appeals an audit"}`, hot:true})),
+      ...inbox.filter(i => i.status === "handled").slice(-2).reverse().map(i => ({title:"Ava · handled", body:`${i.name}: ${i.ava || i.text}`, hot:false}))];
+    let y = 215; for(const cd of cards.slice(0, 5)){ c.fillStyle = cd.hot ? "rgba(69,212,255,.22)" : "rgba(255,255,255,.1)"; rr(c, 16, y, W2 - 32, 92, 18); c.fill();
+      c.fillStyle = cd.hot ? "#7fe6ff" : "#c8cbe8"; c.font = "600 18px system-ui"; c.fillText(cd.title, 32, y + 24); c.fillStyle = "#fff"; c.font = "400 18px system-ui";
+      wrap(c, cd.body, W2 - 64).slice(0, 2).forEach((l, k) => c.fillText(l, 32, y + 52 + k * 22)); y += 104; }
+    if(!cards.length){ c.fillStyle = "#8b95bd"; c.font = "20px system-ui"; c.textAlign = "center"; c.fillText("No messages. Ava's got it.", W2 / 2, 260); c.textAlign = "left"; }
+    if(pend.length){ c.fillStyle = "#ff3d6e"; c.beginPath(); c.arc(W2 - 40, 40, 22, 0, 7); c.fill(); c.fillStyle = "#fff"; c.font = "700 22px system-ui"; c.textAlign = "center"; c.fillText(pend.length, W2 - 40, 41); c.textAlign = "left"; }
+    phoneTex.needsUpdate = true; }
   const posValue = (p, live) => { const px = live && live[p.mint]; return px ? p.qty * px * .99 : p.last ? p.last.value : p.stake; };
   function drawMain(M, live, tick){
     const c = main.tex.userData.c.getContext("2d"), W2 = 1600, H2 = 960; c.drawImage(wall, 0, 0);
@@ -265,10 +362,14 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R, mobile = f
   return {
     loadAssets,
     group:g, OY, eye:new T.Vector3(0, OY + 1.22, .2), panes,
-    pickPC:[main.scr], pickBot:[torso],
+    pickPC:[main.scr], pickBot:[torso], pickPhone:[phone.children[0], phone.userData.screen], pickTV:[tvGrp.userData.screen], pickAva:ava.children.filter(m => m.isMesh),
     setSeated(on){ chair.children.forEach((c, i) => { c.visible = !on || i < 2; }); },   // you're in it: only the arm-rests show
-    drawMonitors(M, live, tick){ drawMain(M, live, tick); if(tick % 4 === 0) drawLeft(M); drawRight(M, tick); },
+    drawMonitors(M, live, tick){ drawMain(M, live, tick); if(tick % 4 === 0) drawLeft(M); drawRight(M, tick); drawTV(M, tick); if(tick % 2 === 0) drawPhone(M, tick); },
     animate(t){
+      { const A = ava.userData, onCall = phoneState.ringing; A.head.rotation.y = onCall ? .35 : Math.sin(t * .3) * .25; A.head.rotation.x = -.12 + Math.sin(t * .7) * .03;
+        A.armR.sh.rotation.x = -.35 - Math.max(0, Math.sin(t * 9)) * .04; A.armL.sh.rotation.x = -.35 - Math.max(0, Math.sin(t * 9 + 1.7)) * .04;   // typing
+        if(onCall){ A.armL.sh.rotation.x = -2.35; A.armL.el.rotation.x = -2.1; A.armL.sh.rotation.z = .25; } else { A.armL.el.rotation.x = -1.15; A.armL.sh.rotation.z = 0; } }
+      phoneGlow.material.opacity = phoneState.pending ? .35 + .3 * Math.max(0, Math.sin(t * 4)) : 0;
       holo.rotation.y = t * .5; holoBeam.material.opacity = .1 + .05 * Math.sin(t * 3);
       rgb.material.color.setHSL((t * .08) % 1, 1, .55); kbGlow.material.color.setHSL((t * .08 + .5) % 1, 1, .55);
       head.rotation.y = Math.sin(t * .23) * .9; head.rotation.x = Math.sin(t * .5) * .06;   // looks around, now and then back at you

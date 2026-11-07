@@ -545,8 +545,11 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
     const sx = e.clientX - r.left, sy = e.clientY - r.top, near = (x, y, z) => { tmp.set(x, y, z).project(cam);
       return tmp.z > 1 ? 1e9 : Math.hypot((tmp.x * .5 + .5) * r.width - sx, (-tmp.y * .5 + .5) * r.height - sy); };
     let best = null, bd = 26;
-    if(mode === "office"){ ray.setFromCamera(v2, cam); const hit = ray.intersectObjects([...hq.pickPC, ...hq.pickBot], false)[0];
-      if(hit) onPick(hq.pickPC.includes(hit.object) ? {kind:"pc"} : {kind:"hqbot", text:"<b>Max, the house robot</b> · keeps an eye on the city for you (and drinks far too much coffee)"});
+    if(mode === "office"){ ray.setFromCamera(v2, cam); const hit = ray.intersectObjects([...hq.pickPC, ...hq.pickBot, ...hq.pickPhone, ...hq.pickTV, ...hq.pickAva], false)[0]; if(!hit) return;
+      const o = hit.object;
+      if(hq.pickPC.includes(o)) onPick({kind:"pc"}); else if(hq.pickPhone.includes(o)) onPick({kind:"phone"}); else if(hq.pickTV.includes(o)) onPick({kind:"workchat"});
+      else if(hq.pickAva.includes(o)) onPick({kind:"ava"});
+      else onPick({kind:"hqbot", text:"<b>Max, the house robot</b> · keeps an eye on the city for you (and drinks far too much coffee)"});
       return; }
     people.forEach((p, i) => { if(!p.vis) return; const d = near(p.px, .45, p.pz); if(d < bd){ bd = d; best = {kind:"person", text:personText(p), ref:{kind:"person", i}}; } });
     cars.forEach((c, i) => { const d = near(c.px, .3, c.pz); if(d < bd){ bd = d; best = {kind:"car", text:carText(c), ref:{kind:"car", i}}; } });

@@ -20,6 +20,7 @@
 // log in b.train; the bulky lesson data lives in paper/meme-brain.json so the website's file stays small.
 // Writes only paper/meme.json and paper/meme-brain.json. Phone alerts (ntfy.sh, NTFY_TOPIC) only for big events.
 import fs from "node:fs";
+import {runHR} from "./hr.mjs";
 
 const STRATS = [
   {id:"hunter",  name:"Rug Hunter",     desc:"the original: rising coins, not vertical",    h1:[3, 50],   h6:[0, 300],  tp:.40, sl:-.20, holdH:24},
@@ -46,6 +47,7 @@ const CFG = {start:50, minStake:2, maxOpen:4, feePct:1, cooldownH:24, reportsPer
   maxPump:{h1:60, h6:400}, keepEquity:400, keepClosed:60, bigTradeUsd:5,
   learn:{trials:80, minLessons:6, minGain:.01, keepLessons:40, pathPoints:48, exploreAfterH:12}};
 const BRAIN = new URL("./meme-brain.json", import.meta.url);
+const DECISIONS = (() => { try{ return JSON.parse(fs.readFileSync(new URL("./decisions.json", import.meta.url), "utf8")).decisions || {}; }catch(e){ return {}; } })();   // the boss's answers to Ava's inbox
 const FILE = new URL("./meme.json", import.meta.url);
 const SET = Object.assign({on:true, mode:"paper", risk:"normal", dailyGoalPct:10, dailyLossPct:10},
   (() => { try{ return JSON.parse(fs.readFileSync(new URL("./settings.json", import.meta.url), "utf8")); }catch(e){ return {}; } })());
@@ -208,7 +210,7 @@ for(const s of STRATS){
         `off duty until midnight UTC · paper money`, b.day.status === "locked" ? "lock" : "octagonal_sign"); }
   }
   // entries
-  const can = SET.on && b.day.status === "on" && inRange(hourUTC, s.hours ? [s.hours[0], s.hours[1] - 1] : null);
+  const can = SET.on && b.day.status === "on" && inRange(hourUTC, s.hours ? [s.hours[0], s.hours[1] - 1] : null) && !(b.hr && b.hr.suspendedUntil > now);   // HR suspension: no new buys
   const cooled = m => !b.closed.some(c => c.mint === m && now - c.closedAt < CFG.cooldownH * 36e5);
   let picks = clean.filter(c => !b.positions.some(p => p.mint === c.mint) && cooled(c.mint)
     && c.chg.h1 <= CFG.maxPump.h1 && c.chg.h6 <= CFG.maxPump.h6
@@ -237,7 +239,8 @@ for(const s of STRATS){
   // what this bot is doing right now (the Crew panel shows it, with how long it's been at it)
   const mine = tape.filter(e => e.bot === s.id), lastMine = mine[mine.length - 1];
   const held = b.positions.map(p => `${p.sym}${p.last ? ` ${p.last.ret >= 0 ? "+" : ""}${(p.last.ret * 100).toFixed(0)}%` : ""}`);
-  const [key, txt, busy] = b.shift === "off" ? ["off", "switched off by the owner", false]
+  const [key, txt, busy] = b.hr && b.hr.suspendedUntil > now ? ["suspended", "suspended by HR after 3 strikes: no new buys", false]
+    : b.shift === "off" ? ["off", "switched off by the owner", false]
     : b.shift === "locked" ? ["locked", `profit locked (${money(b.day.result || 0)}), off duty`, false]
     : b.shift === "brake" ? ["brake", "hit the loss brake, off duty", false]
     : b.shift === "asleep" ? ["asleep", `asleep till ${String(s.hours[0]).padStart(2, "0")}:00 UTC`, false]
@@ -304,6 +307,8 @@ for(const s of STRATS){ const b = L.bots[s.id]; if(s.fixed || s.random) continue
 }
 for(const [id, B] of Object.entries(brain.bots)){ const b = L.bots[id]; if(!b){ delete brain.bots[id]; continue; }
   const keys = new Set(b.positions.map(pkey)); for(const k of Object.keys(B.paths)) if(!keys.has(k)) delete B.paths[k]; }
+// ── the HR office: report cards, audits, paychecks, learning from colleagues, Ava's inbox (paper/hr.mjs) ──
+const hrStats = runHR(L, {now, today, STRATS, say, brainOf, score, minLessons:CFG.learn.minLessons, minGain:CFG.learn.minGain, describe, decisions:DECISIONS});
 // the Rug Desk: announces coins it rejected or cleared this run (only freshly checked ones, so it doesn't repeat itself)
 const freshDesk = L.scan.filter(c => c.checked && L.reports[c.mint] && L.reports[c.mint].t === now && !allPos().some(p => p.mint === c.mint));
 for(const c of freshDesk.filter(c => !c.passed).slice(0, 3))
@@ -315,7 +320,7 @@ for(const c of freshDesk.filter(c => c.passed && c.warnings).slice(0, 1))
 const buys = tape.filter(e => e.kind === "buy").length;
 L.funnel = {found:mints.length, priced:scored.length, checked:L.rugStats.checked, fresh:fetched, passed:clean.length, bought:buys,
   sold:tape.filter(e => ["sell", "rug"].includes(e.kind)).length, t:now};
-L.tape = [...tape.reverse(), ...(L.tape || []).map(e => e.say ? e : {...e, say:e.txt})].slice(0, 80);
+L.tape = [...tape.reverse(), ...(L.tape || []).map(e => e.say ? e : {...e, say:e.txt})].slice(0, 120);
 L.settings = SET; L.rules = MEME_RULES; L.config = CFG; L.lastRun = now;
 L.learning = {setupsThisRun:trainedSetups, adopted, t:now};
 fs.writeFileSync(FILE, JSON.stringify(L));
@@ -323,4 +328,4 @@ fs.writeFileSync(BRAIN, JSON.stringify(brain));
 if(Object.values(L.bots).map(b => b.positions.length + ":" + b.closed.length).join() !== before) console.log("TRADES_CHANGED");
 const tot = Object.values(L.bots).reduce((a, b) => a + b.value, 0);
 console.log(`meme team: ${STRATS.length} bots, $${tot.toFixed(2)} total | ${allPos().length} positions | scanned ${scored.length}, `
-  + `${fetched} new rug reports, ${clean.length} pass every check | ${tape.length} messages this run | trained ${trainedSetups} setups, ${adopted} bots changed their rules`);
+  + `${fetched} new rug reports, ${clean.length} pass every check | ${tape.length} messages this run | trained ${trainedSetups} setups, ${adopted} bots changed their rules | HR: ${hrStats.reports} reports, ${hrStats.cheats} inflated, ${hrStats.audited} audited, ${hrStats.caught} caught`);
