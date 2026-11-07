@@ -9,6 +9,10 @@ import fs from "node:fs";
 const CFG = {start: 50, coins: ["BTC", "ETH", "SOL", "XRP", "DOGE"], avgDays: 50, feePct: 0.1};
 const FILE = new URL("./trend.json", import.meta.url);
 const DAY = 86400000;
+const NTFY = process.env.NTFY_TOPIC || "";   // phone alerts via ntfy.sh (README round 34)
+const alerts = [];
+async function sendAlerts(){ if(!NTFY) return;
+  for(const [title, msg] of alerts){ try{ await fetch(`https://ntfy.sh/${NTFY}`, {method:"POST", body:msg, headers:{Title:title, Tags:"chart_with_upwards_trend"}, signal:AbortSignal.timeout(15000)}); }catch(e){ console.log("alert failed:", e.message); } } }
 
 async function getJSON(url){ const r = await fetch(url, {signal:AbortSignal.timeout(20000)});   // never hang on a stuck request
   if(!r.ok) throw new Error(`HTTP ${r.status} ${url}`); return r.json(); }
@@ -46,6 +50,7 @@ if(L.lastDay !== today && Object.keys(info).length === CFG.coins.length){
     L.cash += gross - fee; delete L.holdings[coin];
     L.trades.push({t:now, coin, side:"sell", price:px, qty:h.qty, fee:+fee.toFixed(4), pnl:+(gross - fee - h.cost).toFixed(4)});
     console.log("sold", coin, px);
+    alerts.push([`Trend bot sold ${coin}`, `It fell below its 50-day average · paper trade ${gross - fee - h.cost >= 0 ? "+" : "-"}$${Math.abs(gross - fee - h.cost).toFixed(2)}`]);
   }
   const slot = value() / CFG.coins.length;
   for(const coin of CFG.coins){
@@ -55,11 +60,13 @@ if(L.lastDay !== today && Object.keys(info).length === CFG.coins.length){
     L.cash -= spend; L.holdings[coin] = {qty, entry:px, cost:spend, at:now};
     L.trades.push({t:now, coin, side:"buy", price:px, qty, fee:+fee.toFixed(4)});
     console.log("bought", coin, px);
+    alerts.push([`Trend bot bought ${coin}`, `It closed above its 50-day average · paper trade $${spend.toFixed(2)} at $${px}`]);
   }
   L.lastDay = today;
 }
 if(Object.keys(info).length){ L.equity.push({t:now, value:+value().toFixed(2)}); if(L.equity.length > 3000) L.equity.splice(0, L.equity.length - 3000); }
 L.cash = +L.cash.toFixed(4); L.lastRun = now;
+await sendAlerts();
 fs.writeFileSync(FILE, JSON.stringify(L, null, 1));
 if(JSON.stringify(L.holdings) !== before) console.log("TRADES_CHANGED");
 console.log(`trend bot: $${value().toFixed(2)} (cash $${L.cash.toFixed(2)}, holding ${Object.keys(L.holdings).join(", ") || "nothing"})`);
