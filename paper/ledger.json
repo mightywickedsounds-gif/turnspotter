@@ -7759,18 +7759,6 @@
  ],
  "equity": [
   {
-   "t": 1793113907178,
-   "value": 57.3
-  },
-  {
-   "t": 1793114212009,
-   "value": 57.3
-  },
-  {
-   "t": 1793114516810,
-   "value": 57.3
-  },
-  {
    "t": 1793114823084,
    "value": 57.3
   },
@@ -19757,6 +19745,18 @@
   {
    "t": 1794040629486,
    "value": 7.95
+  },
+  {
+   "t": 1794040937323,
+   "value": 7.95
+  },
+  {
+   "t": 1794041243426,
+   "value": 7.95
+  },
+  {
+   "t": 1794041549610,
+   "value": 7.95
   }
  ],
  "config": {
@@ -19784,13 +19784,13 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 76132.23,
-   "experience": 0.436,
-   "liveLearner": 0.416,
+   "price": 76136.28,
+   "experience": 0.44,
+   "liveLearner": 0.468,
    "record": 0.52,
    "call": "DOWN",
    "last400": {
-    "call": 0.242,
+    "call": 0.245,
     "bounceOrRollover": 0.015
    },
    "backtest": {
@@ -19801,9 +19801,9 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2248.02,
-   "experience": 0.458,
-   "liveLearner": 0.384,
+   "price": 2249.33,
+   "experience": 0.461,
+   "liveLearner": 0.331,
    "record": 0.53,
    "call": "WAIT",
    "last400": {
@@ -19818,9 +19818,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 90.18,
-   "experience": 0.506,
-   "liveLearner": 0.502,
+   "price": 90.3,
+   "experience": 0.466,
+   "liveLearner": 0.426,
    "record": 0.57,
    "call": "WAIT",
    "last400": {
@@ -19835,9 +19835,9 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.1778,
-   "experience": 0.474,
-   "liveLearner": 0.432,
+   "price": 1.1801,
+   "experience": 0.451,
+   "liveLearner": 0.443,
    "record": 0.51,
    "call": "WAIT",
    "last400": {
@@ -19846,15 +19846,15 @@
    },
    "backtest": {
     "calls": 161,
-    "right": 0.516
+    "right": 0.528
    }
   },
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07205,
-   "experience": 0.519,
-   "liveLearner": 0.593,
+   "price": 0.07214,
+   "experience": 0.479,
+   "liveLearner": 0.396,
    "record": 0.66,
    "call": "WAIT",
    "last400": {
@@ -19867,6 +19867,6 @@
    }
   }
  },
- "lastRun": 1794040629486,
+ "lastRun": 1794041549610,
  "paused": true
 }
