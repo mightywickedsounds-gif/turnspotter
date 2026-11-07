@@ -617,6 +617,46 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   on the big moves. Every number is still under about 0.01% of the price, smaller than Trench's likely spread.
 - Nothing changed on the site.
 
+### Round 34: AI-calls bot paused, scoreboard, meme coins with rug checks, phone alerts, lighter site
+
+- **AI-calls bot paused.** Live it went from $50 to $7.95 in 408 trades; every UP call lost money on every coin while
+  the market fell. `research/experiments14.mjs` replays its exact rules with real costs on the 30 most recent days
+  the model never trained on ($50 start):
+
+  | Rules | End balance | Trades | Won |
+  |---|---|---|---|
+  | as it ran | $0.94 | 711 | 45% |
+  | only calls that agree with the 50-day trend | $12.28 | 532 | 46% |
+  | only calls that agree with the 20-day trend | $22.16 | 490 | 49% |
+  | 50-day trend + ×10 cap | $27.02 | 532 | 36% |
+  | DOWN calls only (hindsight, the month fell) | $37.84 | 477 | 49% |
+
+  A trend filter cuts the losses a lot, but no version made money, even with hindsight: the short-term edge is smaller
+  than fees and spread, as `research/experiments7.py` found. `paper/trader.mjs` now has `paused: true`: open trades still settle, no new ones.
+- **Scoreboard** at the top of the Bots tab (renamed from Arena): every bot's $50 next to what $50 of Bitcoin bought on
+  its start day is worth now (Coinbase daily closes). Today only the trend bot, sitting in cash, beats holding.
+- **Meme tab.** A rug-pull checklist lives in `index.html` between `/*MEME-START*/` and `/*MEME-END*/`; the site and the
+  bot both use it. It reads RugCheck's report and DexScreener's pool data. Critical checks (all must pass): pool of at
+  least $30K, people are able to sell, mint and freeze authority revoked, 90%+ of the main pool locked or burned, top 10
+  wallets (pools and lockers excluded) at most 30%, no wallet over 10%, creator at most 5%, linked insider wallets at
+  most 10%, no RugCheck danger flags. Warnings: under 2 hours old, under $50K traded in 24 h.
+  - Paste-a-coin checker: paste a Solana coin address or DexScreener link and get the checklist live in plain English.
+  - `paper/meme.mjs` (own job, `.github/workflows/meme.yml`, writes only `paper/meme.json`): $50 paper money, scans
+    trending Solana coins every ~5 minutes, buys 10% stakes in coins that pass every check with no warnings and are
+    rising (1 h > +3%, 6 h > 0, more buys than sells) but not vertical (1 h ≤ +50%, 6 h ≤ +300%). 1% swap fee each
+    way plus constant-product pool slippage. Exits: +40%, −20%, 24 h, or a rug sign (pool drained 60%+, checks now
+    failing, coin gone). Prices are seen every ~5 minutes, so exits fill at the price seen then, not the stop level.
+  - Not backtested: there's no free history of meme-coin pools and rug reports to replay, so it's a forward test only.
+    Passing the checklist rules out the obvious rugs; it doesn't make a coin safe.
+- **Phone alerts** through ntfy.sh (topic `turnspotter-1808cf83ce14`, set in `meme.yml` and `paper-trade.yml`): the meme
+  bot's buys and sells and the trend bot's buys and sells. Anyone who knows the topic name can read it; it's paper money.
+- **Lighter site.** Measured idle work per second in Chrome: the animated background was ~73% of it. It now draws at
+  15 fps (same speed of movement) and pauses on the Scalper tab; the hidden market section's price readout stops
+  redrawing; the 500-level order book is only downloaded when its panel shows or the Scalper runs in "ai" mode (it was
+  every 5 s). Idle work: Live 44 → 36 ms/s, Meme 35 → 27, Bots 39 → 28, Scalper 42 → 23. The hidden old sections stay
+  in the file: they no longer cost CPU or data, and the Live tab still uses pieces of them (the coin picker, the trade
+  stream), so removing them is a refactor of its own.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
@@ -624,5 +664,5 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)
 - `research/experiments*.py`: tests of candidate upgrades; `research/train.py`: trains the Experience brain
 - `research/data/`: 2023–2026 candles for all five coins, plus the last 45 days of 1-minute candles (refreshed weekly)
-- `paper/`: the two paper bots (`trader.mjs` follows the AI calls, `trend.mjs` follows 50-day trends) and their ledgers
+- `paper/`: the paper bots and their files: `trader.mjs` (AI calls, paused), `trend.mjs` (50-day trends), `arena.mjs` (Bot Arena), `meme.mjs` (rug-checked meme coins)
 - `research/btc_1h_2011_2017.csv`: the hourly BTC data used for testing

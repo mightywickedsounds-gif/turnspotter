@@ -1417,6 +1417,7 @@ function animate(ts){
   if(reduceMotion) S.disp = S.target;
   else S.disp += (S.target - S.disp) * 0.08;
   if(Math.abs(S.target - S.disp) < Math.abs(S.target) * 1e-7) S.disp = S.target;
+  if(document.body.dataset.on !== "market") return;   // the price readout and chart live in the (hidden) market section
   $("pNow").textContent = fmtP(S.disp);
   drawChart(S.candles, S.A, S.viewBars, S.disp, reduceMotion ? 0 : ts);
 }
@@ -2050,6 +2051,8 @@ $("range").addEventListener("click", e => { const b = e.target.closest("button")
 const BOOK = {bids:[], asks:[], mid:0, range:0.01, shown:null, hover:null, at:0};
 async function fetchBook(){
   if(!S.src || document.hidden) return;
+  // the 500-level order book only feeds its own (hidden) panel and the Scalper's "ai" mode: don't download it otherwise
+  if(document.body.dataset.on !== "market" && !(BOT.running && BOT.cfg && BOT.cfg.dir === "ai")) return;
   const coin = S.coin;
   try{
     let bids, asks;
@@ -2206,7 +2209,9 @@ function tradeMood(){
   if(reduceMotion){ for(const l of lanes){ for(let i = 0; i < 40; i++){ spawn(l); l.candles.forEach(c => c.x -= l.w + l.gap); } } frame(0, 0); }
   else (function loop(ts){
     requestAnimationFrame(loop);
-    if(document.hidden || ts - last < 33) return;
+    // 15 fps is plenty for slow-drifting background candles (half the battery of 30 fps, README round 34);
+    // paused on the Scalper tab, where the 3D table is the animation
+    if(document.hidden || document.body.dataset.on === "bot" || ts - last < 66) return;
     const dt = last ? Math.min(.1, (ts - last) / 1000) : .033; last = ts;
     frame(ts, dt);
   })(0);
