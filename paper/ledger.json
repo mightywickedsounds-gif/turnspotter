@@ -7759,18 +7759,6 @@
  ],
  "equity": [
   {
-   "t": 1793103208612,
-   "value": 54.87
-  },
-  {
-   "t": 1793103513221,
-   "value": 54.71
-  },
-  {
-   "t": 1793103820482,
-   "value": 54.71
-  },
-  {
    "t": 1793104125359,
    "value": 54.71
   },
@@ -19757,6 +19745,18 @@
   {
    "t": 1794030184161,
    "value": 7.95
+  },
+  {
+   "t": 1794030492220,
+   "value": 7.95
+  },
+  {
+   "t": 1794030798437,
+   "value": 7.95
+  },
+  {
+   "t": 1794031104984,
+   "value": 7.95
   }
  ],
  "config": {
@@ -19784,11 +19784,11 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 76036.84,
-   "experience": 0.439,
-   "liveLearner": 0.323,
+   "price": 76021.36,
+   "experience": 0.465,
+   "liveLearner": 0.41,
    "record": 0.53,
-   "call": "DOWN",
+   "call": "WAIT",
    "last400": {
     "call": 0.24,
     "bounceOrRollover": 0.015
@@ -19801,11 +19801,11 @@
   "ETH": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 2249.37,
-   "experience": 0.431,
-   "liveLearner": 0.305,
+   "price": 2248.14,
+   "experience": 0.46,
+   "liveLearner": 0.422,
    "record": 0.53,
-   "call": "DOWN",
+   "call": "WAIT",
    "last400": {
     "call": 0.242,
     "bounceOrRollover": 0.018
@@ -19818,9 +19818,9 @@
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 90.18,
-   "experience": 0.484,
-   "liveLearner": 0.384,
+   "price": 90.12,
+   "experience": 0.507,
+   "liveLearner": 0.464,
    "record": 0.57,
    "call": "WAIT",
    "last400": {
@@ -19835,9 +19835,9 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.1602,
-   "experience": 0.497,
-   "liveLearner": 0.373,
+   "price": 1.1631,
+   "experience": 0.52,
+   "liveLearner": 0.537,
    "record": 0.51,
    "call": "WAIT",
    "last400": {
@@ -19852,9 +19852,9 @@
   "DOGE": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 0.07188,
-   "experience": 0.55,
-   "liveLearner": 0.587,
+   "price": 0.07199,
+   "experience": 0.52,
+   "liveLearner": 0.513,
    "record": 0.65,
    "call": "WAIT",
    "last400": {
@@ -19867,6 +19867,6 @@
    }
   }
  },
- "lastRun": 1794030184161,
+ "lastRun": 1794031104984,
  "paused": true
 }
