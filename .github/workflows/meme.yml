@@ -1,0 +1,58 @@
+name: Meme Bot
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # GitHub fires this late and unevenly, so each run stays awake for ~5h40m
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [paper/meme.mjs, .github/workflows/meme.yml]
+permissions:
+  contents: write
+  actions: write      # lets each run queue the next one (GitHub's cron timer skips hours at a time)
+concurrency:
+  group: meme-bot             # its own queue, separate from the other bots
+  cancel-in-progress: false
+jobs:
+  meme:
+    runs-on: ubuntu-latest
+    env:
+      NTFY_TOPIC: turnspotter-1808cf83ce14   # phone alerts: subscribe to this topic in the free ntfy app
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/setup-node@v4
+        with: {node-version: "20"}
+      - name: Run the meme bot every 5 minutes for ~5h40m
+        run: |
+          git config user.name "turnspotter-bot"
+          git config user.email "turnspotter-bot@users.noreply.github.com"
+          # This job writes ONE file, paper/meme.json, and nothing else. To save, it resets to the newest main and
+          # puts only its own file back, so it can never overwrite the other bots' files (or anything else).
+          save() {
+            mkdir -p "$RUNNER_TEMP/keep"; cp paper/meme.json "$RUNNER_TEMP/keep/meme.json" || return 0
+            for i in 1 2 3; do
+              if timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD \
+                 && cp "$RUNNER_TEMP/keep/meme.json" paper/meme.json && git add paper/meme.json \
+                 && { git diff --cached --quiet || git commit -qm "Meme bot update"; } \
+                 && timeout 60 git push -q origin HEAD:main; then echo "saved"; return 0; fi
+              echo "save attempt $i failed"; sleep 10
+            done
+            cp "$RUNNER_TEMP/keep/meme.json" paper/meme.json
+          }
+          # start from the newest meme file, never a stale copy
+          timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD
+          end=$((SECONDS + 20400)); saved=-900
+          while true; do
+            out=$(timeout 200 node paper/meme.mjs 2>&1) || true; echo "$out"
+            if echo "$out" | grep -q TRADES_CHANGED || [ $((SECONDS - saved)) -ge 900 ] || [ $SECONDS -ge $end ]; then
+              save; saved=$SECONDS
+            fi
+            [ $SECONDS -ge $end ] && break
+            sleep 300
+          done
+      - name: Queue the next run
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run meme.yml --ref main --repo "$GITHUB_REPOSITORY" || echo "could not queue the next run"

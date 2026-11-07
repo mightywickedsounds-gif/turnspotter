@@ -55,7 +55,7 @@ body[data-mood="up"]{--mood:var(--up)} body[data-mood="down"]{--mood:var(--down)
 @keyframes ping{0%{box-shadow:0 0 0 0 rgba(62,230,162,.55)}80%,100%{box-shadow:0 0 0 10px rgba(62,230,162,0)}}
 
 /* ticker */
-body[data-on="auto"] .watch,body[data-on="arena"] .watch{display:none}
+body[data-on="auto"] .watch,body[data-on="arena"] .watch,body[data-on="meme"] .watch{display:none}
 #botTiles{display:none}
 .watch{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .watch::-webkit-scrollbar{display:none}
@@ -285,6 +285,22 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 #mvTxt b{font-family:var(--mono)}
 .arenaBanner{margin:0 0 12px;font:700 15px var(--body)}
 .arenaList{display:grid;gap:10px}
+.memeForm{display:flex;gap:8px}
+.memeForm input{flex:1;min-width:0;padding:12px 14px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.05);color:var(--ink);font:500 14px var(--mono)}
+.memeForm button{padding:0 18px;border-radius:12px;border:0;background:var(--up);color:#04130c;font:700 14px var(--body);cursor:pointer}
+.memeVerdict{padding:12px 14px;border-radius:12px;font:700 15px var(--body);margin:12px 0 8px}
+.memeVerdict.good{background:color-mix(in srgb,var(--up) 16%,transparent);color:var(--up)}
+.memeVerdict.warn{background:rgba(255,196,77,.14);color:#ffc44d}
+.memeVerdict.bad{background:color-mix(in srgb,var(--down) 16%,transparent);color:var(--down)}
+.memeCoin{display:flex;flex-wrap:wrap;gap:6px 14px;font:500 12px var(--mono);color:var(--muted);margin-top:10px}
+.memeCoin b{color:var(--ink);font:700 16px var(--body)} .memeCoin a{color:var(--muted)}
+.chkList{display:grid;gap:4px}
+.chk{display:grid;grid-template-columns:22px 1fr;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(140,155,255,.04)}
+.chk i{font-style:normal;font-weight:700;text-align:center} .chk.ok i{color:var(--up)} .chk.no i{color:var(--down)} .chk.w i{color:#ffc44d}
+.chk b{font:600 13px var(--body)} .chk span{display:block;font:500 11px var(--mono);color:var(--muted)}
+.memeRow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:9px 12px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.04);cursor:pointer}
+.memeRow:hover{border-color:var(--muted)} .memeRow b{font:600 14px var(--body)} .memeRow span{display:block;font:500 11px var(--mono);color:var(--muted)}
+.memeList{display:grid;gap:6px} .memeSub{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
 .scoreTbl{display:grid;gap:6px}
 .scoreRow{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.04)}
 .scoreRow.bench{border-style:dashed;background:transparent}
@@ -528,7 +544,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   </header>
 
   <nav class="pages" id="pages" aria-label="Sections">
-    <button type="button" data-page="live" aria-current="page">Live</button><button type="button" data-page="bot">Scalper bot</button><button type="button" data-page="arena">Bots</button>
+    <button type="button" data-page="live" aria-current="page">Live</button><button type="button" data-page="meme">Meme</button><button type="button" data-page="bot">Scalper bot</button><button type="button" data-page="arena">Bots</button>
   </nav>
 
   <nav class="watch" id="watch" aria-label="Pick a coin"></nav>
@@ -559,6 +575,19 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </details>
   </section>
 
+  <section class="card" id="memeCheckCard" data-page="meme" hidden>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Rug check</h2><span class="record">before you buy</span></div>
+    <form class="memeForm" id="memeForm"><input id="memeIn" placeholder="Paste a Solana coin address or DexScreener link" autocomplete="off" spellcheck="false"><button type="submit">Check</button></form>
+    <div id="memeResult"></div>
+    <p class="note">Checks the coin live on RugCheck and DexScreener: can the dev print or freeze coins, is the liquidity locked, do whales or insiders hold too much, can people sell. Passing rules out the obvious rugs. It doesn't make a coin safe, and most meme coins still go to zero.</p>
+  </section>
+  <section class="card" id="memeBotCard" data-page="meme" hidden>
+    <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Meme bot</h2><span class="record" id="memeMeta">loading…</span></div>
+    <div class="scoreRow"><div><b>Paper balance</b><span id="memeSub">$50 of fake money · buys only coins that pass every rug check and are rising</span></div><div class="money" id="memeBal">—</div></div>
+    <p class="memeSub">Holding</p><div class="memeList" id="memePos"></div>
+    <p class="memeSub">Recent trades</p><div class="memeList" id="memeHist"></div>
+    <p class="memeSub">Trending coins it just checked · tap one to see why</p><div class="memeList" id="memeScan"></div>
+  </section>
   <section class="card" id="scoreCard" data-page="arena" hidden>
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Scoreboard</h2><span class="record" id="scoreMeta">loading…</span></div>
     <div class="scoreTbl" id="scoreTbl"></div>
@@ -1138,6 +1167,64 @@ function selfCheck(c, prob, H, conf){
 }
 
 /*LOGIC-END*/
+/*MEME-START*/
+// Rug-pull checklist, shared by the Meme tab and the meme paper bot (paper/meme.mjs loads this block), README round 34.
+// pair   = one DexScreener pair (api.dexscreener.com/tokens/v1/solana/...)
+// report = a RugCheck report (api.rugcheck.xyz/v1/tokens/<mint>/report), or null when RugCheck has none yet
+// Critical checks must ALL pass; warnings (very new, thin volume) are shown but don't block on their own.
+const MEME_RULES = {minLiqUsd:30000, minAgeH:2, minVol24:50000, maxTop10:30, maxOne:10, maxCreator:5, maxInsider:10, minLpLocked:90};
+function memePickPair(pairs){
+  return (pairs || []).filter(p => p && p.chainId === "solana" && p.liquidity && p.liquidity.usd > 0)
+    .sort((a, b) => b.liquidity.usd - a.liquidity.usd)[0] || null;
+}
+function memeUsd(v){ return v >= 1e6 ? "$" + (v / 1e6).toFixed(1) + "M" : v >= 1e3 ? "$" + (v / 1e3).toFixed(0) + "K" : "$" + Math.round(v || 0); }
+function memeChecks(pair, report, now = Date.now()){
+  const R = MEME_RULES, out = [];
+  const add = (id, label, pass, critical, detail) => out.push({id, label, pass:!!pass, critical, detail});
+  const liq = pair && pair.liquidity ? pair.liquidity.usd || 0 : 0;
+  add("liquidity", "Enough money in the pool to sell", liq >= R.minLiqUsd, true, `${memeUsd(liq)} in the pool (needs ${memeUsd(R.minLiqUsd)})`);
+  const d24 = (pair && pair.txns && pair.txns.h24) || {buys:0, sells:0};
+  add("sells", "People are able to sell", !(d24.buys >= 30 && d24.sells === 0), true, `${d24.buys} buys · ${d24.sells} sells in 24h`);
+  if(!report){
+    add("rugcheck", "Rug check available", false, true, "RugCheck has no report on this coin yet");
+  } else {
+    add("mint", "Dev can't print more coins", !report.mintAuthority, true, report.mintAuthority ? "mint authority is still ON" : "mint authority revoked");
+    add("freeze", "Dev can't freeze your coins", !report.freezeAuthority, true, report.freezeAuthority ? "freeze authority is still ON (honeypot risk)" : "freeze authority revoked");
+    const size = m => ((m.lp && m.lp.quoteUSD) || 0) + ((m.lp && m.lp.baseUSD) || 0);
+    const main = (report.markets || []).filter(m => m.lp).sort((a, b) => size(b) - size(a))[0];
+    const locked = main ? +main.lp.lpLockedPct || 0 : 0;
+    add("lp", "Liquidity locked or burned", locked >= R.minLpLocked, true, main ? `${locked.toFixed(0)}% of the main pool is locked` : "no pool found");
+    const known = report.knownAccounts || {}, typeOf = h => (known[h.owner] || known[h.address] || {}).type;
+    const holders = (report.topHolders || []).filter(h => !["AMM", "LOCKER", "CLOB"].includes(typeOf(h)));
+    const top10 = holders.slice(0, 10).reduce((s, h) => s + (h.pct || 0), 0), one = holders.length ? Math.max(...holders.map(h => h.pct || 0)) : 0;
+    add("top10", "Top 10 wallets don't control it", top10 <= R.maxTop10, true, `top 10 wallets own ${top10.toFixed(1)}% (max ${R.maxTop10}%)`);
+    add("whale", "No single whale", one <= R.maxOne, true, `biggest wallet owns ${one.toFixed(1)}% (max ${R.maxOne}%)`);
+    const creator = holders.filter(h => typeOf(h) === "CREATOR").reduce((s, h) => s + (h.pct || 0), 0);
+    add("creator", "Dev isn't sitting on a big bag", creator <= R.maxCreator, true, `creator holds ${creator.toFixed(1)}% (max ${R.maxCreator}%)`);
+    const insider = holders.filter(h => h.insider).reduce((s, h) => s + (h.pct || 0), 0);
+    add("insiders", "No linked insider wallets", insider <= R.maxInsider, true, `insider wallets hold ${insider.toFixed(1)}% (max ${R.maxInsider}%)`);
+    const danger = (report.risks || []).filter(r => r.level === "danger");
+    add("risks", "No RugCheck danger flags", !report.rugged && !danger.length, true,
+      report.rugged ? "RugCheck marks it RUGGED" : danger.length ? danger.map(r => r.name).join(", ") : "none");
+  }
+  const ageH = pair && pair.pairCreatedAt ? (now - pair.pairCreatedAt) / 36e5 : 0;
+  add("age", "Not brand new", ageH >= R.minAgeH, false, ageH < 48 ? `${ageH.toFixed(1)} hours old` : `${Math.round(ageH / 24)} days old`);
+  const vol = pair && pair.volume ? pair.volume.h24 || 0 : 0;
+  add("volume", "Real trading volume", vol >= R.minVol24, false, `${memeUsd(vol)} traded in 24h`);
+  const crit = out.filter(c => c.critical);
+  return {checks:out, passed:crit.every(c => c.pass), failed:crit.filter(c => !c.pass).length, warnings:out.filter(c => !c.critical && !c.pass).length};
+}
+// a RugCheck report trimmed to what memeChecks reads (keeps paper/meme.json small)
+function memeTrim(r){
+  if(!r) return null;
+  const top = (r.topHolders || []).slice(0, 20).map(h => ({pct:h.pct, owner:h.owner, address:h.address, insider:!!h.insider}));
+  const known = {}; for(const h of top) for(const k of [h.owner, h.address]) if(r.knownAccounts && r.knownAccounts[k]) known[k] = {type:r.knownAccounts[k].type};
+  return {mintAuthority:r.mintAuthority || null, freezeAuthority:r.freezeAuthority || null, rugged:!!r.rugged, score:r.score_normalised,
+    markets:(r.markets || []).map(m => ({lp:m.lp ? {lpLockedPct:m.lp.lpLockedPct, quoteUSD:m.lp.quoteUSD, baseUSD:m.lp.baseUSD} : null})),
+    topHolders:top, knownAccounts:known, risks:(r.risks || []).map(x => ({name:x.name, level:x.level}))};
+}
+/*MEME-END*/
+
 // ───────── render ─────────
 const fmtP = x => x >= 1000 ? x.toLocaleString(undefined,{maximumFractionDigits:0}) : x >= 10 ? x.toFixed(2) : x >= 1 ? x.toFixed(3) : x.toPrecision(5);
 const fmtT = t => new Date(t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
@@ -2682,12 +2769,14 @@ async function btcOn(t){
 async function loadScore(){
   if(document.body.dataset.on !== "arena") return;
   const get = f => fetch(`paper/${f}.json?` + Date.now(), {cache:"no-store"}).then(r => r.json()).catch(() => null);
-  const [L, T, A] = await Promise.all([get("ledger"), get("trend"), get("arena")]);
+  const [L, T, A, M] = await Promise.all([get("ledger"), get("trend"), get("arena"), get("meme")]);
   const rows = [];
   if(L){ const open = L.trades.filter(t => t.status === "open").reduce((s, t) => s + t.stake, 0);
     rows.push({name:"AI calls", note:L.paused ? "paused: no edge after costs" : "5 coins, 1-hour calls", start:L.start, now:L.balance + open, t0:L.startedAt}); }
   if(T){ const v = T.equity.length ? T.equity.at(-1).value : T.start, held = Object.keys(T.holdings);
     rows.push({name:"Trend bot", note:held.length ? "holding " + held.join(", ") : "in cash: every coin below its 50-day average", start:T.start, now:v, t0:T.startedAt}); }
+  if(M){ const v = M.balance + M.positions.reduce((s, p) => s + (p.last ? p.last.value : p.stake), 0);
+    rows.push({name:"Meme bot", note:"Solana meme coins, rug-checked", start:M.start, now:v, t0:M.startedAt}); }
   if(A) for(const [id, b] of Object.entries(A.bots))
     rows.push({name:b.name, note:id === "flipper" ? "random picks (the control)" : "Bot Arena · BTC ×100", start:A.start, now:b.balance, t0:A.startedAt});
   if(!rows.length){ $("scoreMeta").textContent = "no results yet"; return; }
@@ -2709,6 +2798,66 @@ async function loadScore(){
     + (ref ? `<div class="scoreRow bench"><div><b>Just hold Bitcoin</b><span>$50 of BTC bought ${new Date(ref.t0).toLocaleDateString(undefined, {month:"short", day:"numeric"})}</span></div><div class="money">$${ref.hold.toFixed(2)}<span class="${ref.hold >= 50 ? "win" : "loss"}">${pct(ref.hold / 50 - 1)}</span></div><i class="verdict meh">benchmark</i></div>` : "");
 }
 setInterval(loadScore, 120000);
+// ───────── Meme coins: live rug-pull checker + the meme paper bot's results (README round 34) ─────────
+const MEMEADDR = /[1-9A-HJ-NP-Za-km-z]{32,44}/;
+const memeEsc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;"}[c]));
+async function memeLookup(text){
+  const found = (String(text).match(MEMEADDR) || [])[0];
+  if(!found) throw new Error("That doesn't look like a Solana coin address.");
+  const tokenPairs = async m => { const d = await (await fetch(`https://api.dexscreener.com/tokens/v1/solana/${m}`)).json();
+    return Array.isArray(d) ? d.filter(p => p.baseToken && p.baseToken.address === m) : []; };
+  let mint = found, pairs = await tokenPairs(found);
+  if(!pairs.length){   // maybe a pair (pool) address from a DexScreener link
+    const d = await (await fetch(`https://api.dexscreener.com/latest/dex/pairs/solana/${found}`)).json();
+    const ps = (d && (d.pairs || (d.pair ? [d.pair] : []))) || [];
+    if(ps.length){ mint = ps[0].baseToken.address; pairs = await tokenPairs(mint); }
+  }
+  let report = null;
+  try{ const r = await fetch(`https://api.rugcheck.xyz/v1/tokens/${mint}/report`); if(r.ok) report = memeTrim(await r.json()); }catch(e){}
+  return {mint, pair:memePickPair(pairs), report};
+}
+async function memeCheck(text){
+  const box = $("memeResult");
+  box.innerHTML = `<p class="note">Checking…</p>`;
+  try{
+    const {mint, pair, report} = await memeLookup(text), res = memeChecks(pair, report);
+    if(!pair && !report){ box.innerHTML = `<div class="memeVerdict bad">Couldn't find this coin trading on Solana.</div>`; return; }
+    const warn = res.checks.filter(c => !c.critical && !c.pass).map(c => c.label.toLowerCase());
+    const v = !res.passed ? `<div class="memeVerdict bad">✗ ${res.failed} red flag${res.failed > 1 ? "s" : ""}: don't buy</div>`
+      : warn.length ? `<div class="memeVerdict warn">⚠ No rug signs, but careful: ${memeEsc(warn.join(", "))}</div>`
+      : `<div class="memeVerdict good">✓ Passed every rug check</div>`;
+    const coin = pair ? `<div class="memeCoin"><b>${memeEsc(pair.baseToken.symbol)}</b><span>$${(+pair.priceUsd).toPrecision(4)}</span>
+      <span>mcap ${memeUsd(pair.marketCap || pair.fdv || 0)}</span><span>24h ${(pair.priceChange.h24 || 0) >= 0 ? "▲" : "▼"} ${Math.abs(pair.priceChange.h24 || 0).toFixed(1)}%</span>
+      <a href="${memeEsc(pair.url)}" target="_blank" rel="noopener">DexScreener ↗</a><a href="https://rugcheck.xyz/tokens/${memeEsc(mint)}" target="_blank" rel="noopener">RugCheck ↗</a></div>` : "";
+    box.innerHTML = coin + v + `<div class="chkList">` + res.checks.map(c => `<div class="chk ${c.pass ? "ok" : c.critical ? "no" : "w"}">
+      <i>${c.pass ? "✓" : c.critical ? "✗" : "!"}</i><div><b>${memeEsc(c.label)}</b><span>${memeEsc(c.detail)}</span></div></div>`).join("") + `</div>`;
+  }catch(e){ box.innerHTML = `<div class="memeVerdict bad">${memeEsc(e.message || "Couldn't reach RugCheck or DexScreener. Try again in a minute.")}</div>`; }
+}
+$("memeForm").addEventListener("submit", e => { e.preventDefault(); memeCheck($("memeIn").value.trim()); });
+async function loadMeme(){
+  if(document.body.dataset.on !== "meme") return;
+  try{
+    const L = await (await fetch("paper/meme.json?" + Date.now(), {cache:"no-store"})).json();
+    const openVal = L.positions.reduce((s, p) => s + (p.last ? p.last.value : p.stake), 0), value = L.balance + openVal, chg = value / L.start - 1;
+    const won = L.closed.filter(c => c.pnl > 0).length, mins = Math.round((Date.now() - L.lastRun) / 60000);
+    $("memeBal").innerHTML = `$${value.toFixed(2)}<span class="${chg >= 0 ? "win" : "loss"}">${chg >= 0 ? "▲" : "▼"} ${Math.abs(chg * 100).toFixed(1)}%</span>`;
+    $("memeMeta").textContent = `${L.closed.length} trades · ${won} won · updated ${mins < 1 ? "just now" : mins + " min ago"}`;
+    $("memePos").innerHTML = L.positions.map(p => { const r = p.last ? p.last.ret : 0;
+      return `<div class="memeRow" data-mint="${memeEsc(p.mint)}"><div><b>${memeEsc(p.sym)}</b><span>${memeEsc(p.why || "")}</span></div>
+        <div class="money">$${(p.last ? p.last.value : p.stake).toFixed(2)}<span class="${r >= 0 ? "win" : "loss"}">${r >= 0 ? "▲" : "▼"} ${Math.abs(r * 100).toFixed(1)}%</span></div></div>`; }).join("")
+      || `<p class="note">Nothing right now. It only buys when a coin passes every check and is rising.</p>`;
+    $("memeHist").innerHTML = L.closed.slice(-6).reverse().map(c => `<div class="memeRow" data-mint="${memeEsc(c.mint)}"><div><b>${memeEsc(c.sym)}</b><span>${memeEsc(c.reason)} · ${fmtT(c.closedAt)}</span></div>
+      <div class="money ${c.pnl >= 0 ? "win" : "loss"}">${c.pnl >= 0 ? "+" : "−"}$${Math.abs(c.pnl).toFixed(2)}</div></div>`).join("")
+      || `<p class="note">No finished trades yet.</p>`;
+    $("memeScan").innerHTML = L.scan.slice(0, 12).map(c => `<div class="memeRow" data-mint="${memeEsc(c.mint)}"><div><b>${memeEsc(c.sym)}</b>
+      <span>${memeUsd(c.liq)} liquidity · ${memeUsd(c.vol24)} 24h · 1h ${c.chg.h1 >= 0 ? "+" : ""}${c.chg.h1}%</span></div>
+      <i class="verdict ${!c.checked ? "meh" : c.passed ? (c.warnings ? "meh" : "good") : "bad"}">${!c.checked ? "not checked yet" : c.passed ? (c.warnings ? "passed · " + c.warnings + " warning" : "passed") : c.failed + " red flag" + (c.failed > 1 ? "s" : "")}</i></div>`).join("");
+  }catch(e){ $("memeMeta").textContent = "starting up"; $("memeScan").innerHTML = `<p class="note">The meme bot's first scan is on its way from GitHub. Meanwhile, paste any coin above to check it yourself.</p>`; }
+}
+document.addEventListener("click", e => { const r = e.target.closest(".memeRow[data-mint]"); if(!r) return;
+  $("memeIn").value = r.dataset.mint; memeCheck(r.dataset.mint); $("memeCheckCard").scrollIntoView({behavior:reduceMotion ? "auto" : "smooth"}); });
+setInterval(loadMeme, 60000);
+
 
 // ───────── Multiverse: 100 possible next minutes, coloured by how a Trench trade from here would end ─────────
 // Each future is a random walk with this coin's normal 1-minute move (no edge added: the measured follow-through is
@@ -3334,6 +3483,7 @@ function showPage(name){
   if(name === "practice" && !$("pane-whatif").hidden) runWhatIf();
   if(name === "bot") tableInit();
   if(name === "arena"){ loadArena(); loadScore(); }
+  if(name === "meme") loadMeme();
   window.scrollTo({top:0, behavior:reduceMotion ? "auto" : "smooth"});
 }
 $("pages").addEventListener("click", e => { const b = e.target.closest("button[data-page]"); if(b) showPage(b.dataset.page); });
