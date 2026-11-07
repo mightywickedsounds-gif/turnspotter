@@ -7759,18 +7759,6 @@
  ],
  "equity": [
   {
-   "t": 1793117572568,
-   "value": 57.3
-  },
-  {
-   "t": 1793117877489,
-   "value": 57.3
-  },
-  {
-   "t": 1793118826961,
-   "value": 57.3
-  },
-  {
    "t": 1793119134902,
    "value": 57.3
   },
@@ -19757,6 +19745,18 @@
   {
    "t": 1794044309026,
    "value": 7.95
+  },
+  {
+   "t": 1794044616351,
+   "value": 7.95
+  },
+  {
+   "t": 1794044922404,
+   "value": 7.95
+  },
+  {
+   "t": 1794045228502,
+   "value": 7.95
   }
  ],
  "config": {
@@ -19784,9 +19784,9 @@
   "BTC": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 76130.44,
-   "experience": 0.478,
-   "liveLearner": 0.564,
+   "price": 76098.79,
+   "experience": 0.493,
+   "liveLearner": 0.576,
    "record": 0.5,
    "call": "WAIT",
    "last400": {
@@ -19802,8 +19802,8 @@
    "src": "Binance US",
    "candles": 1999,
    "price": 2247.32,
-   "experience": 0.496,
-   "liveLearner": 0.527,
+   "experience": 0.491,
+   "liveLearner": 0.48,
    "record": 0.53,
    "call": "WAIT",
    "last400": {
@@ -19812,15 +19812,15 @@
    },
    "backtest": {
     "calls": 150,
-    "right": 0.573
+    "right": 0.567
    }
   },
   "SOL": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 90.12,
-   "experience": 0.515,
-   "liveLearner": 0.592,
+   "price": 90.03,
+   "experience": 0.536,
+   "liveLearner": 0.614,
    "record": 0.57,
    "call": "WAIT",
    "last400": {
@@ -19835,9 +19835,9 @@
   "XRP": {
    "src": "Binance US",
    "candles": 1999,
-   "price": 1.1742,
-   "experience": 0.506,
-   "liveLearner": 0.471,
+   "price": 1.1705,
+   "experience": 0.527,
+   "liveLearner": 0.495,
    "record": 0.51,
    "call": "WAIT",
    "last400": {
@@ -19853,7 +19853,7 @@
    "src": "Binance US",
    "candles": 1999,
    "price": 0.07215,
-   "experience": 0.461,
+   "experience": 0.462,
    "liveLearner": 0.525,
    "record": 0.66,
    "call": "WAIT",
@@ -19863,10 +19863,10 @@
    },
    "backtest": {
     "calls": 164,
-    "right": 0.537
+    "right": 0.543
    }
   }
  },
- "lastRun": 1794044309026,
+ "lastRun": 1794045228502,
  "paused": true
 }
