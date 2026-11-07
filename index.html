@@ -347,7 +347,7 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .msg b{font:800 12px var(--body);color:var(--c);letter-spacing:.04em} .msg time{font:500 10px var(--mono);color:var(--muted);margin-left:6px}
 .msg p{margin:3px 0 0;font:500 13px/1.45 var(--body);color:var(--ink);background:rgba(140,155,255,.06);border:1px solid var(--edge);padding:7px 10px;border-radius:4px 12px 12px 12px}
 .msg.rug p,.msg.reject p,.msg.brake p{border-color:color-mix(in srgb,var(--down) 60%,transparent)} .msg.locked p,.msg.clear p{border-color:color-mix(in srgb,var(--up) 55%,transparent)}
-.msg.buy p{border-color:color-mix(in srgb,#ffc44d 45%,transparent)}
+.msg.buy p{border-color:color-mix(in srgb,#ffc44d 45%,transparent)} .msg.learn p{border-color:color-mix(in srgb,#b07bff 60%,transparent);background:rgba(176,123,255,.08)}
 .cityStage.office canvas.cityMap,.cityStage.office .cityPipe,.cityStage.office #driveBtn{display:none}
 .os{position:absolute;inset:0;z-index:6;overflow:hidden;font:400 13px system-ui,-apple-system,"Segoe UI",sans-serif;color:#eef1ff;
   background:radial-gradient(120% 70% at 70% 110%,#ff4fa3 0%,rgba(255,79,163,0) 55%),radial-gradient(90% 60% at 10% 0%,#3b1fb8 0%,rgba(59,31,184,0) 60%),linear-gradient(180deg,#0d0628,#24093e)}
@@ -3021,7 +3021,7 @@ async function loadMeme(){
       : "Every bot rug-checks a coin before it buys.";
     $("roster").innerHTML = team.map(([id, b, d]) => { const r = b.value / b.start - 1, today = b.day ? b.day.pnl || 0 : 0;
       return `<div class="crewRow ${d.busy ? "busy" : ""}" data-bot="${memeEsc(id)}" style="--c:${cityColor(id)}"><span class="ava">${botAvatar(id)}<i class="${d.busy ? "on" : ""}"></i></span>
-        <div><b>${memeEsc(b.name)}</b><span class="doing">${memeEsc(d.txt)}</span><span class="tmr">${d.busy ? "working" : "idle"} for ${cityAgo(now - d.since)} · today ${cityMoney(today)}</span></div>
+        <div><b>${memeEsc(b.name)}</b><span class="doing">${memeEsc(d.txt)}</span><span class="tmr">${d.busy ? "working" : "idle"} for ${cityAgo(now - d.since)} · today ${cityMoney(today)}</span>${b.train ? `<span class="tmr">🧠 gen ${b.train.gen} · ${b.train.tested.toLocaleString()} setups tested · TP ${Math.round(b.gene.tp * 100)}% · stop ${Math.round(b.gene.sl * 100)}% · hold ${b.gene.holdH}h</span>` : id === "flipper" ? `<span class="tmr">🎲 the control: never learns, on purpose</span>` : ""}</div>
         <div class="val">$${b.value.toFixed(2)}<span class="${r >= 0 ? "win" : "loss"}">${r >= 0 ? "▲" : "▼"} ${Math.abs(r * 100).toFixed(1)}%</span></div></div>`; }).join("");
     // Team chat: the trade tape, written by the bots themselves
     const byName = Object.fromEntries(Object.entries(M.bots).map(([id, b]) => [b.name, id]));
@@ -3041,7 +3041,9 @@ const CITY = {loading:false, ready:false, towers:{}, data:null, set:null, sel:nu
 const CITY_TEAM = [["hunter", "Rug Hunter"], ["sniper", "Sniper"], ["surfer", "Trend Surfer"], ["dip", "Dip Buyer"], ["flip", "Quick Flip"], ["moon", "Moonshot"],
   ["diamond", "Diamond Hands"], ["whale", "Whale Watcher"], ["volume", "Volume Hunter"], ["early", "Early Bird"], ["oldmoney", "Old Money"],
   ["crowd", "Crowd Follower"], ["steady", "Steady Eddie"], ["yolo", "YOLO"], ["owl", "Night Owl"], ["flipper", "Coin Flipper"]];
-const CITY_PAL = ["#ffc44d", "#ff4fa3", "#7dffc2", "#ff8a3d", "#5ad1ff", "#c38bff", "#ffe14d", "#ff6b6b", "#4dffb8", "#9db4ff", "#ffa3d9", "#b6ff5c", "#ffd28a", "#6bf0ff", "#ff9e6b", "#d0d6ff"];
+CITY_TEAM.push(...["Apex", "Bolt", "Cipher", "Drift", "Ember", "Flux", "Glitch", "Halo", "Ion", "Jolt", "Karma", "Lumen", "Mako", "Nyx", "Onyx", "Pulse"].map(n => [n.toLowerCase(), n + " AI"]));   // round 41: the self-taught bots
+const CITY_PAL = ["#ffc44d", "#ff4fa3", "#7dffc2", "#ff8a3d", "#5ad1ff", "#c38bff", "#ffe14d", "#ff6b6b", "#4dffb8", "#9db4ff", "#ffa3d9", "#b6ff5c", "#ffd28a", "#6bf0ff", "#ff9e6b", "#d0d6ff",
+  "#00e5ff", "#ff2e88", "#a6ff00", "#ffb000", "#8a5cff", "#00ffa3", "#ff5e3a", "#3d9bff", "#f6ff4d", "#ff7ad9", "#2effd1", "#ffd1a1", "#b388ff", "#7cff7c", "#ff9a9a", "#9ae6ff"];
 const CITY_OTHERS = [["trend", "Trend Bot", "#45d4ff"], ["arena", "Arena", "#b07bff"], ["ai", "AI Calls", "#8b95bd"]];
 const cityColor = id => { const k = CITY_TEAM.findIndex(t => t[0] === id); if(k >= 0) return CITY_PAL[k % CITY_PAL.length]; const o = CITY_OTHERS.find(t => t[0] === id); return o ? o[2] : "#8b95bd"; };
 const cityBots = () => [...CITY_TEAM.map(([id, name]) => ({id, name, css:cityColor(id)})), ...CITY_OTHERS.map(([id, name, css]) => ({id, name, css}))];
@@ -3064,7 +3066,7 @@ async function cityInit(){
 // ───────── BossOS: the PC in the HQ penthouse (README round 40). Live trades with prices straight from DexScreener ─────────
 const OS = {wins:{}, z:10, live:{}, prev:{}, timer:0, liveTimer:0, n:0};
 const OS_APPS = {trades:["📈", "Live Trades", 700, 430], board:["🏆", "Leaderboard", 560, 420], rug:["🛡", "Rug Desk", 620, 420], term:["⌨", "Terminal", 600, 380],
-  chart:["📊", "Team Chart", 620, 380], chat:["💬", "Team Chat", 460, 440]};
+  chart:["📊", "Team Chart", 620, 380], chat:["💬", "Team Chat", 460, 440], lab:["🧠", "AI Lab", 720, 440]};
 $("osIcons").innerHTML = Object.entries(OS_APPS).map(([id, [ic, name]]) => `<button type="button" data-app="${id}"><i>${ic}</i>${name}</button>`).join("");
 $("osStart").innerHTML = `<p>Apps</p>` + Object.entries(OS_APPS).map(([id, [ic, name]]) => `<button type="button" data-app="${id}"><i>${ic}</i>${name}</button>`).join("")
   + `<button type="button" data-app="stand"><i>⏻</i>Stand up</button>`;
@@ -3162,6 +3164,15 @@ function osRender(id){
     else { g.fillStyle = "#8f97c6"; g.font = "28px system-ui"; g.fillText("Not enough history yet.", 60, 80); }
   }
   else if(id === "chat") body.innerHTML = `<div class="chat osChat">${$("chat").innerHTML}</div>`;
+  else if(id === "lab"){   // every bot's current rules and what its training has done
+    const L2 = M.learning || {}, rows = team.filter(([, b]) => b.gene).sort((x, y) => (y[1].train ? y[1].train.gen : -1) - (x[1].train ? x[1].train.gen : -1));
+    const total = rows.reduce((a, [, b]) => a + (b.train ? b.train.tested : 0), 0);
+    body.innerHTML = `<div class="osHead"><b>🧠 ${total.toLocaleString()} setups tested</b><span>each bot replays its own past trades under new rules every 5 minutes and only switches if the new rules win on both halves of its history</span></div>
+      <table class="osT"><tr><th>Bot</th><th>Gen</th><th>Tested</th><th>Take profit</th><th>Stop</th><th>Max hold</th><th>Buys if 1h move</th><th>Latest thinking</th></tr>`
+      + rows.map(([bid, b]) => { const g = b.gene, t = b.train;
+        return `<tr><td style="color:${cityColor(bid)}">${memeEsc(b.name)}</td><td>${t ? t.gen : "—"}</td><td>${t ? t.tested.toLocaleString() : "control"}</td><td>${Math.round(g.tp * 100)}%</td><td>${Math.round(g.sl * 100)}%</td><td>${g.holdH}h</td>
+          <td>${g.h1 ? `${g.h1[0]}% to ${g.h1[1]}%` : "any"}</td><td style="white-space:normal;color:#b9bfe8">${t && t.last ? memeEsc(t.last.txt) : bid === "flipper" ? "the control: never learns" : ""}</td></tr>`; }).join("") + `</table>`;
+  }
 }
 // live prices for every coin the bots hold (DexScreener, 30 coins per request); also fed to the 3D monitor
 async function osLive(){

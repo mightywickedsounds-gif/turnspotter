@@ -18,6 +18,7 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
   const R = new T.WebGLRenderer({canvas, antialias:true, powerPreference:"high-performance"});
   R.setPixelRatio(Math.min(1.5, devicePixelRatio || 1)); R.outputColorSpace = T.SRGBColorSpace; R.setClearColor(0x0a0620);
   R.toneMapping = T.ACESFilmicToneMapping; R.toneMappingExposure = 1.2;
+  R.shadowMap.enabled = true; R.shadowMap.type = T.PCFSoftShadowMap;   // only the penthouse's ceiling spotlight casts shadows
   const HIGH = matchMedia("(pointer:fine)").matches && (navigator.hardwareConcurrency || 4) >= 8 && !reduceMotion;   // desktops: mirror-wet streets too
   const scene = new T.Scene(); scene.fog = new T.FogExp2(0x1c1046, .0115);
   const cam = new T.PerspectiveCamera(45, 1, .05, 600);
@@ -88,7 +89,8 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
   const team = (bots || []).filter(b => b.id !== "arena"), arenaBot = (bots || []).find(b => b.id === "arena");
   const r2 = ring(2), special = {2:"rugdesk", 6:"plaza", 12:"plaza"};
   r2.forEach((s, k) => { if(special[k]) Z[key(...s)] = special[k]; });
-  const spots = [...ring(1), ...r2.filter((_, k) => !special[k])];
+  const taken3 = new Set(["3,-2", "-2,-3", "3,3", "-3,1", "-3,2"]);   // ring 3 also has a gas station, two cafés and Central Park
+  const spots = [...ring(1), ...r2.filter((_, k) => !special[k]), ...ring(3).filter(([i, j]) => !taken3.has(key(i, j)))];
   team.forEach((b, k) => { if(spots[k]){ Z[key(...spots[k])] = "bot"; BOTS[key(...spots[k])] = b; } });
   setZ([[3, -2], [-5, 1], [2, 6], [6, 2]], "gas");
   setZ([[-2, -3], [3, 3], [-1, 5], [5, 6]], "cafe");
@@ -555,7 +557,7 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
   function flyTo(where){
     if(where === "office"){ if(mode === "office") return; if(mode === "drive") drive(false); followRef = null; saved = {...goal};
       trans = {t:0, dur:reduceMotion ? .01 : 1.8, from:cam.position.clone(), fromQ:cam.quaternion.clone(), into:true};
-      Object.assign(lookGoal, {yaw:0, pitch:-.2, fov:cam.aspect < 1 ? 82 : 60}); Object.assign(look, lookGoal);   // phones get a wider view so the desk and the window both fit hq.setSeated(true); rain.visible = false;
+      hq.loadAssets(); Object.assign(lookGoal, {yaw:0, pitch:-.2, fov:cam.aspect < 1 ? 82 : 60}); Object.assign(look, lookGoal); hq.setSeated(true); rain.visible = false;   // phones get a wider view so the desk and the window both fit
       setMode("office"); onPick({kind:"view", office:true}); }
     else if(mode === "office"){ trans = {t:0, dur:reduceMotion ? .01 : 1.4, from:cam.position.clone(), fromQ:cam.quaternion.clone(), into:false};
       Object.assign(goal, saved || {yaw:goal.yaw, pitch:.9, dist:48, tx:0, ty:1.5, tz:0}); Object.assign(view, goal); saved = null; hq.setSeated(false); rain.visible = true;

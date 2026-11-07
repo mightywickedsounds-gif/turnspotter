@@ -2,7 +2,10 @@
 // (1 unit ≈ 1 metre): you sit in the boss's chair at an executive desk facing the south window, with three monitors in front
 // of you. The middle one is the PC (tap it to use it: index.html opens the BossOS desktop); the left one charts the bot
 // team, the right one is a live terminal. Behind you: a lounge with a sofa, a holographic market globe, a bar and the
-// house robot, who looks out of the window. Everything is built from code; the screens are canvases redrawn with live data.
+// house robot, who looks out of the window. The screens are canvases redrawn with live data.
+// Round 41: real furniture, wood and concrete textures and a night-city light probe (HDRI) from Poly Haven (CC0, in
+// assets/hq), loaded the first time you visit (loadAssets); a ceiling spotlight casts real shadows. Until they arrive
+// (or if they can't load) the hand-built stand-ins below are shown.
 export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
   const g = new T.Group(); g.position.y = OY; parent.add(g);
   const W = 5.6, D = 5.6, H = 2.7, hw = W / 2, hd = D / 2;
@@ -11,6 +14,8 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
   const glow = (hex, s, op = 1) => { const m = new T.Sprite(new T.SpriteMaterial({map:glowTex, color:hex, blending:T.AdditiveBlending, transparent:true, depthWrite:false, opacity:op})); m.scale.set(s, s, 1); return m; };
   const aniso = R.capabilities.getMaxAnisotropy();
   const rnd = (() => { let a = 77; return () => (a = (a * 16807) % 2147483647) / 2147483647; })();
+  const FB = {sofa:[], table:[], plant:[], lamp:[]};   // stand-ins, hidden when the real models load
+  const fb = (k, m) => { FB[k].push(m); return m; };
 
   // ── surfaces ──
   const marble = canvasTex(1024, 1024, (c, w, h) => { c.fillStyle = "#16141c"; c.fillRect(0, 0, w, h);
@@ -25,7 +30,7 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
   const leather = std({color:0x141218, roughness:.55, metalness:.05});
   const steel = std({color:0x9aa0b4, roughness:.25, metalness:.9}), darkMetal = std({color:0x1b1c24, roughness:.35, metalness:.8});
   const floorMat = std({map:marble, roughness:.3, metalness:.1, envMapIntensity:.25});
-  add(new T.BoxGeometry(W, .08, D), floorMat, 0, -.04, 0);
+  add(new T.BoxGeometry(W, .08, D), floorMat, 0, -.04, 0).receiveShadow = true;
   // the slab the penthouse sits on, with an LED edge you can see from the street
   add(new T.BoxGeometry(W + .3, .35, D + .3), std({color:0x101018, roughness:.6, metalness:.5}), 0, -.26, 0);
   for(const [x, z, w, d] of [[0, hd + .16, W + .3, .03], [0, -hd - .16, W + .3, .03], [hw + .16, 0, .03, D + .3], [-hw - .16, 0, .03, D + .3]])
@@ -35,9 +40,17 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
   for(const x of [-1.6, 0, 1.6]) add(new T.BoxGeometry(.05, .02, D - .8), new T.MeshBasicMaterial({color:0xcfe9ff}), x, H - .01, 0);
   add(new T.BoxGeometry(W - .6, .02, .05), new T.MeshBasicMaterial({color:0xff4fa3}), 0, H - .01, -hd + .3);
   // floor-to-ceiling glass with slim mullions
-  const glass = phys({color:0x9fd6ff, transparent:true, opacity:.08, roughness:.04, metalness:0, envMapIntensity:.08, depthWrite:false, side:T.DoubleSide});
+  const glass = phys({color:0x9fd6ff, transparent:true, opacity:.06, roughness:.04, metalness:0, envMapIntensity:.02, specularIntensity:.15, depthWrite:false, side:T.DoubleSide});
   const panes = [];
-  for(const [x, z, ry, len] of [[0, hd, 0, W], [0, -hd, Math.PI, W], [hw, 0, Math.PI / 2, D], [-hw, 0, -Math.PI / 2, D]]){
+  const wallMat = std({color:0x2a2a30, roughness:.85});
+  add(new T.BoxGeometry(W, H, .12), wallMat, 0, H / 2, -hd + .02).receiveShadow = true;
+  const art = canvasTex(1024, 640, (c, w, h) => { const gr = c.createLinearGradient(0, 0, w, h); gr.addColorStop(0, "#12052e"); gr.addColorStop(1, "#05020f"); c.fillStyle = gr; c.fillRect(0, 0, w, h);
+    for(let k = 0; k < 26; k++){ const col = ["#ff4fa3", "#45d4ff", "#ffc44d", "#7b6bff"][k % 4]; c.strokeStyle = col; c.globalAlpha = .25 + rnd() * .6; c.lineWidth = 2 + rnd() * 10;
+      c.beginPath(); c.arc(w * (.2 + rnd() * .6), h * (.2 + rnd() * .6), 40 + rnd() * 260, rnd() * 6, rnd() * 6 + 1 + rnd() * 3); c.stroke(); } c.globalAlpha = 1; });
+  add(new T.BoxGeometry(1.74, 1.1, .04), std({color:0x0b0b0e, roughness:.4, metalness:.6}), -1.1, 1.62, -hd + .1);
+  add(new T.PlaneGeometry(1.66, 1.02), new T.MeshBasicMaterial({map:art, toneMapped:false}), -1.1, 1.62, -hd + .125);
+  const artLight = new T.SpotLight(0xffe6c8, 12, 3, .5, .6, 2); artLight.position.set(-1.1, H - .1, -hd + .7); artLight.target.position.set(-1.1, 1.5, -hd); g.add(artLight, artLight.target);
+  for(const [x, z, ry, len] of [[0, hd, 0, W], [hw, 0, Math.PI / 2, D], [-hw, 0, -Math.PI / 2, D]]){
     const p = add(new T.PlaneGeometry(len, H), glass, x, H / 2, z, ry); panes.push(p);
     for(let k = 0; k <= 4; k++){ const o = -len / 2 + k * len / 4, m = add(new T.BoxGeometry(.05, H, .05), darkMetal, 0, H / 2, 0);
       m.position.set(x + (ry === 0 || ry === Math.PI ? o : 0), H / 2, z + (ry === 0 || ry === Math.PI ? 0 : o)); }
@@ -45,10 +58,11 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
 
   // ── the desk you sit at (facing the south window) ──
   const DZ = 1.55;
-  add(new T.BoxGeometry(2.6, .06, .9), std({map:wood, roughness:.35, metalness:.05}), 0, .74, DZ);
+  const deskMat = std({map:wood, roughness:.35, metalness:.05});
+  const deskTop = add(new T.BoxGeometry(2.6, .06, .9), deskMat, 0, .74, DZ); deskTop.castShadow = deskTop.receiveShadow = true;
   add(new T.BoxGeometry(2.6, .02, .02), new T.MeshBasicMaterial({color:0xffb04d}), 0, .705, DZ - .45);   // amber under-glow strip
   for(const x of [-1.2, 1.2]) add(new T.BoxGeometry(.06, .72, .8), steel, x, .36, DZ);
-  add(new T.BoxGeometry(2.3, .45, .03), std({map:wood, roughness:.4}), 0, .48, DZ + .4);
+  add(new T.BoxGeometry(2.3, .45, .03), deskMat, 0, .48, DZ + .4).castShadow = true;
   // three monitors: canvases are drawn by drawMonitors()
   const mon = (w, h, cw, ch, x, z, ry) => { const tex = canvasTex(cw, ch, c => { c.fillStyle = "#05070d"; c.fillRect(0, 0, cw, ch); }); tex.anisotropy = aniso;
     const grp = new T.Group(); grp.position.set(x, 1.12, z); grp.rotation.y = ry; g.add(grp);
@@ -66,9 +80,9 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
   add(new T.BoxGeometry(.28, .5, .5), darkMetal, 1.05, .25, DZ + .05);
   const rgb = add(new T.BoxGeometry(.005, .42, .42), new T.MeshBasicMaterial({color:0xff4fa3, transparent:true, opacity:.7}), .905, .25, DZ + .05);
   add(new T.CylinderGeometry(.04, .035, .1, 16), std({color:0xe8e4dc, roughness:.3}), -.62, .82, DZ - .15);
-  add(new T.CylinderGeometry(.08, .1, .02, 16), steel, -1.1, .78, DZ + .25);
-  add(new T.CylinderGeometry(.01, .01, .45, 8), steel, -1.1, 1, DZ + .25);
-  add(new T.ConeGeometry(.09, .1, 16, 1, true), std({color:0x22222a, roughness:.4, side:T.DoubleSide}), -1.1, 1.22, DZ + .2);
+  fb("lamp", add(new T.CylinderGeometry(.08, .1, .02, 16), steel, -1.1, .78, DZ + .25));
+  fb("lamp", add(new T.CylinderGeometry(.01, .01, .45, 8), steel, -1.1, 1, DZ + .25));
+  fb("lamp", add(new T.ConeGeometry(.09, .1, 16, 1, true), std({color:0x22222a, roughness:.4, side:T.DoubleSide}), -1.1, 1.22, DZ + .2));
   const lampL = new T.PointLight(0xffc98a, 6, 4, 2); lampL.position.set(-1.1, 1.15, DZ + .1); g.add(lampL);
   // your chair: you sit in it, so only the arm-rests show at the bottom of the view
   const chair = new T.Group(); chair.position.set(0, 0, .35); g.add(chair);
@@ -80,19 +94,19 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
 
   // ── the lounge behind you ──
   const fabric = std({color:0x2a2440, roughness:.9});
-  add(new T.BoxGeometry(2.2, .42, .85), fabric, -.4, .21, -1.9);
-  add(new T.BoxGeometry(2.2, .5, .2), fabric, -.4, .55, -2.25);
-  for(const x of [-1.45, .65]) add(new T.BoxGeometry(.18, .55, .85), fabric, x, .28, -1.9);
-  add(new T.BoxGeometry(1.1, .05, .6), std({color:0x0b0b10, roughness:.05, metalness:.3}), -.4, .4, -1.05);
-  for(const [x, z] of [[-.9, -1.3], [.1, -1.3], [-.9, -.8], [.1, -.8]]) add(new T.CylinderGeometry(.015, .015, .38, 8), steel, x, .19, z);
-  add(new T.PlaneGeometry(2.6, 1.8), std({color:0x3a1f46, roughness:1}), -.4, .005, -1.3, 0, -Math.PI / 2);   // rug
+  fb("sofa", add(new T.BoxGeometry(2.2, .42, .85), fabric, -1.1, .21, -2.05));
+  fb("sofa", add(new T.BoxGeometry(2.2, .5, .2), fabric, -1.1, .55, -2.4));
+  for(const x of [-2.15, -.05]) fb("sofa", add(new T.BoxGeometry(.18, .55, .85), fabric, x, .28, -2.05));
+  fb("table", add(new T.BoxGeometry(1.1, .05, .6), std({color:0x0b0b10, roughness:.05, metalness:.3}), -1.1, .38, -1.1));
+  for(const [x, z] of [[-1.6, -1.35], [-.6, -1.35], [-1.6, -.85], [-.6, -.85]]) fb("table", add(new T.CylinderGeometry(.015, .015, .36, 8), steel, x, .18, z));
+  add(new T.PlaneGeometry(2.8, 2), std({color:0x2a1836, roughness:1}), -1.1, .005, -1.2, 0, -Math.PI / 2).receiveShadow = true;   // rug
   // a holographic market globe over the coffee table
-  const holo = new T.Group(); holo.position.set(-.4, .82, -1.05); g.add(holo);
+  const holo = new T.Group(); holo.position.set(-1.1, .8, -1.1); g.add(holo);
   holo.add(new T.Mesh(new T.SphereGeometry(.22, 20, 14), new T.MeshBasicMaterial({color:0x45d4ff, wireframe:true, transparent:true, opacity:.35, blending:T.AdditiveBlending, depthWrite:false})));
   { const pts = []; for(let k = 0; k < 120; k++){ const a = rnd() * Math.PI * 2, e = (rnd() - .5) * Math.PI; pts.push(Math.cos(a) * Math.cos(e) * .23, Math.sin(e) * .23, Math.sin(a) * Math.cos(e) * .23); }
     const pg = new T.BufferGeometry(); pg.setAttribute("position", new T.Float32BufferAttribute(pts, 3));
     holo.add(new T.Points(pg, new T.PointsMaterial({color:0xff4fa3, size:.02, transparent:true, opacity:.9, blending:T.AdditiveBlending, depthWrite:false}))); }
-  const holoBeam = add(new T.CylinderGeometry(.2, .05, .38, 20, 1, true), new T.MeshBasicMaterial({color:0x45d4ff, transparent:true, opacity:.12, blending:T.AdditiveBlending, depthWrite:false, side:T.DoubleSide}), -.4, .6, -1.05);
+  const holoBeam = add(new T.CylinderGeometry(.2, .05, .38, 20, 1, true), new T.MeshBasicMaterial({color:0x45d4ff, transparent:true, opacity:.12, blending:T.AdditiveBlending, depthWrite:false, side:T.DoubleSide}), -1.1, .58, -1.1);
   // the bar on the north wall: shelves of glowing bottles
   add(new T.BoxGeometry(1.6, 1, .5), std({color:0x121218, roughness:.25, metalness:.4}), 1.6, .5, -2.4);
   add(new T.BoxGeometry(1.6, .04, .55), std({color:0xd8d4e8, roughness:.1, metalness:.2}), 1.6, 1.02, -2.4);
@@ -101,19 +115,22 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
     for(let k = 0; k < 9; k++){ const c = [0x7dffc2, 0xffc44d, 0xff4fa3, 0x45d4ff, 0xffffff][k % 5];
       add(new T.CylinderGeometry(.03, .035, .2 + rnd() * .1, 10), std({color:c, emissive:c, emissiveIntensity:.35, roughness:.1, transparent:true, opacity:.8}), .95 + k * .16, y + .1, -2.64); } }
   // a tall plant and a floor lamp in the corners
-  add(new T.CylinderGeometry(.18, .14, .45, 16), std({color:0xd8d4e0, roughness:.4}), -2.35, .22, 2.3);
-  for(let k = 0; k < 9; k++){ const l = add(new T.ConeGeometry(.12, .9, 6), std({color:0x1f6b3a, roughness:.6}), -2.35 + (rnd() - .5) * .3, .85 + rnd() * .3, 2.3 + (rnd() - .5) * .3);
+  fb("plant", add(new T.CylinderGeometry(.18, .14, .45, 16), std({color:0xd8d4e0, roughness:.4}), -2.35, .22, 2.3));
+  for(let k = 0; k < 9; k++){ const l = fb("plant", add(new T.ConeGeometry(.12, .9, 6), std({color:0x1f6b3a, roughness:.6}), -2.35 + (rnd() - .5) * .3, .85 + rnd() * .3, 2.3 + (rnd() - .5) * .3));
     l.rotation.set((rnd() - .5) * .9, 0, (rnd() - .5) * .9); }
   add(new T.CylinderGeometry(.015, .015, 1.6, 8), steel, 2.4, .8, -1.2);
   add(new T.SphereGeometry(.14, 16, 12), new T.MeshBasicMaterial({color:0xffe2b0}), 2.4, 1.65, -1.2);
   const lampF = new T.PointLight(0xffd8a0, 10, 6, 2); lampF.position.set(2.4, 1.6, -1.2); g.add(lampF);
   for(const [x, z] of [[-1.4, 1.2], [1.4, 1.2], [-1.4, -1.4], [1.4, -1.4]]){ const l = new T.PointLight(0xcfe0ff, 9, 6, 2); l.position.set(x, H - .25, z); g.add(l); }
   const fill = new T.HemisphereLight(0x9fb4ff, 0x2a1830, .9); fill.position.y = 2; g.add(fill);   // soft bounce light inside the glass box
+  // a warm ceiling spotlight that casts real shadows (furniture, desk, the robot)
+  const key = new T.SpotLight(0xffeedd, 40, 9, 1.05, .6, 1.6); key.position.set(-.3, H - .08, -.2); key.target.position.set(-.4, 0, -.4);
+  key.castShadow = true; key.shadow.mapSize.set(1024, 1024); key.shadow.bias = -.0006; key.shadow.normalBias = .02; key.shadow.camera.near = .2; key.shadow.camera.far = 6; g.add(key, key.target);
   // ── the house robot: stands at the east window looking out over the city ──
   const bot = new T.Group(); bot.position.set(2.15, 0, .2); bot.rotation.y = Math.PI / 2; g.add(bot);
   const suit = std({color:0x1a1c26, roughness:.45, metalness:.2}), chrome = std({color:0xc8cee0, roughness:.18, metalness:1});
   for(const x of [-.1, .1]){ const leg = new T.Mesh(new T.CapsuleGeometry(.07, .7, 4, 10), suit); leg.position.set(x, .45, 0); bot.add(leg); }
-  const torso = new T.Mesh(new T.CapsuleGeometry(.2, .45, 6, 14), suit); torso.position.y = 1.15; torso.scale.z = .7; bot.add(torso);
+  const torso = new T.Mesh(new T.CapsuleGeometry(.2, .45, 6, 14), suit); torso.position.y = 1.15; torso.scale.z = .7; bot.add(torso); torso.castShadow = true;
   const tie = new T.Mesh(new T.BoxGeometry(.05, .3, .01), std({color:0xff3d6e, emissive:0x661020})); tie.position.set(0, 1.22, .145); bot.add(tie);
   const neck = new T.Mesh(new T.CylinderGeometry(.05, .06, .1, 12), chrome); neck.position.y = 1.52; bot.add(neck);
   const head = new T.Group(); head.position.y = 1.68; bot.add(head);
@@ -196,7 +213,42 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
     right.tex.needsUpdate = true;
   }
 
+  // ── real assets (Poly Haven, CC0): night-city HDRI for reflections, wood/concrete textures, furniture models ──
+  let assetsAsked = false;
+  async function loadAssets(){
+    if(assetsAsked) return; assetsAsked = true;
+    const base = new URL("assets/hq/", location.href).href, JSM = "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/";
+    let GLTFLoader, RGBELoader;
+    try{ [{GLTFLoader}, {RGBELoader}] = await Promise.all([import(JSM + "loaders/GLTFLoader.js"), import(JSM + "loaders/RGBELoader.js")]); }catch(e){ return; }
+    let env = null;
+    try{ const hdr = await new RGBELoader().loadAsync(base + "night_city_1k.hdr"); const pm = new T.PMREMGenerator(R); env = pm.fromEquirectangular(hdr).texture; hdr.dispose(); pm.dispose();
+      g.traverse(o => { const m = o.material; if(m && m.isMeshStandardMaterial){ m.envMap = env; m.envMapIntensity = m === glass ? .02 : m.metalness > .5 ? 1.1 : .5; m.needsUpdate = true; } }); }catch(e){}
+    const tl = new T.TextureLoader(), tex = (f, srgb, rx = 1, ry = 1) => { const t = tl.load(base + "tex/" + f); t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(rx, ry); t.anisotropy = aniso; if(srgb) t.colorSpace = T.SRGBColorSpace; return t; };
+    Object.assign(floorMat, {map:tex("dark_wood_diffuse.jpg", true, 3, 3), normalMap:tex("dark_wood_nor_gl.jpg", false, 3, 3), roughnessMap:tex("dark_wood_rough.jpg", false, 3, 3), roughness:.9, metalness:0, envMapIntensity:.6, color:new T.Color(0xffffff)});
+    floorMat.normalScale.set(.6, .6); floorMat.needsUpdate = true;
+    Object.assign(deskMat, {map:tex("wood_table_001_diffuse.jpg", true, 2, .7), normalMap:tex("wood_table_001_nor_gl.jpg", false, 2, .7), roughnessMap:tex("wood_table_001_rough.jpg", false, 2, .7), roughness:.8, color:new T.Color(0xc8b8a8)}); deskMat.needsUpdate = true;
+    Object.assign(wallMat, {map:tex("concrete_wall_008_diffuse.jpg", true, 2, 1), normalMap:tex("concrete_wall_008_nor_gl.jpg", false, 2, 1), color:new T.Color(0x77737a), roughness:.95}); wallMat.needsUpdate = true;
+    const gl = new GLTFLoader();
+    const put = async (name, x, y, z, ry = 0, sc = 1, hide) => { try{ const o = (await gl.loadAsync(`${base}${name}/${name}.gltf`)).scene;
+      o.position.set(x, y, z); o.rotation.y = ry; o.scale.setScalar(sc);
+      o.traverse(m => { if(m.isMesh){ m.castShadow = m.receiveShadow = true; if(env && m.material){ m.material.envMap = env; m.material.envMapIntensity = .7; } } });
+      g.add(o); if(hide) FB[hide].forEach(m => { m.visible = false; }); return o; }catch(e){ return null; } };
+    await Promise.all([
+      put("sofa_03", -1.1, 0, -2.3, 0, 1, "sofa"),
+      put("throw_pillows_01", -1.75, .52, -2.32, 0, 1),
+      put("modern_coffee_table_01", -1.1, 0, -1.1, Math.PI / 2, 1, "table"),
+      put("mid_century_lounge_chair", -2.15, 0, -.45, 2.2, 1),
+      put("potted_plant_02", -2.3, 0, 2.25, .6, 1.9, "plant"),
+      put("potted_plant_02", 2.35, 0, -1.75, 2.1, 1.6),
+      put("desk_lamp_arm_01", -1.18, .77, DZ + .32, .9, .75, "lamp"),
+      put("standing_picture_frame_01", .62, .77, DZ + .12, -.4, 1.2),
+      put("wooden_display_shelves_01", -2.55, 0, .9, 0, 1.15),
+      put("modern_ceiling_lamp_01", -1.1, H - 1.17, -1.1, 0, 1),
+    ]);
+  }
+
   return {
+    loadAssets,
     group:g, OY, eye:new T.Vector3(0, OY + 1.22, .2), panes,
     pickPC:[main.scr], pickBot:[torso],
     setSeated(on){ chair.children.forEach((c, i) => { c.visible = !on || i < 2; }); },   // you're in it: only the arm-rests show

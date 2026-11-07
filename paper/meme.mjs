@@ -12,7 +12,13 @@
 // Round 38: each bot also reports what it is doing (b.doing), every run records the whole pipeline (L.funnel:
 // found → priced → rug-checked → passed → bought), and the tape is a team chat ({t, bot, kind, txt, say}) with a
 // Rug Desk that announces coins it rejects or clears.
-// Writes only paper/meme.json. Phone alerts (ntfy.sh, NTFY_TOPIC) only for big events, so 16 bots don't spam.
+// Round 41: 32 bots. Each one trains itself (except the Coin Flipper, the control): it records the price path of every
+// coin it holds, files each finished trade as a lesson, and every run replays its lessons under ~80 mutated versions of
+// its own rules (take profit, stop loss, hold time, entry filters). It only adopts a new version if it beats the current
+// one on BOTH halves of its history (a guard against fooling itself with a lucky streak), and posts what it changed.
+// Bots that go 12 h without a trade loosen their entry rules a little (curiosity). Rules live in b.gene, the training
+// log in b.train; the bulky lesson data lives in paper/meme-brain.json so the website's file stays small.
+// Writes only paper/meme.json and paper/meme-brain.json. Phone alerts (ntfy.sh, NTFY_TOPIC) only for big events.
 import fs from "node:fs";
 
 const STRATS = [
@@ -31,10 +37,15 @@ const STRATS = [
   {id:"steady",  name:"Steady Eddie",   desc:"half-size bets, tight stops",                  h1:[2, 20],   h6:[0, 60], stake:.5, tp:.20, sl:-.10, holdH:24},
   {id:"yolo",    name:"YOLO",           desc:"2.5× bets on the hottest coin, 2 at a time",   h1:[8, 60],   stake:2.5, maxOpen:2, hottest:true, tp:.60, sl:-.30, holdH:12},
   {id:"owl",     name:"Night Owl",      desc:"trades only 00:00 to 08:00 UTC",               h1:[3, 50],   hours:[0, 8], tp:.40, sl:-.20, holdH:12},
-  {id:"flipper", name:"Coin Flipper",   desc:"random rug-checked coin: the control",         random:true,  tp:.40, sl:-.20, holdH:24},
+  {id:"flipper", name:"Coin Flipper",   desc:"random rug-checked coin: the control",         random:true,  tp:.40, sl:-.20, holdH:24, fixed:true},
+  // 16 self-taught companies: they start from random rules and learn everything from their own trades
+  ...["Apex", "Bolt", "Cipher", "Drift", "Ember", "Flux", "Glitch", "Halo", "Ion", "Jolt", "Karma", "Lumen", "Mako", "Nyx", "Onyx", "Pulse"]
+    .map(n => ({id:n.toLowerCase(), name:`${n} AI`, desc:"self-taught: started from random rules", learner:true})),
 ];
 const CFG = {start:50, minStake:2, maxOpen:4, feePct:1, cooldownH:24, reportsPerRun:12, reportTtlMin:30, heldTtlMin:10, rugLiqDrop:.60,
-  maxPump:{h1:60, h6:400}, keepEquity:700, keepClosed:60, bigTradeUsd:5};
+  maxPump:{h1:60, h6:400}, keepEquity:400, keepClosed:60, bigTradeUsd:5,
+  learn:{trials:80, minLessons:6, minGain:.01, keepLessons:40, pathPoints:48, exploreAfterH:12}};
+const BRAIN = new URL("./meme-brain.json", import.meta.url);
 const FILE = new URL("./meme.json", import.meta.url);
 const SET = Object.assign({on:true, mode:"paper", risk:"normal", dailyGoalPct:10, dailyLossPct:10},
   (() => { try{ return JSON.parse(fs.readFileSync(new URL("./settings.json", import.meta.url), "utf8")); }catch(e){ return {}; } })());
@@ -71,6 +82,18 @@ for(const s of STRATS){
   Object.assign(L.bots[s.id], {name:s.name, desc:s.desc, strat:{tp:s.tp, sl:s.sl, holdH:s.holdH}});
 }
 for(const id of Object.keys(L.bots)) if(!STRATS.some(s => s.id === id)) delete L.bots[id];
+// each bot's own rules ("gene"), seeded from its starting strategy or, for the self-taught ones, at random
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const seeded = id => { let h = 2166136261; for(const c of id) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return () => ((h = Math.imul(h ^ h >>> 13, 1597334677) >>> 0) % 1e6) / 1e6; };
+for(const s of STRATS){ const b = L.bots[s.id]; if(b.gene) continue;
+  if(s.learner){ const r = seeded(s.id), lo = -10 + r() * 20;
+    b.gene = {tp:+(.1 + r() * .9).toFixed(3), sl:+(-.06 - r() * .34).toFixed(3), holdH:+(2 + r() * 70).toFixed(1), h1:[+lo.toFixed(1), +(lo + 15 + r() * 45).toFixed(1)],
+      buyRatio:+(1 + r()).toFixed(2), minLiq:Math.round(30000 + r() * 220000)}; }
+  else b.gene = {tp:s.tp, sl:s.sl, holdH:s.holdH, h1:s.h1 ? [...s.h1] : null, buyRatio:s.buyRatio || 1, minLiq:s.minLiq || 0};
+  b.train = {gen:0, tested:0, lr:.25, history:[], since:now}; }
+const brain = (() => { try{ return JSON.parse(fs.readFileSync(BRAIN, "utf8")); }catch(e){ return {bots:{}}; } })();
+const brainOf = id => brain.bots[id] = brain.bots[id] || {lessons:[], paths:{}};
+const pkey = p => `${p.mint}:${p.openedAt}`;
 const allPos = () => Object.values(L.bots).flatMap(b => b.positions);
 const before = Object.values(L.bots).map(b => b.positions.length + ":" + b.closed.length).join();
 
@@ -131,8 +154,16 @@ const whyNot = c => (c.failIds || []).map(id => WHY_NOT[id] || id);
 const SAY_SELL = {"take profit":"take-profit hit 🎯", "stop loss":"stop loss, cutting it", "time limit":"held long enough, out",
   "rug: pool drained":"🚨 the pool got drained, bailed out", "rug: RugCheck flagged it":"🚨 RugCheck flagged it as rugged, bailed out",
   "rug check failed":"🚨 it started failing the rug check, bailed out", "rug: coin vanished from the market":"🚨 the coin vanished from the market"};
+// a finished trade becomes a lesson: entry features + the path squeezed to 24 (low, high) pairs in time order
+function squeeze(path){ if(path.length <= CFG.learn.pathPoints) return path; const n = CFG.learn.pathPoints / 2, out = [];
+  for(let k = 0; k < n; k++){ const seg = path.slice(Math.floor(k * path.length / n), Math.floor((k + 1) * path.length / n)); if(!seg.length) continue;
+    const lo = Math.min(...seg), hi = Math.max(...seg); out.push(...(seg.indexOf(lo) < seg.indexOf(hi) ? [lo, hi] : [hi, lo])); } return out; }
 async function sell(b, s, p, reason, pair, proceeds){
   const pnl = proceeds - p.stake;
+  { const B = brainOf(s.id), rec = B.paths[pkey(p)] || {path:[], step:5}, ret = +(pnl / p.stake).toFixed(3);
+    const path = [...rec.path, ret], sq = squeeze(path);
+    B.lessons.push({path:sq, step:+(rec.step * path.length / sq.length).toFixed(2), ret, feat:p.feat || null, rug:reason.startsWith("rug"), t:now});
+    if(B.lessons.length > CFG.learn.keepLessons) B.lessons.splice(0, B.lessons.length - CFG.learn.keepLessons); delete B.paths[pkey(p)]; }
   b.cash = +(b.cash + proceeds).toFixed(4); b.positions.splice(b.positions.indexOf(p), 1);
   b.closed.push({mint:p.mint, sym:p.sym, stake:p.stake, openedAt:p.openedAt, closedAt:now, proceeds:+proceeds.toFixed(4), pnl:+pnl.toFixed(4), reason});
   if(b.closed.length > CFG.keepClosed) b.closed.splice(0, b.closed.length - CFG.keepClosed);
@@ -151,12 +182,14 @@ for(const s of STRATS){
     else {
       p.missing = 0; proceeds = sellValue(p, pair); const ret = proceeds / p.stake - 1, chk = memeChecks(pair, rep, now);
       p.last = {price:+pair.priceUsd, value:+proceeds.toFixed(2), ret:+ret.toFixed(4), t:now};
+      { const bp = brainOf(s.id).paths, k = pkey(p), rec = bp[k] = bp[k] || {path:[], step:5};   // price path, for learning later
+        rec.path.push(+ret.toFixed(3)); if(rec.path.length > 400){ rec.path = rec.path.filter((_, i) => i % 2 === 0); rec.step *= 2; } }
       if(pair.liquidity.usd < p.entryLiq * (1 - CFG.rugLiqDrop)) reason = "rug: pool drained";
       else if(rep && rep.rugged) reason = "rug: RugCheck flagged it";
       else if(!chk.passed && chk.checks.some(c => !c.pass && ["mint", "freeze", "lp", "risks"].includes(c.id))) reason = "rug check failed";
-      else if(ret >= s.tp) reason = "take profit";
-      else if(ret <= s.sl) reason = "stop loss";
-      else if(now - p.openedAt >= s.holdH * 36e5) reason = "time limit";
+      else if(ret >= b.gene.tp) reason = "take profit";
+      else if(ret <= b.gene.sl) reason = "stop loss";
+      else if(now - p.openedAt >= b.gene.holdH * 36e5) reason = "time limit";
     }
     if(reason) await sell(b, s, p, reason, pair, proceeds);
   }
@@ -179,8 +212,8 @@ for(const s of STRATS){
   const cooled = m => !b.closed.some(c => c.mint === m && now - c.closedAt < CFG.cooldownH * 36e5);
   let picks = clean.filter(c => !b.positions.some(p => p.mint === c.mint) && cooled(c.mint)
     && c.chg.h1 <= CFG.maxPump.h1 && c.chg.h6 <= CFG.maxPump.h6
-    && (s.random || (inRange(c.chg.h1, s.h1) && inRange(c.chg.h6, s.h6) && inRange(c.chg.h24, s.h24) && inRange(c.ageH, s.age)
-      && c.liq >= (s.minLiq || 0) && c.vol24 >= (s.minVol || 0) && c.h1.buys >= (s.buyRatio || 1) * c.h1.sells && (s.id === "dip" || c.h1.buys > c.h1.sells))));
+    && (s.random || (inRange(c.chg.h1, b.gene.h1) && inRange(c.chg.h6, s.h6) && inRange(c.chg.h24, s.h24) && inRange(c.ageH, s.age)
+      && c.liq >= (b.gene.minLiq || 0) && c.vol24 >= (s.minVol || 0) && c.h1.buys >= (b.gene.buyRatio || 1) * c.h1.sells && (s.id === "dip" || b.gene.h1 && b.gene.h1[1] < 0 || c.h1.buys > c.h1.sells))));
   if(s.random) picks = picks.sort(() => Math.random() - .5).slice(0, Math.random() < .25 ? 1 : 0);   // a random coin now and then
   else if(s.hottest) picks.sort((a, b2) => b2.chg.h1 - a.chg.h1);
   else picks.sort((a, b2) => b2.vol24 - a.vol24);
@@ -191,6 +224,7 @@ for(const s of STRATS){
     const pair = pairOf[c.mint], afterFee = stake * (1 - CFG.feePct / 100), eff = +pair.priceUsd * (1 + impact(afterFee, pair.liquidity.usd));
     b.cash = +(b.cash - stake).toFixed(4);
     b.positions.push({mint:c.mint, sym:c.sym, url:c.url, stake, qty:afterFee / eff, entryPrice:+pair.priceUsd, entryLiq:pair.liquidity.usd, openedAt:now,
+      feat:{h1:c.chg.h1, h6:c.chg.h6, h24:c.chg.h24, liq:c.liq, vol:c.vol24, age:c.ageH, br:+(c.h1.buys / Math.max(1, c.h1.sells)).toFixed(2)},
       why:`1h ${c.chg.h1 >= 0 ? "+" : ""}${c.chg.h1}% · ${c.h1.buys} buys vs ${c.h1.sells} sells · passed every rug check`});
     b.rug.passed++;
     say(s.id, "buy", `${s.name} bought ${c.sym} $${stake.toFixed(2)}`,
@@ -215,6 +249,61 @@ for(const s of STRATS){
     b.doing = {key, since:now};
   Object.assign(b.doing, {txt, busy});
 }
+// ── self-training: every bot (except the control) replays its own lessons under mutated rules ──
+// replay(gene, lesson): what this trade would have returned under these rules (null = the entry rules would have skipped it)
+function replay(g, l){
+  const f = l.feat; if(f && ((g.h1 && (f.h1 < g.h1[0] || f.h1 > g.h1[1])) || f.br < g.buyRatio || f.liq < g.minLiq)) return null;
+  const P = l.path.length ? l.path : [l.ret], maxI = Math.floor(g.holdH * 60 / l.step);
+  for(let i = 0; i < P.length; i++){ const r = P[i]; if(r >= g.tp || r <= g.sl || i >= maxI) return r; }
+  return P[P.length - 1];   // the bot actually sold here; prices after that are unknown
+}
+const score = (g, ls) => ls.reduce((a, l) => a + (replay(g, l) ?? 0), 0);
+const gauss = () => Math.sqrt(-2 * Math.log(Math.random() + 1e-9)) * Math.cos(2 * Math.PI * Math.random());
+function mutate(g, lr){ const n = {...g, h1:g.h1 ? [...g.h1] : null}, pickN = 1 + Math.floor(Math.random() * 3);
+  for(const k of ["tp", "sl", "holdH", "h1", "buyRatio", "minLiq"].sort(() => Math.random() - .5).slice(0, pickN)){
+    if(k === "tp") n.tp = +clamp(g.tp * Math.exp(gauss() * lr), .05, 2).toFixed(3);
+    if(k === "sl") n.sl = +clamp(g.sl * Math.exp(gauss() * lr), -.6, -.03).toFixed(3);
+    if(k === "holdH") n.holdH = +clamp(g.holdH * Math.exp(gauss() * lr), 1, 96).toFixed(1);
+    if(k === "h1" && n.h1){ const lo = clamp(g.h1[0] + gauss() * lr * 20, -30, 70), hi = clamp(g.h1[1] + gauss() * lr * 20, lo + 3, 80); n.h1 = [+lo.toFixed(1), +hi.toFixed(1)]; }
+    if(k === "buyRatio") n.buyRatio = +clamp(g.buyRatio * Math.exp(gauss() * lr * .5), 1, 3).toFixed(2);
+    if(k === "minLiq") n.minLiq = Math.round(clamp((g.minLiq || 30000) * Math.exp(gauss() * lr), 30000, 1e6)); }
+  return n; }
+const pct = v => `${(v * 100).toFixed(0)}%`;
+function describe(a, b2){ const out = [];
+  if(a.tp !== b2.tp) out.push(`take-profit ${pct(a.tp)} → ${pct(b2.tp)}`); if(a.sl !== b2.sl) out.push(`stop ${pct(a.sl)} → ${pct(b2.sl)}`);
+  if(a.holdH !== b2.holdH) out.push(`max hold ${a.holdH}h → ${b2.holdH}h`);
+  if(a.h1 && b2.h1 && (a.h1[0] !== b2.h1[0] || a.h1[1] !== b2.h1[1])) out.push(`buys coins up ${b2.h1[0]}% to ${b2.h1[1]}% this hour (was ${a.h1[0]} to ${a.h1[1]})`);
+  if(a.buyRatio !== b2.buyRatio) out.push(`wants ${b2.buyRatio}× more buyers than sellers (was ${a.buyRatio}×)`);
+  if(a.minLiq !== b2.minLiq) out.push(`min pool $${Math.round(b2.minLiq / 1000)}K (was $${Math.round(a.minLiq / 1000)}K)`);
+  return out.join(", "); }
+let trainedSetups = 0, adopted = 0;
+for(const s of STRATS){ const b = L.bots[s.id]; if(s.fixed || s.random) continue;
+  const ls = brainOf(s.id).lessons, T = b.train; T.lr = clamp(T.lr || .25, .05, .6);
+  if(ls.length >= CFG.learn.minLessons){
+    const A = ls.filter((_, i) => i % 2 === 0), Bh = ls.filter((_, i) => i % 2 === 1), base = score(b.gene, ls), baseA = score(b.gene, A), baseB = score(b.gene, Bh);
+    let best = null, bestS = base;
+    for(let k = 0; k < CFG.learn.trials; k++){ const c = mutate(b.gene, T.lr), sc = score(c, ls); if(sc > bestS){ best = c; bestS = sc; } }
+    T.tested += CFG.learn.trials; trainedSetups += CFG.learn.trials;
+    const gain = (bestS - base) / ls.length;
+    if(best && gain >= CFG.learn.minGain && score(best, A) > baseA && score(best, Bh) > baseB){
+      const what = describe(b.gene, best); b.gene = best; T.gen++; T.lr *= 1.15; adopted++;
+      T.history.push({t:now, gen:T.gen, what, gain:+gain.toFixed(4), n:ls.length}); T.history = T.history.slice(-10);
+      T.last = {t:now, kept:false, txt:`gen ${T.gen}: ${what}`};
+      say(s.id, "learn", `${s.name} learned: ${what}`, `Questioned my own rules and changed them: ${what}. Replayed on my last ${ls.length} trades that's ${gain >= 0 ? "+" : ""}${(gain * 100).toFixed(1)}% per trade better, and it held up on both halves of my history. Generation ${T.gen}. 🧠`);
+    }
+    else { T.lr *= .97; T.last = {t:now, kept:true, txt:best ? `found a setup ${(gain * 100).toFixed(1)}% better per trade but it didn't hold up on both halves, so I kept my rules` : `no setup beat my rules on my last ${ls.length} trades`}; }
+  }
+  else T.last = {t:now, kept:true, txt:`learning: ${ls.length} of ${CFG.learn.minLessons} finished trades needed before I start tuning`};
+  // curiosity: a bot that hasn't traded for a while loosens its entry rules a little, so it gets something to learn from
+  const lastTrade = Math.max(T.since || 0, ...b.positions.map(p => p.openedAt), ...b.closed.map(c => c.openedAt));
+  if(!b.positions.length && now - lastTrade > CFG.learn.exploreAfterH * 36e5 && now - (T.explored || 0) > 6 * 36e5 && b.shift === "on"){
+    const g = b.gene; T.explored = now;
+    if(g.h1) g.h1 = [+clamp(g.h1[0] - 3, -30, 70).toFixed(1), +clamp(g.h1[1] + 6, g.h1[0] + 3, 80).toFixed(1)];
+    g.buyRatio = +clamp(g.buyRatio * .9, 1, 3).toFixed(2); g.minLiq = Math.round(clamp(g.minLiq * .8, 0, 1e6));
+    say(s.id, "learn", `${s.name} loosened its entry rules`, `Haven't found a coin I like in ${Math.round((now - lastTrade) / 36e5)} hours, so I'm loosening my entry rules a little to get more to learn from. 🔍`); }
+}
+for(const [id, B] of Object.entries(brain.bots)){ const b = L.bots[id]; if(!b){ delete brain.bots[id]; continue; }
+  const keys = new Set(b.positions.map(pkey)); for(const k of Object.keys(B.paths)) if(!keys.has(k)) delete B.paths[k]; }
 // the Rug Desk: announces coins it rejected or cleared this run (only freshly checked ones, so it doesn't repeat itself)
 const freshDesk = L.scan.filter(c => c.checked && L.reports[c.mint] && L.reports[c.mint].t === now && !allPos().some(p => p.mint === c.mint));
 for(const c of freshDesk.filter(c => !c.passed).slice(0, 3))
@@ -228,8 +317,10 @@ L.funnel = {found:mints.length, priced:scored.length, checked:L.rugStats.checked
   sold:tape.filter(e => ["sell", "rug"].includes(e.kind)).length, t:now};
 L.tape = [...tape.reverse(), ...(L.tape || []).map(e => e.say ? e : {...e, say:e.txt})].slice(0, 80);
 L.settings = SET; L.rules = MEME_RULES; L.config = CFG; L.lastRun = now;
+L.learning = {setupsThisRun:trainedSetups, adopted, t:now};
 fs.writeFileSync(FILE, JSON.stringify(L));
+fs.writeFileSync(BRAIN, JSON.stringify(brain));
 if(Object.values(L.bots).map(b => b.positions.length + ":" + b.closed.length).join() !== before) console.log("TRADES_CHANGED");
 const tot = Object.values(L.bots).reduce((a, b) => a + b.value, 0);
 console.log(`meme team: ${STRATS.length} bots, $${tot.toFixed(2)} total | ${allPos().length} positions | scanned ${scored.length}, `
-  + `${fetched} new rug reports, ${clean.length} pass every check | ${tape.length} trades this run`);
+  + `${fetched} new rug reports, ${clean.length} pass every check | ${tape.length} messages this run | trained ${trainedSetups} setups, ${adopted} bots changed their rules`);

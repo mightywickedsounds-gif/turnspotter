@@ -29,19 +29,19 @@ jobs:
         run: |
           git config user.name "turnspotter-bot"
           git config user.email "turnspotter-bot@users.noreply.github.com"
-          # This job writes TWO files, paper/meme.json and paper/echo.json (Echo's call log), and nothing else. To save, it resets to the newest main and
+          # This job writes THREE files, paper/meme.json, paper/meme-brain.json (what each bot has learned) and paper/echo.json (Echo's call log), and nothing else. To save, it resets to the newest main and
           # puts only its own file back, so it can never overwrite the other bots' files (or anything else).
           save() {
-            mkdir -p "$RUNNER_TEMP/keep"; cp paper/meme.json "$RUNNER_TEMP/keep/meme.json" || return 0; cp paper/echo.json "$RUNNER_TEMP/keep/echo.json" 2>/dev/null || true
+            mkdir -p "$RUNNER_TEMP/keep"; cp paper/meme.json "$RUNNER_TEMP/keep/meme.json" || return 0; cp paper/echo.json "$RUNNER_TEMP/keep/echo.json" 2>/dev/null || true; cp paper/meme-brain.json "$RUNNER_TEMP/keep/meme-brain.json" 2>/dev/null || true
             for i in 1 2 3; do
               if timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD \
-                 && cp "$RUNNER_TEMP/keep/meme.json" paper/meme.json && { cp "$RUNNER_TEMP/keep/echo.json" paper/echo.json 2>/dev/null || true; } \
-                 && git add paper/meme.json && { git add paper/echo.json 2>/dev/null || true; } \
+                 && cp "$RUNNER_TEMP/keep/meme.json" paper/meme.json && { cp "$RUNNER_TEMP/keep/echo.json" paper/echo.json 2>/dev/null || true; cp "$RUNNER_TEMP/keep/meme-brain.json" paper/meme-brain.json 2>/dev/null || true; } \
+                 && git add paper/meme.json && { git add paper/echo.json paper/meme-brain.json 2>/dev/null || true; } \
                  && { git diff --cached --quiet || git commit -qm "Meme bot update"; } \
                  && timeout 60 git push -q origin HEAD:main; then echo "saved"; return 0; fi
               echo "save attempt $i failed"; sleep 10
             done
-            cp "$RUNNER_TEMP/keep/meme.json" paper/meme.json; cp "$RUNNER_TEMP/keep/echo.json" paper/echo.json 2>/dev/null || true
+            cp "$RUNNER_TEMP/keep/meme.json" paper/meme.json; cp "$RUNNER_TEMP/keep/echo.json" paper/echo.json 2>/dev/null || true; cp "$RUNNER_TEMP/keep/meme-brain.json" paper/meme-brain.json 2>/dev/null || true
           }
           # start from the newest meme file, never a stale copy
           timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD

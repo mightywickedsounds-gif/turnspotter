@@ -809,9 +809,43 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - Tested in Chrome (software 3D) at phone and desktop sizes: city, flight into the chair, looking around, tapping
   the monitor, every BossOS app with live DexScreener prices, standing up and leaving HQ; no page errors.
 
+### Round 41: 32 self-training bots, and a real-looking penthouse
+
+- **Where $782.53 came from:** it's the 16 meme bots' paper money added up (16 × $50 = $800 at the start), with every
+  coin they hold valued at its latest price.
+- **32 bots, each teaching itself.** 16 new "self-taught" companies (Apex AI … Pulse AI) start from random rules; the 16
+  originals start from their designed rules. Every bot except the Coin Flipper (the control, frozen on purpose):
+  - records the price path of every coin it holds (`paper/meme-brain.json`, kept out of the website's file);
+  - files each finished trade as a lesson (entry conditions + the path squeezed to 24 low/high pairs);
+  - every 5 minutes replays all its lessons under ~80 mutated versions of its own rules: take profit, stop loss,
+    max hold, the 1-hour move it buys into, buyers-vs-sellers ratio and minimum pool size;
+  - **questions itself:** it only switches if the new rules are at least 1% per trade better AND better on both halves
+    of its history separately (so a lucky streak in one half can't fool it); it then posts in Team chat what it
+    changed and by how much. Its learning speed adapts (faster after a good change, slower after misses);
+  - gets curious: after 12 hours without a trade it loosens its entry rules a little, to have something to learn from.
+- New BossOS app **AI Lab** (every bot's generation, setups tested, current rules and latest thinking); the Crew panel
+  shows each bot's brain line; the city has 32 company buildings (ring 3 of Bot Row now has towers too).
+- Tested: two live runs on a copy of the data (32 bots, 49 price paths recorded), and a learning check: given 20
+  trades that peaked at +30–40% and then crashed, Moonshot cut its take-profit from 100% to 50% (+10.6% per trade on
+  replay, held up on both halves) and announced it.
+- **Honest limits:** no amount of self-training makes a meme-coin bot "almost always right": rug pulls, bots and news
+  move these coins in ways their own past trades can't predict. What learning can do is tune each bot's exits and
+  filters to what its own trades have shown. The replay can't know prices after a bot actually sold, and it can only
+  judge coins the bot bought, so it's biased towards being pickier; the both-halves rule and the Coin Flipper control
+  are how we'll see whether any of it is real skill. Signal logic changed, but meme coins still can't be backtested on
+  our research data (there's no history of rug-check results), so the paper results are the test.
+- **The penthouse got real assets:** furniture models (sofa with pillows, mid-century lounge chair, coffee table, two
+  potted plants, an architect desk lamp, shelves, a pendant light, a picture frame), real dark-wood floor, wood desk and
+  concrete wall textures, a night-city HDRI for realistic reflections, all CC0 from Poly Haven (`assets/hq`, 6.7 MB,
+  credits in `assets/hq/CREDITS.md`), loaded the first time you visit. A ceiling spotlight now casts real shadows, the
+  back wall is concrete with a neon artwork, and the lounge moved in front of it.
+- Fixed: a code comment from round 40 had swallowed the lines that hide your chair's backrest and stop the rain
+  indoors; looking behind you showed a grey wall.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
+- `assets/hq/`: CC0 furniture, textures and HDRI for the penthouse (Poly Haven)
 - `hq.js`: the HQ penthouse (first-person seat, live monitors), imported by city.js
 - `city.js`: the open-world 3D Bot City (districts, citizens, cars, driving, minimap, HQ office), loaded by the City tab
 - `tradingview/TrenchAI_Direction.pine`: the indicator (paste into TradingView)
