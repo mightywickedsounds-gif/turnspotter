@@ -6,26 +6,41 @@
 // and zoom around, follow any person or car, or take your own car for a drive. HQ's glass penthouse holds the boss,
 // whose monitors mirror the real meme bot team (paper/meme.json). Everything is procedural (no model files) and the
 // layout is the same on every visit (seeded random).
-export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, onPick, onFrame, onToast, bots}){   // bots: [{id, name, css}]
+// Round 40: night-time cyberpunk look (filmic tone mapping, neon bloom when the device can take it, wet reflective
+// streets, rain, neon signs, a glowing sky) and a first-person penthouse (hq.js): sit in the boss's chair, look around,
+// tap the PC. `fx` holds three.js add-ons (bloom, reflections); without them the city still works, just plainer.
+import {buildPenthouse} from "./hq.js";
+export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, onPick, onFrame, onToast, bots, fx}){   // bots: [{id, name, css}]
   const rand = (() => { let a = 20261107; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
     t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; })();
   const pick = arr => arr[Math.floor(rand() * arr.length)];
   const toast = onToast || (() => {});
-  const R = new T.WebGLRenderer({canvas, antialias:true, powerPreference:"low-power"});
-  R.setPixelRatio(Math.min(1.5, devicePixelRatio || 1)); R.outputColorSpace = T.SRGBColorSpace; R.setClearColor(0x0e0838);
-  const scene = new T.Scene(); scene.fog = new T.Fog(0x160d52, 45, 170);
-  const cam = new T.PerspectiveCamera(45, 1, .1, 420);
-  scene.add(new T.HemisphereLight(0xa596ff, 0x120a40, 1.15));
+  const R = new T.WebGLRenderer({canvas, antialias:true, powerPreference:"high-performance"});
+  R.setPixelRatio(Math.min(1.5, devicePixelRatio || 1)); R.outputColorSpace = T.SRGBColorSpace; R.setClearColor(0x0a0620);
+  R.toneMapping = T.ACESFilmicToneMapping; R.toneMappingExposure = 1.2;
+  const HIGH = matchMedia("(pointer:fine)").matches && (navigator.hardwareConcurrency || 4) >= 8 && !reduceMotion;   // desktops: mirror-wet streets too
+  const scene = new T.Scene(); scene.fog = new T.FogExp2(0x1c1046, .0115);
+  const cam = new T.PerspectiveCamera(45, 1, .05, 600);
+  const trand = (() => { let a = 4242; return () => (a = (a * 16807) % 2147483647) / 2147483647; })();   // for looks only, so the city layout stays the same
+  let envTex = null;
+  if(fx && fx.RoomEnvironment){ const pm = new T.PMREMGenerator(R); envTex = pm.fromScene(new fx.RoomEnvironment(), .04).texture; }
+  scene.add(new T.HemisphereLight(0xa596ff, 0x120a40, 1.0));
   const moonLight = new T.DirectionalLight(0xc8d0ff, .55); moonLight.position.set(-12, 25, 10); scene.add(moonLight);
 
   // ── textures ──
   const canvasTex = (w, h, draw) => { const c = document.createElement("canvas"); c.width = w; c.height = h; const g = c.getContext("2d");
     draw(g, w, h); const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.userData = {c, g}; return t; };
-  const windows = (lit, tints) => canvasTex(64, 128, g => { g.fillStyle = "#0b0a2a"; g.fillRect(0, 0, 64, 128);
-    for(let y = 4; y < 124; y += 8) for(let x = 4; x < 60; x += 8) if(rand() < lit){ g.globalAlpha = .5 + rand() * .5; g.fillStyle = pick(tints); g.fillRect(x, y, 4, 4); } });
+  const windows = (lit, tints) => { for(let y = 4; y < 124; y += 8) for(let x = 4; x < 60; x += 8) if(rand() < lit){ rand(); pick(tints); }   // same random draws as before, so the city layout doesn't change
+    return canvasTex(128, 256, g => { g.fillStyle = "#07061a"; g.fillRect(0, 0, 128, 256);
+      for(let y = 3; y < 252; y += 8){ const floorLit = trand() < .85;
+        g.fillStyle = "#0e0c26"; g.fillRect(0, y + 6, 128, 1);
+        for(let x = 3; x < 124; x += 8){ if(!floorLit || trand() > lit) continue; const c = tints[Math.floor(trand() * tints.length)];
+          g.globalAlpha = .45 + trand() * .55; g.fillStyle = c; g.fillRect(x, y, 6, 5);
+          if(trand() < .18){ g.globalAlpha = .6; g.fillStyle = "#1a1030"; g.fillRect(x + 2, y + 2, 2, 3); } } }
+      g.globalAlpha = 1; }); };
   const winOffice = windows(.55, ["#ffe9a8", "#ffffff", "#8fd8ff"]), winHome = windows(.35, ["#ffcf7a", "#ffb35c"]), winHQ = windows(.75, ["#9fe8ff", "#ffffff"]);
   const winDesk = windows(.6, ["#7dffc2", "#c8ffe8"]);
-  for(const t of [winOffice, winHome, winHQ, winDesk]) t.magFilter = T.NearestFilter;
+  for(const t of [winOffice, winHome, winHQ, winDesk]){ t.anisotropy = R.capabilities.getMaxAnisotropy(); }
   const glowTex = canvasTex(64, 64, g => { const r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
     r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(.3, "rgba(255,255,255,.4)"); r.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = r; g.fillRect(0, 0, 64, 64); });
   const waterTex = canvasTex(64, 64, g => { g.fillStyle = "#14307a"; g.fillRect(0, 0, 64, 64);
@@ -46,8 +61,13 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
   const EXT = (N + .5) * P;
   const ground = new T.Mesh(new T.PlaneGeometry(EXT * 2 + 300, EXT * 2 + 300), new T.MeshStandardMaterial({color:0x150f3a, roughness:1}));
   ground.rotation.x = -Math.PI / 2; scene.add(ground);
-  const roads = new T.Mesh(new T.PlaneGeometry(EXT * 2 + 1.2, EXT * 2 + 1.2), new T.MeshStandardMaterial({color:0x1d1648, roughness:1}));
+  // wet asphalt: glossy, reflects the sky and, on desktops, the whole lit city (a mirror under a half-see-through road)
+  const roads = new T.Mesh(new T.PlaneGeometry(EXT * 2 + 1.2, EXT * 2 + 1.2), new T.MeshStandardMaterial({color:0x1a1438, roughness:.32, metalness:.55,
+    envMap:envTex, envMapIntensity:.45, transparent:HIGH && !!(fx && fx.Reflector), opacity:.72}));
   roads.rotation.x = -Math.PI / 2; roads.position.y = .004; scene.add(roads);
+  let mirror = null;
+  if(HIGH && fx && fx.Reflector){ mirror = new fx.Reflector(new T.PlaneGeometry(EXT * 2 + 1.2, EXT * 2 + 1.2), {textureWidth:768, textureHeight:768, color:0x6a6a8a});
+    mirror.rotation.x = -Math.PI / 2; mirror.position.y = .001; scene.add(mirror); }
   const unit = new T.BoxGeometry(1, 1, 1); unit.translate(0, .5, 0);
   const M4 = new T.Matrix4(), Q = new T.Quaternion(), V = new T.Vector3(), S = new T.Vector3(), E = new T.Euler();
   const place = (inst, i, x, y, z, sx, sy, sz, ry = 0) => { Q.setFromEuler(E.set(0, ry, 0)); inst.setMatrixAt(i, M4.compose(V.set(x, y, z), Q, S.set(sx, sy, sz))); };
@@ -272,46 +292,45 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
     const l = glow(0xff4fa3, 4); l.position.set(0, 2.9, .3); l.material.opacity = .25; g.add(l);
     pickable.push({obj:scr, kind:"landmark", text:"<b>Neon Square</b> · the big screen shows the bot team live"}); }
 
-  // ── HQ tower with the boss's glass penthouse ──
+  // ── HQ tower with the boss's glass penthouse (hq.js) ──
   const HQ_H = 16, HQ = new T.Group(); scene.add(HQ);
-  const hqMat = new T.MeshStandardMaterial({map:winHQ, emissiveMap:winHQ, emissive:0xbfefff, emissiveIntensity:1.1, color:0x1a2a5a, roughness:.4});
+  const hqMat = new T.MeshStandardMaterial({map:winHQ, emissiveMap:winHQ, emissive:0xbfefff, emissiveIntensity:1.1, color:0x1a2a5a, roughness:.25, metalness:.4, envMap:envTex, envMapIntensity:.6});
   const hqBody = new T.Mesh(unit, hqMat); hqBody.scale.set(3.2, HQ_H, 3.2); hqBody.position.y = .12; HQ.add(hqBody);
-  const OY = HQ_H + .12;   // office floor
-  const glass = new T.Mesh(new T.BoxGeometry(3.6, 2.1, 3.6), new T.MeshStandardMaterial({color:0x7fd8ff, transparent:true, opacity:.12, roughness:.1, depthWrite:false}));
-  glass.position.y = OY + 1.05; HQ.add(glass);
-  const hqFrame = new T.LineSegments(new T.EdgesGeometry(new T.BoxGeometry(3.6, 2.1, 3.6)), new T.LineBasicMaterial({color:0x45d4ff})); hqFrame.position.y = OY + 1.05; HQ.add(hqFrame);
-  const floor = new T.Mesh(new T.BoxGeometry(3.6, .1, 3.6), new T.MeshStandardMaterial({color:0x2a2340})); floor.position.y = OY; HQ.add(floor);
-  const roof = new T.Mesh(new T.BoxGeometry(3.8, .18, 3.8), new T.MeshStandardMaterial({color:0x221b44, emissive:0x45d4ff, emissiveIntensity:.05, roughness:1})); roof.position.y = OY + 2.18; HQ.add(roof);
-  const antenna = new T.Mesh(new T.CylinderGeometry(.04, .06, 2.4), new T.MeshStandardMaterial({color:0xccd2ff})); antenna.position.y = OY + 3.4; HQ.add(antenna);
-  const beacon = glow(0xff4f7d, 1.2); beacon.position.y = OY + 4.7; HQ.add(beacon);
-  for(const [x, z, ry] of [[0, 1.91, 0], [0, -1.91, Math.PI], [1.91, 0, Math.PI / 2], [-1.91, 0, -Math.PI / 2]]){
-    const s = signMesh(sign("HQ", "#45d4ff", 128, 64), 1.3, .65); s.position.set(x, OY + 2.75, z); s.rotation.y = ry; HQ.add(s); }
-  const officeLight = new T.PointLight(0xffe2b0, 6, 6, 1.5); officeLight.position.set(0, OY + 1.8, .2); HQ.add(officeLight);
-  // back wall of monitors (they face +z, toward the boss and the camera)
-  const screens = [];
-  const backWall = new T.Mesh(new T.BoxGeometry(3.5, 2, .08), new T.MeshStandardMaterial({color:0x14112e})); backWall.position.set(0, OY + 1.05, -1.72); HQ.add(backWall);
-  const SW = 320, SH = 200, layout = [[-1.08, 1.45], [0, 1.45], [1.08, 1.45], [-.54, .82], [.54, .82]];
-  for(const [x, y] of layout){ const tex = canvasTex(SW, SH, g => { g.fillStyle = "#06101e"; g.fillRect(0, 0, SW, SH); });
-    const m = new T.Mesh(new T.PlaneGeometry(1, .62), new T.MeshBasicMaterial({map:tex})); m.position.set(x, OY + y, -1.66); HQ.add(m);
-    const bezel = new T.Mesh(new T.BoxGeometry(1.06, .68, .04), new T.MeshStandardMaterial({color:0x0a0a14})); bezel.position.set(x, OY + y, -1.69); HQ.add(bezel);
-    screens.push(tex); }
-  // desk, chair and the boss (a robot in a suit), seated with his back to us, watching the screens
-  const desk = new T.Mesh(new T.BoxGeometry(2.4, .08, .7), new T.MeshStandardMaterial({color:0x3a2a1a, roughness:.5})); desk.position.set(0, OY + .72, -1.05); HQ.add(desk);
-  for(const x of [-1.1, 1.1]){ const leg = new T.Mesh(new T.BoxGeometry(.06, .72, .6), new T.MeshStandardMaterial({color:0x2a1f12})); leg.position.set(x, OY + .36, -1.05); HQ.add(leg); }
-  const kb = new T.Mesh(new T.BoxGeometry(.5, .02, .16), new T.MeshStandardMaterial({color:0x222233, emissive:0x45d4ff, emissiveIntensity:.3})); kb.position.set(0, OY + .77, -.92); HQ.add(kb);
-  const chair = new T.Mesh(new T.BoxGeometry(.56, .42, .08), new T.MeshStandardMaterial({color:0x1a1a2a})); chair.position.set(0, OY + .74, -.12); HQ.add(chair);
-  const seat = new T.Mesh(new T.BoxGeometry(.6, .08, .55), new T.MeshStandardMaterial({color:0x1a1a2a})); seat.position.set(0, OY + .5, -.4); HQ.add(seat);
-  const boss = new T.Group(); boss.position.set(0, OY + .54, -.42); HQ.add(boss);
-  const suit = new T.MeshStandardMaterial({color:0x1d2233, roughness:.5});
-  const torso = new T.Mesh(new T.BoxGeometry(.5, .6, .28), suit); torso.position.y = .42; boss.add(torso);
-  const tie = new T.Mesh(new T.BoxGeometry(.06, .3, .02), new T.MeshStandardMaterial({color:0xff4f7d, emissive:0x661020})); tie.position.set(0, .45, -.15); boss.add(tie);
-  const head = new T.Group(); head.position.y = .9; boss.add(head);
-  const skull = new T.Mesh(new T.BoxGeometry(.32, .32, .32), new T.MeshStandardMaterial({color:0xb8bfd8, metalness:.6, roughness:.3})); head.add(skull);
-  const visor = new T.Mesh(new T.BoxGeometry(.26, .08, .02), new T.MeshBasicMaterial({color:0x45d4ff})); visor.position.set(0, .03, -.17); head.add(visor);
-  const armL = new T.Mesh(new T.BoxGeometry(.12, .12, .5), suit), armR = armL.clone();
-  armL.position.set(-.3, .38, -.3); armR.position.set(.3, .38, -.3); boss.add(armL, armR);
-  pickable.push({obj:hqBody, kind:"hq"}, {obj:glass, kind:"hq"}, {obj:torso, kind:"hq"});
+  for(const [x, z] of [[1.62, 1.62], [-1.62, 1.62], [1.62, -1.62], [-1.62, -1.62]]){ const e = new T.Mesh(new T.BoxGeometry(.06, HQ_H, .06), new T.MeshBasicMaterial({color:0x45d4ff})); e.position.set(x, .12 + HQ_H / 2, z); HQ.add(e); }
+  const OY = HQ_H + .12 + .435;   // penthouse floor
+  const hq = buildPenthouse(T, {parent:HQ, OY, glowTex, canvasTex, R});
+  hq.group.traverse(o => { const m = o.material; if(m && m.isMeshStandardMaterial && envTex && !m.envMap){ m.envMap = envTex; if(m.envMapIntensity === 1) m.envMapIntensity = m.metalness > .5 ? 1 : .35; } });
+  const antenna = new T.Mesh(new T.CylinderGeometry(.04, .07, 3, 8), new T.MeshStandardMaterial({color:0xccd2ff, metalness:.8, roughness:.3})); antenna.position.set(1.8, OY + 4.3, -1.8); HQ.add(antenna);
+  const beacon = glow(0xff4f7d, 1.4); beacon.position.set(1.8, OY + 5.9, -1.8); HQ.add(beacon);
+  for(const [x, z, ry] of [[0, 2.95, 0], [0, -2.95, Math.PI], [2.95, 0, Math.PI / 2], [-2.95, 0, -Math.PI / 2]]){
+    const s = signMesh(sign("HQ", "#45d4ff", 128, 64), 1.3, .65); s.material.toneMapped = false; s.position.set(x, OY + 3.15, z); s.rotation.y = ry; HQ.add(s); }
+  pickable.push({obj:hqBody, kind:"hq"}, ...hq.panes.map(o => ({obj:o, kind:"hq"})), ...hq.pickPC.map(o => ({obj:o, kind:"pc"})), ...hq.pickBot.map(o => ({obj:o, kind:"hqbot"})));
   places.hq = door(0, 0);
+
+  // ── cyberpunk dressing: neon signs on the towers, holo ads on the roofs, a glowing sky and rain ──
+  { const WORDS = ["NEON", "BAR", "HOTEL", "24H", "RAMEN", "CYBER", "TRADE", "SOL", "PUMP", "MINT", "LOCKED", "NOODLES", "ARCADE", "CLINIC", "BOT", "DATA"];
+    const signTex = WORDS.map((w, k) => canvasTex(96, 384, g => { const col = ["#ff4fa3", "#45d4ff", "#ffc44d", "#7dffc2", "#b07bff", "#ff6b3d"][k % 6];
+      g.fillStyle = "#08040f"; g.fillRect(0, 0, 96, 384); g.strokeStyle = col; g.lineWidth = 5; g.strokeRect(5, 5, 86, 374);
+      g.fillStyle = col; g.shadowColor = col; g.shadowBlur = 14; g.font = "bold 56px sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+      const L = [...w].slice(0, 6); L.forEach((ch, i) => g.fillText(ch, 48, 384 / (L.length + 1) * (i + 1))); }));
+    const tall = offices.filter(o => o[4] > 3.2);
+    for(const o of tall) if(trand() < .5){ const [x, y, z, w, h] = o, f = Math.floor(trand() * 4), ry = f * Math.PI / 2, sh = Math.min(2.6, h * .45);
+      const m = new T.Mesh(new T.PlaneGeometry(.42, sh), new T.MeshBasicMaterial({map:signTex[Math.floor(trand() * signTex.length)], toneMapped:false, side:T.DoubleSide}));
+      const off = w / 2 + .05; m.position.set(x + Math.sin(ry) * off + (f % 2 ? 0 : .3 * (trand() - .5)), y + h * .55, z + Math.cos(ry) * off); m.rotation.y = ry; scene.add(m); }
+    // a few rooftop holo ads that slowly scroll
+    const adTex = canvasTex(512, 128, g => { const gr = g.createLinearGradient(0, 0, 512, 0); gr.addColorStop(0, "#ff4fa3"); gr.addColorStop(.5, "#45d4ff"); gr.addColorStop(1, "#ffc44d");
+      g.fillStyle = "rgba(8,4,20,.5)"; g.fillRect(0, 0, 512, 128); g.fillStyle = gr; g.font = "bold 60px sans-serif"; g.textBaseline = "middle"; g.fillText("TURN SPOTTER · RUG-CHECKED · ", 10, 66); });
+    adTex.wrapS = T.RepeatWrapping; scene.userData.adTex = adTex;
+    for(const o of tall.filter(o => o[4] > 7).slice(0, 10)){ const [x, y, z, w, h] = o, m = new T.Mesh(new T.PlaneGeometry(2.4, .6), new T.MeshBasicMaterial({map:adTex, transparent:true, opacity:.85, toneMapped:false, side:T.DoubleSide, blending:T.AdditiveBlending, depthWrite:false}));
+      m.position.set(x, y + h + .9, z); m.rotation.y = Math.atan2(-x, -z); scene.add(m); }
+    // sky: deep blue overhead, a magenta glow on the horizon from the city's lights
+    const skyTex = canvasTex(8, 256, g => { const gr = g.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, "#03020c"); gr.addColorStop(.55, "#160a3a"); gr.addColorStop(.82, "#4a1660"); gr.addColorStop(1, "#ff4fa3"); g.fillStyle = gr; g.fillRect(0, 0, 8, 256); });
+    const sky = new T.Mesh(new T.SphereGeometry(400, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), new T.MeshBasicMaterial({map:skyTex, side:T.BackSide, fog:false, depthWrite:false}));
+    sky.position.y = -8; scene.add(sky); }
+  const RAIN = reduceMotion ? 0 : HIGH ? 3200 : 1600, rainPos = new Float32Array(RAIN * 6), rainBox = 46;
+  for(let k = 0; k < RAIN; k++){ const x = (trand() - .5) * rainBox, y = trand() * 30, z = (trand() - .5) * rainBox; rainPos.set([x, y, z, x - .03, y - .55, z], k * 6); }
+  const rainGeo = new T.BufferGeometry(); rainGeo.setAttribute("position", new T.BufferAttribute(rainPos, 3));
+  const rain = new T.LineSegments(rainGeo, new T.LineBasicMaterial({color:0xa8c4ff, transparent:true, opacity:.28, depthWrite:false})); rain.frustumCulled = false; scene.add(rain);
 
   // ── sky: stars, the moon, mountains on the horizon and the blimp ──
   { const st = []; for(let k = 0; k < 700; k++){ const a = rand() * Math.PI * 2, e = .12 + rand() * 1.2, r = 200; st.push([Math.cos(a) * Math.cos(e) * r, Math.sin(e) * r, Math.sin(a) * Math.cos(e) * r]); }
@@ -382,7 +401,9 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
   const cBody = new T.InstancedMesh(carBody, new T.MeshStandardMaterial({color:0xffffff, metalness:.4, roughness:.4}), NC);
   const cTop = new T.InstancedMesh(carTop, new T.MeshStandardMaterial({color:0x111428, roughness:.2}), NC);
   const cLight = new T.InstancedMesh(lightGeo, new T.MeshBasicMaterial({color:0xfff2c0}), NC);
-  scene.add(cBody, cTop, cLight); pickable.push({obj:cBody, kind:"car"});
+  const tailGeo = new T.BoxGeometry(.03, .06, .3); tailGeo.translate(-.41, .26, 0);
+  const cTail = new T.InstancedMesh(tailGeo, new T.MeshBasicMaterial({color:0xff2a55, toneMapped:false}), NC);
+  scene.add(cBody, cTop, cLight, cTail); pickable.push({obj:cBody, kind:"car"});
   const neighbours = ([x, z]) => [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([a, b]) => [NODES[idx(x) + a], NODES[idx(z) + b]]).filter(([a, b]) => a !== undefined && b !== undefined);
   const MODELS = ["hatchback", "coupe", "taxi", "van", "sports car", "pickup"];
   for(let k = 0; k < NC; k++){ const at = [pick(NODES), pick(NODES)];
@@ -404,10 +425,10 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
       else if(c.mode === "fuel"){ c.t0 += dt; if(c.t0 > 4){ c.mode = "fromPump"; c.t0 = 0; } }
       // drive on the right: offset from the centre line
       const ox = c.mode === "drive" ? -Math.cos(c.dir) * .33 : 0, oz = c.mode === "drive" ? Math.sin(c.dir) * .33 : 0, ry = c.dir - Math.PI / 2;
-      for(const m of [cBody, cTop, cLight]) place(m, i, c.x + ox, .02, c.z + oz, 1, 1, 1, ry);
+      for(const m of [cBody, cTop, cLight, cTail]) place(m, i, c.x + ox, .02, c.z + oz, 1, 1, 1, ry);
       c.px = c.x + ox; c.pz = c.z + oz;
     }
-    cBody.instanceMatrix.needsUpdate = cTop.instanceMatrix.needsUpdate = cLight.instanceMatrix.needsUpdate = true; };
+    cBody.instanceMatrix.needsUpdate = cTop.instanceMatrix.needsUpdate = cLight.instanceMatrix.needsUpdate = cTail.instanceMatrix.needsUpdate = true; };
   const personText = p => `<b>${p.name}</b> · AI ${p.job} · ${p.doing}`;
   const carText = c => `<b>${c.owner}'s ${c.model}</b> · ${c.mode === "drive" ? `driving through ${DISTRICT(c.x, c.z)}` : "filling up at the gas station"}`;
 
@@ -446,49 +467,14 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
       drv.lastFuel = t; toast("⛽ Filled up · the bots are paying"); } };
 
   // ── the boss's monitors and the plaza billboards: a live mirror of the meme bot team ──
-  let MDATA = null;
+  let MDATA = null, LIVE = null;
   const money = v => (v >= 0 ? "+$" : "−$") + Math.abs(v).toFixed(2);
-  const screenHead = (g, title, color) => { g.fillStyle = "#06101e"; g.fillRect(0, 0, SW, SH); g.fillStyle = color; g.fillRect(0, 0, SW, 26);
-    g.fillStyle = "#06101e"; g.font = "bold 15px monospace"; g.textBaseline = "middle"; g.fillText(title, 10, 14); g.font = "13px monospace"; };
   const drawScreens = (tick = 0) => {
     const M = MDATA; if(!M || !M.bots) return;
-    const team = Object.values(M.bots), total = team.reduce((a, b) => a + (b.value ?? b.cash), 0), start = team.reduce((a, b) => a + b.start, 0), up = total >= start;
+    if(mode === "office" || tick % 6 === 0) hq.drawMonitors(M, LIVE, tick);
+    const team = Object.values(M.bots), total = team.reduce((a, b) => a + (b.value ?? b.cash), 0);
     const today = team.reduce((a, b) => a + (b.day ? b.day.pnl || 0 : 0), 0), n = k => team.filter(b => b.shift === k).length;
-    const trades = (M.tape || []).filter(e => e.bot !== "rugdesk");
-    { const t = screens[0], g = t.userData.g; screenHead(g, `BOT TEAM · ${team.length} BOTS · PAPER`, "#ffc44d");
-      g.fillStyle = up ? "#3ee6a2" : "#ff4f7d"; g.font = "bold 32px monospace"; g.fillText("$" + total.toFixed(2), 12, 56);
-      g.font = "14px monospace"; g.fillText(money(total - start) + " since start", 12, 84);
-      // team equity: sum of every bot's history, by time
-      const pts = new Map(); for(const b of team) for(const [tt, v] of b.equity.slice(-160)) pts.set(Math.round(tt / 3e5), (pts.get(Math.round(tt / 3e5)) || 0) + v);
-      const eq = [...pts.entries()].sort((a, b) => a[0] - b[0]).map(e => e[1]).slice(-160);
-      if(eq.length > 1){ const lo = Math.min(...eq), hi = Math.max(...eq); g.strokeStyle = up ? "#3ee6a2" : "#ff4f7d"; g.lineWidth = 2; g.beginPath();
-        eq.forEach((v, k) => { const x = 10 + k / (eq.length - 1) * (SW - 20), y = SH - 12 - (v - lo) / ((hi - lo) || 1) * 80; k ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke(); }
-      t.needsUpdate = true; }
-    { const t = screens[1], g = t.userData.g; screenHead(g, "LEADERBOARD", "#45d4ff");
-      [...team].sort((a, b) => (b.value ?? b.cash) - (a.value ?? a.cash)).slice(0, 7).forEach((b, k) => { const v = b.value ?? b.cash, r = v / b.start - 1;
-        g.fillStyle = "#eaf0ff"; g.fillText(`${k + 1}. ${b.name}`.slice(0, 18), 10, 46 + k * 21);
-        g.fillStyle = r >= 0 ? "#3ee6a2" : "#ff4f7d"; g.fillText(`${r >= 0 ? "+" : ""}${(r * 100).toFixed(1)}%`, 250, 46 + k * 21); });
-      t.needsUpdate = true; }
-    { const t = screens[2], g = t.userData.g; screenHead(g, "TRADE TAPE", "#ff4fa3");
-      const ev = trades.slice(0, 8);
-      if(!ev.length){ g.fillStyle = "#8b95bd"; g.fillText("no trades yet", 12, 52); }
-      g.font = "11px monospace";
-      ev.forEach((e, k) => { g.fillStyle = / sold /.test(e.txt) ? (/ \+\$/.test(e.txt) ? "#3ee6a2" : "#ff4f7d") : "#ffc44d"; g.fillText(e.txt.slice(0, 44), 8, 44 + k * 19); });
-      if(tick % 2) { g.fillStyle = "#ff4fa3"; g.fillRect(SW - 18, 9, 8, 8); }
-      t.needsUpdate = true; }
-    { const t = screens[3], g = t.userData.g, rs = M.rugStats || {checked:0, passed:0, rejected:0};
-      screenHead(g, `RUG CHECKS · ${rs.passed} OK · ${rs.rejected} REJECTED`, "#7dffc2");
-      (M.scan || []).filter(c => c.checked).slice(0, 7).forEach((c, k) => { g.fillStyle = "#eaf0ff"; g.fillText(c.sym.slice(0, 10), 12, 46 + k * 21);
-        g.fillStyle = c.passed && !c.warnings ? "#3ee6a2" : c.passed ? "#ffc44d" : "#ff4f7d";
-        g.fillText(c.passed && !c.warnings ? "PASS" : c.passed ? "WARN" : (c.fails[0] || "FAIL").slice(0, 20), 120, 46 + k * 21); });
-      t.needsUpdate = true; }
-    { const t = screens[4], g = t.userData.g;
-      screenHead(g, "TODAY", "#ffc44d");
-      g.font = "bold 26px monospace"; g.fillStyle = today >= 0 ? "#3ee6a2" : "#ff4f7d"; g.fillText(money(today), 14, 62);
-      g.font = "14px monospace";
-      [[`on shift`, n("on"), "#ffc44d"], [`profit locked`, n("locked"), "#3ee6a2"], [`profit brake`, n("brake"), "#ff4f7d"], [`asleep / off`, n("asleep") + n("off"), "#8b95bd"]]
-        .forEach(([label, v, c], k) => { g.fillStyle = c; g.fillText(`${String(v).padStart(2)}  ${label}`, 14, 100 + k * 22); });
-      t.needsUpdate = true; }
+    if(mode === "office") return;   // the plaza billboard can't be seen from up here
     // Neon Square billboard
     { const g = board.userData.g, W = 512, H = 256, f = M.funnel;
       g.fillStyle = "#07051c"; g.fillRect(0, 0, W, H);
@@ -503,11 +489,17 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
 
   // ── camera: drag to move around, two fingers (or right-drag) to spin and tilt, pinch/scroll to zoom ──
   const view = {yaw:.75, pitch:.9, dist:48, tx:0, ty:1.5, tz:0}, goal = {...view};
-  const OFFICE = {yaw:.7, pitch:.13, dist:5, tx:0, ty:OY + 1, tz:-.85};   // eye level, looking in over the boss's shoulder at his screens
+  const look = {yaw:0, pitch:-.16, fov:62}, lookGoal = {...look};   // in the penthouse: you sit in the chair; yaw 0 faces the desk and the south window
+  let trans = null;   // a short camera flight into or out of the penthouse
   let mode = "free", saved = null, followRef = null, tilt = 0;
   const tiltFor = d => Math.max(.2, Math.min(1.3, .24 + (d - 5) / 55 * .95 + tilt));
   const clampT = () => { goal.tx = Math.max(-EXT - 4, Math.min(EXT + 4, goal.tx)); goal.tz = Math.max(-EXT - 4, Math.min(EXT + 4, goal.tz)); };
-  const resize = () => { const w = stage.clientWidth, h = stage.clientHeight; if(!w) return; R.setSize(w, h, false); cam.aspect = w / h; cam.fov = w < h ? 58 : 45; cam.updateProjectionMatrix(); };   // phones: a wider lens
+  let composer = null, bloom = null;
+  if(fx && fx.EffectComposer && !reduceMotion){ try{ composer = new fx.EffectComposer(R); composer.addPass(new fx.RenderPass(scene, cam));
+    bloom = new fx.UnrealBloomPass(new T.Vector2(256, 256), .85, .5, .6); composer.addPass(bloom); composer.addPass(new fx.OutputPass()); }catch(e){ composer = null; } }
+  let baseFov = 45;
+  const resize = () => { const w = stage.clientWidth, h = stage.clientHeight; if(!w) return; R.setSize(w, h, false); cam.aspect = w / h; baseFov = w < h ? 58 : 45; cam.updateProjectionMatrix();
+    if(composer){ composer.setPixelRatio(R.getPixelRatio()); composer.setSize(w, h); bloom.setSize(Math.round(w * .5), Math.round(h * .5)); } };   // phones: a wider lens
   new ResizeObserver(resize).observe(stage); resize();
   const setMode = m => { if(m === mode) return; const was = mode; mode = m; onPick({kind:"mode", mode:m, was}); };
   const ptrs = new Map(); let gest = null;
@@ -517,9 +509,13 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
   canvas.addEventListener("contextmenu", e => e.preventDefault());
   canvas.addEventListener("pointerdown", e => { canvas.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
     if(ptrs.size === 1) gest = {type:e.button === 2 || e.shiftKey || e.ctrlKey ? "spin" : "pan", x:e.clientX, y:e.clientY, lx:e.clientX, ly:e.clientY, moved:false, yaw:goal.yaw, tilt};
-    if(ptrs.size === 2){ const i = twoInfo(); gest = {type:"two", ...i, dist:goal.dist, yaw:goal.yaw, tilt, moved:true}; } });
+    if(ptrs.size === 2){ const i = twoInfo(); gest = {type:"two", ...i, dist:goal.dist, yaw:goal.yaw, tilt, fov:lookGoal.fov, moved:true}; } });
   canvas.addEventListener("pointermove", e => { if(!ptrs.has(e.pointerId) || !gest) return; ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
-    if(mode === "office") return;
+    if(mode === "office"){   // look around from the chair: drag the view, pinch to zoom
+      if(gest.type === "two" && ptrs.size === 2){ const i = twoInfo(); lookGoal.fov = Math.max(30, Math.min(80, gest.fov * gest.d / Math.max(10, i.d))); return; }
+      if(Math.hypot(e.clientX - gest.x, e.clientY - gest.y) > 6) gest.moved = true; if(!gest.moved) return;
+      lookGoal.yaw += (e.clientX - gest.lx) * .005; lookGoal.pitch = Math.max(-1.1, Math.min(1, lookGoal.pitch + (e.clientY - gest.ly) * .004));
+      gest.lx = e.clientX; gest.ly = e.clientY; return; }
     if(gest.type === "two" && ptrs.size === 2){ const i = twoInfo();
       goal.dist = Math.max(3, Math.min(95, gest.dist * gest.d / Math.max(10, i.d)));
       if(mode !== "drive"){ goal.yaw = gest.yaw - (i.a - gest.a); tilt = Math.max(-.45, Math.min(.45, gest.tilt + (i.my - gest.my) * .003)); }
@@ -532,7 +528,7 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
     if(g && g.type !== "two" && !g.moved && ptrs.size === 0) tap(e);
     if(ptrs.size === 0) gest = null; else if(ptrs.size === 1){ const [p] = [...ptrs.values()]; gest = {type:"pan", x:p.x, y:p.y, lx:p.x, ly:p.y, moved:true, yaw:goal.yaw, tilt}; } };
   canvas.addEventListener("pointerup", up); canvas.addEventListener("pointercancel", up);
-  canvas.addEventListener("wheel", e => { e.preventDefault(); if(mode === "office") return; goal.dist = Math.max(3, Math.min(95, goal.dist * (1 + Math.sign(e.deltaY) * .1))); }, {passive:false});
+  canvas.addEventListener("wheel", e => { e.preventDefault(); if(mode === "office"){ lookGoal.fov = Math.max(30, Math.min(80, lookGoal.fov * (1 + Math.sign(e.deltaY) * .08))); return; } goal.dist = Math.max(3, Math.min(95, goal.dist * (1 + Math.sign(e.deltaY) * .1))); }, {passive:false});
   const typing = () => /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || "");
   addEventListener("keydown", e => { if(!isActive() || typing()) return; keys.add(e.code); if(mode === "drive" && /^Arrow/.test(e.code)) e.preventDefault(); });
   addEventListener("keyup", e => keys.delete(e.code));
@@ -543,19 +539,27 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
     const sx = e.clientX - r.left, sy = e.clientY - r.top, near = (x, y, z) => { tmp.set(x, y, z).project(cam);
       return tmp.z > 1 ? 1e9 : Math.hypot((tmp.x * .5 + .5) * r.width - sx, (-tmp.y * .5 + .5) * r.height - sy); };
     let best = null, bd = 26;
+    if(mode === "office"){ ray.setFromCamera(v2, cam); const hit = ray.intersectObjects([...hq.pickPC, ...hq.pickBot], false)[0];
+      if(hit) onPick(hq.pickPC.includes(hit.object) ? {kind:"pc"} : {kind:"hqbot", text:"<b>Max, the house robot</b> · keeps an eye on the city for you (and drinks far too much coffee)"});
+      return; }
     people.forEach((p, i) => { if(!p.vis) return; const d = near(p.px, .45, p.pz); if(d < bd){ bd = d; best = {kind:"person", text:personText(p), ref:{kind:"person", i}}; } });
     cars.forEach((c, i) => { const d = near(c.px, .3, c.pz); if(d < bd){ bd = d; best = {kind:"car", text:carText(c), ref:{kind:"car", i}}; } });
     if(best) return onPick(best);
     ray.setFromCamera(v2, cam); const hit = ray.intersectObjects(pickable.map(p => p.obj), false)[0]; if(!hit) return;
     const info = pickable.find(p => p.obj === hit.object);
     if(info.kind === "tower") onPick({kind:"tower", id:info.id});
-    else if(info.kind === "hq") flyTo(mode === "office" ? "city" : "office");
+    else if(info.kind === "hq" || info.kind === "pc" || info.kind === "hqbot") flyTo("office");
     else if(info.kind === "landmark") onPick({kind:"landmark", text:info.text});
     else if(info.kind === "person"){ const p = people[hit.instanceId]; onPick({kind:"person", text:personText(p), ref:{kind:"person", i:hit.instanceId}}); }
     else if(info.kind === "car"){ const c = cars[hit.instanceId]; onPick({kind:"car", text:carText(c), ref:{kind:"car", i:hit.instanceId}}); } }
   function flyTo(where){
-    if(where === "office"){ if(mode === "drive") drive(false); if(mode !== "office") saved = {...goal}; Object.assign(goal, OFFICE); setMode("office"); onPick({kind:"view", office:true}); }
-    else { Object.assign(goal, saved || {yaw:goal.yaw, pitch:.9, dist:48, tx:0, ty:1.5, tz:0}); saved = null; setMode("free"); onPick({kind:"view", office:false}); } }
+    if(where === "office"){ if(mode === "office") return; if(mode === "drive") drive(false); followRef = null; saved = {...goal};
+      trans = {t:0, dur:reduceMotion ? .01 : 1.8, from:cam.position.clone(), fromQ:cam.quaternion.clone(), into:true};
+      Object.assign(lookGoal, {yaw:0, pitch:-.2, fov:cam.aspect < 1 ? 82 : 60}); Object.assign(look, lookGoal);   // phones get a wider view so the desk and the window both fit hq.setSeated(true); rain.visible = false;
+      setMode("office"); onPick({kind:"view", office:true}); }
+    else if(mode === "office"){ trans = {t:0, dur:reduceMotion ? .01 : 1.4, from:cam.position.clone(), fromQ:cam.quaternion.clone(), into:false};
+      Object.assign(goal, saved || {yaw:goal.yaw, pitch:.9, dist:48, tx:0, ty:1.5, tz:0}); Object.assign(view, goal); saved = null; hq.setSeated(false); rain.visible = true;
+      setMode("free"); onPick({kind:"view", office:false}); } }
   function focus(id){ const tw = towers[id]; if(!tw) return; if(mode === "office") flyTo("city"); if(mode === "drive") drive(false);
     followRef = null; setMode("free"); Object.assign(goal, {tx:tw.x, tz:tw.z, ty:1.5, dist:Math.min(goal.dist, 20)}); }
   function follow(ref){ if(!ref) return; if(mode === "drive") drive(false); if(mode === "office") flyTo("city");
@@ -591,6 +595,7 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
 
   // ── loop ──
   let last = 0, t = 0, tick = 0, lastScreens = 0, frame = 0, lastDistrict = "", districtAt = 0;
+  const quality = {bloom:!!composer, acc:0, n:0, forced:false};
   (function loop(ts){
     requestAnimationFrame(loop);
     if(!isActive() || document.hidden || !stage.clientWidth) return;
@@ -611,15 +616,31 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
     const kk = Math.min(1, dt * (mode === "drive" ? 7 : 3));
     view.yaw += ((goal.yaw - view.yaw + Math.PI * 3) % (Math.PI * 2) - Math.PI) * kk;
     for(const k of ["pitch", "dist", "tx", "ty", "tz"]) view[k] += (goal[k] - view[k]) * kk;
+    if(mode === "office") cam.fov += (look.fov - cam.fov) * kk; else cam.fov += (baseFov - cam.fov) * kk;
     let cd = view.dist;   // chase cam: pull in in front of any building between the camera and what it's following
     if(mode === "drive" || mode === "follow"){ const ex = Math.sin(view.yaw) * Math.cos(view.pitch), ez = Math.cos(view.yaw) * Math.cos(view.pitch), ey = Math.sin(view.pitch);
       for(let k = .9; k < cd; k += .25) if(view.ty + ey * k < 5 && blocked(view.tx + ex * k, view.tz + ez * k)){ cd = Math.max(2.6, k - .35); break; } }
     cam.position.set(view.tx + Math.sin(view.yaw) * Math.cos(view.pitch) * cd, view.ty + Math.sin(view.pitch) * cd,
       view.tz + Math.cos(view.yaw) * Math.cos(view.pitch) * cd);
     cam.lookAt(view.tx, view.ty, view.tz);
+    if(mode === "office"){ for(const k of ["yaw", "pitch", "fov"]) look[k] += (lookGoal[k] - look[k]) * Math.min(1, dt * 8);
+      const keyYaw = (keys.has("ArrowLeft") || keys.has("KeyA") ? 1 : 0) - (keys.has("ArrowRight") || keys.has("KeyD") ? 1 : 0); lookGoal.yaw += keyYaw * dt * 1.6;
+      cam.position.copy(hq.eye); cam.lookAt(hq.eye.x + Math.sin(look.yaw) * Math.cos(look.pitch), hq.eye.y + Math.sin(look.pitch), hq.eye.z + Math.cos(look.yaw) * Math.cos(look.pitch)); }
+    cam.updateProjectionMatrix();
+    if(trans){ trans.t += dt / trans.dur; const k = Math.min(1, trans.t), e2 = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      const toP = cam.position.clone(), toQ = cam.quaternion.clone();
+      if(trans.into){ const mid = new T.Vector3(0, hq.eye.y + 2.5, 8), u = 1 - e2;   // swoop in through the south window
+        cam.position.set(u * u * trans.from.x + 2 * u * e2 * mid.x + e2 * e2 * toP.x, u * u * trans.from.y + 2 * u * e2 * mid.y + e2 * e2 * toP.y, u * u * trans.from.z + 2 * u * e2 * mid.z + e2 * e2 * toP.z); }
+      else cam.position.lerpVectors(trans.from, toP, e2);
+      cam.quaternion.slerpQuaternions(trans.fromQ, toQ, e2); if(k >= 1) trans = null; }
     // the world keeps moving
-    head.rotation.y = Math.sin(t * .5) * .45; head.rotation.x = Math.sin(t * .8) * .05;   // the boss glances from screen to screen
-    armL.position.y = .38 + Math.max(0, Math.sin(t * 14)) * .02; armR.position.y = .38 + Math.max(0, Math.sin(t * 14 + 1.5)) * .02;   // typing
+    hq.animate(t);
+    if(rain.visible && RAIN){ const a = rainGeo.attributes.position.array, fall = dt * 22, cx = cam.position.x, cz = cam.position.z;
+      for(let k = 0; k < RAIN; k++){ const o = k * 6; a[o + 1] -= fall; a[o + 4] -= fall;
+        if(a[o + 4] < 0){ const x = cx + ((a[o] - cx + rainBox * 1.5) % rainBox) - rainBox / 2, z = cz + ((a[o + 2] - cz + rainBox * 1.5) % rainBox) - rainBox / 2, y = 26 + trand() * 6;
+          a[o] = x; a[o + 1] = y; a[o + 2] = z; a[o + 3] = x - .03; a[o + 4] = y - .55; a[o + 5] = z; } }
+      rainGeo.attributes.position.needsUpdate = true; }
+    if(scene.userData.adTex) scene.userData.adTex.offset.x = (t * .05) % 1;
     beacon.material.opacity = .5 + .5 * Math.sin(t * 3); red.material.opacity = .45 + .55 * Math.max(0, Math.sin(t * 2.4));
     if(!reduceMotion){ wheel.rotation.z = t * .15; for(const c of wheel.children) if(c.userData.cab) c.rotation.z = -wheel.rotation.z;
       const a = t * .045; blimp.position.set(Math.cos(a) * 34, 21 + Math.sin(t * .4) * .6, Math.sin(a) * 34); blimp.rotation.y = -a - Math.PI / 2;
@@ -635,7 +656,12 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
     if(searchlight){ const alarm = towers.rugdesk && towers.rugdesk.state.alarm; searchlight.material.color.setHex(alarm ? 0xff3d6e : 0x7dffc2); searchlight.material.opacity = alarm ? .22 : .14; }
     if(t - lastScreens > .5){ lastScreens = t; tick++; drawScreens(tick); }
     if((mode === "drive" || mode === "follow") && t - districtAt > .5){ districtAt = t; const d = DISTRICT(view.tx, view.tz); if(d !== lastDistrict){ if(lastDistrict) toast(`Now entering ${d}`); lastDistrict = d; } }
-    R.render(scene, cam);
+    // render: with neon bloom when the device keeps up; drops to plain rendering if it can't hold ~18 fps
+    if(bloom){ bloom.strength = mode === "office" ? .3 : .85; bloom.threshold = mode === "office" ? .92 : .6; }   // keep the screens sharp in the office
+    if(composer && quality.bloom) composer.render(); else R.render(scene, cam);
+    quality.acc += dt; quality.n++;
+    if(quality.acc > 4){ const fps = quality.n / quality.acc; quality.acc = 0; quality.n = 0;
+      if(fps < 18 && quality.bloom && !quality.forced){ quality.bloom = false; if(mirror){ mirror.visible = false; roads.material.transparent = false; roads.material.needsUpdate = true; } } }
     if(frame % 3 === 0) drawMap();
     onFrame(id => { const v = id === "hq" ? tmp.set(0, OY + 5.2, 0) : towers[id] ? tmp.copy(towers[id].top) : null; if(!v) return null;
       const d = cam.position.distanceTo(v); v.project(cam);
@@ -646,6 +672,9 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
   return {
     setStates(st){ for(const [id, s] of Object.entries(st)) if(towers[id]) towers[id].state = s; },
     setMeme(M){ MDATA = M; drawScreens(tick); },
+    setLive(prices){ LIVE = prices; if(MDATA) hq.drawMonitors(MDATA, LIVE, tick); },
+    setQuality(on){ quality.forced = true; quality.bloom = !!on && !!composer; if(mirror){ mirror.visible = !!on; roads.material.transparent = !!on; roads.material.needsUpdate = true; } },
+    get quality(){ return {bloom:quality.bloom, mirror:!!(mirror && mirror.visible), available:!!composer}; },
     setInput(o){ Object.assign(drv.input, o); },
     unfollow(){ if(mode === "follow"){ followRef = null; setMode("free"); } },
     flyTo, focus, follow, drive, get mode(){ return mode; }, get inOffice(){ return mode === "office"; },

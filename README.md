@@ -780,9 +780,39 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
     number or what was said. `ECHO_DRY=1` prints what it would say instead of calling.
 - Tested: dry runs on the live bot data, and one real briefing call placed by the same code.
 
+### Round 40: cyberpunk graphics, a first-person penthouse and a PC you can use
+
+- You said the HQ visit was bland: blurry screens with random info, and the city looked like blocks and circles. You
+  wanted to sit in the penthouse chair, look around and out of the window, use a real-looking PC showing the live
+  trades, and a more realistic, Cyberpunk-style look.
+- **Graphics (city.js):** filmic colour (ACES tone mapping), a neon glow ("bloom") on lights and signs, glossy wet
+  streets (on fast desktops they mirror the city), rain, a night sky that glows magenta on the horizon from the city,
+  sharper building windows with lit and dark floors, vertical neon signs on the towers (BAR, HOTEL, RAMEN, 24H…),
+  scrolling holo ads on the roofs and red tail lights on the cars. On a device that can't hold ~18 frames a second the
+  glow and mirrors switch off by themselves. The three.js add-ons for this load from jsDelivr through an import map;
+  if they fail the city still works, just plainer.
+- **The penthouse (new `hq.js`):** a glass box on top of HQ, built to human scale: marble floor, wood executive desk,
+  three monitors on arms, an RGB keyboard and PC, a mug and a desk lamp; behind you a sofa, a holographic market globe,
+  a bar with glowing bottles, a plant, a floor lamp and Max the house robot drinking coffee at the window. "Visit HQ"
+  flies the camera in through the window and **sits you in the boss's chair**. Drag to look all the way round
+  (and out of the glass at the city), pinch or scroll to zoom.
+- **The screens are sharp and real now:** the middle monitor shows the live trades table (every open position: bot,
+  coin, size, value now, profit/loss, time held) at 1600×960; the left one charts the bot team; the right one is a
+  green terminal streaming the bots' messages and the Rug Desk's scans.
+- **The PC (BossOS):** tap the middle screen (or 🖥️ Use the PC) and a Windows-style desktop opens: draggable windows,
+  a taskbar, a Start menu and a clock. Apps: **Live Trades** (open positions priced live from DexScreener every 10
+  seconds, flashing green or red as prices move, plus recent fills), Leaderboard, Rug Desk (every checked coin with
+  the reason it passed or failed), Terminal, Team Chart and Team Chat. "Stand up" (or Esc) puts you back in the chair.
+  The 3D monitor uses the same live prices.
+- Honest note: it's still built entirely from code, with no 3D models or photos, so it's "stylised realistic", not
+  photoreal. Going further would mean licensing a 3D city and furniture models.
+- Tested in Chrome (software 3D) at phone and desktop sizes: city, flight into the chair, looking around, tapping
+  the monitor, every BossOS app with live DexScreener prices, standing up and leaving HQ; no page errors.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
+- `hq.js`: the HQ penthouse (first-person seat, live monitors), imported by city.js
 - `city.js`: the open-world 3D Bot City (districts, citizens, cars, driving, minimap, HQ office), loaded by the City tab
 - `tradingview/TrenchAI_Direction.pine`: the indicator (paste into TradingView)
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)

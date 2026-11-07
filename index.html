@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js"}}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Turn Spotter</title>
 <meta name="theme-color" content="#06080f">
@@ -347,6 +348,48 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .msg p{margin:3px 0 0;font:500 13px/1.45 var(--body);color:var(--ink);background:rgba(140,155,255,.06);border:1px solid var(--edge);padding:7px 10px;border-radius:4px 12px 12px 12px}
 .msg.rug p,.msg.reject p,.msg.brake p{border-color:color-mix(in srgb,var(--down) 60%,transparent)} .msg.locked p,.msg.clear p{border-color:color-mix(in srgb,var(--up) 55%,transparent)}
 .msg.buy p{border-color:color-mix(in srgb,#ffc44d 45%,transparent)}
+.cityStage.office canvas.cityMap,.cityStage.office .cityPipe,.cityStage.office #driveBtn{display:none}
+.os{position:absolute;inset:0;z-index:6;overflow:hidden;font:400 13px system-ui,-apple-system,"Segoe UI",sans-serif;color:#eef1ff;
+  background:radial-gradient(120% 70% at 70% 110%,#ff4fa3 0%,rgba(255,79,163,0) 55%),radial-gradient(90% 60% at 10% 0%,#3b1fb8 0%,rgba(59,31,184,0) 60%),linear-gradient(180deg,#0d0628,#24093e)}
+.os::before{content:"";position:absolute;left:0;right:0;bottom:46px;height:38%;opacity:.55;pointer-events:none;
+  background:repeating-linear-gradient(90deg,#07031a 0 22px,transparent 22px 30px,#0a0522 30px 64px,transparent 64px 70px,#07031a 70px 86px,transparent 86px 98px);
+  -webkit-mask:linear-gradient(transparent,#000 35%);mask:linear-gradient(transparent,#000 35%)}
+.osIcons{position:absolute;left:10px;top:10px;display:grid;grid-template-columns:repeat(1,84px);gap:6px;z-index:1}
+.osIcons button{display:grid;justify-items:center;gap:4px;padding:8px 4px;border:1px solid transparent;border-radius:8px;background:none;color:#fff;font:500 11.5px system-ui;cursor:pointer;text-shadow:0 1px 3px #000}
+.osIcons button:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15)} .osIcons i{font-style:normal;font-size:26px;line-height:1}
+.osWin{position:absolute;min-width:260px;display:flex;flex-direction:column;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.14);
+  background:rgba(18,16,34,.86);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 18px 50px rgba(0,0,0,.55)}
+.osWin.max{inset:0 0 46px 0!important;width:auto!important;height:auto!important;border-radius:0}
+.osTitle{display:flex;align-items:center;gap:8px;height:34px;padding-left:12px;background:rgba(255,255,255,.04);cursor:default;user-select:none;-webkit-user-select:none;touch-action:none;flex:none}
+.osTitle b{flex:1;font:600 12.5px system-ui} .osTitle button{width:44px;height:34px;border:0;background:none;color:#cfd3f0;font:15px system-ui;cursor:pointer}
+.osTitle button:hover{background:rgba(255,255,255,.1)} .osTitle button.x:hover{background:#e81123;color:#fff}
+.osBody{flex:1;overflow:auto;padding:12px 14px}
+.osBar{position:absolute;left:0;right:0;bottom:0;height:46px;display:flex;align-items:center;justify-content:center;gap:4px;z-index:9999;
+  background:rgba(14,12,28,.82);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.08)}
+.osBar button{height:38px;min-width:38px;padding:0 9px;border:0;border-radius:6px;background:none;color:#fff;font:18px system-ui;cursor:pointer;position:relative}
+.osBar button:hover,.osBar button.on{background:rgba(255,255,255,.1)} .osBar button.on::after{content:"";position:absolute;left:35%;right:35%;bottom:2px;height:3px;border-radius:2px;background:#45d4ff}
+.osBar{justify-content:flex-start;padding:0 8px} .osLogo{color:#45d4ff!important;font-size:20px!important} #osTasks{display:flex;gap:4px} #osClock{margin-left:auto;font:500 11.5px/1.3 system-ui;text-align:right;color:#eef1ff}
+#osStand{font:600 12px system-ui!important;color:#ffb3c7!important;margin-right:6px}
+@media (max-width:520px){ #osStand{font-size:0!important;margin-right:2px} #osStand::before{content:"⏻";font-size:17px} .osBar button{min-width:34px;padding:0 6px} }
+.osStart{position:absolute;left:50%;bottom:54px;transform:translateX(-50%);width:min(420px,92%);z-index:10000;padding:16px;border-radius:12px;
+  background:rgba(24,20,44,.92);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.12);display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.osStart p{grid-column:1/-1;margin:0 0 4px;font:600 12px system-ui;color:#b9bfe8}
+.osStart button{display:grid;justify-items:center;gap:4px;padding:10px 4px;border:0;border-radius:8px;background:rgba(255,255,255,.04);color:#fff;font:500 11.5px system-ui;cursor:pointer}
+.osStart button:hover{background:rgba(255,255,255,.1)} .osStart i{font-style:normal;font-size:24px}
+.osT{width:100%;border-collapse:collapse;font:500 12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.osT th{position:sticky;top:-12px;background:#16142a;text-align:left;font:600 10.5px system-ui;letter-spacing:.08em;color:#8f97c6;padding:6px 8px;text-transform:uppercase}
+.osT td{padding:6px 8px;border-top:1px solid rgba(255,255,255,.05);white-space:nowrap} .osT tr:hover td{background:rgba(255,255,255,.04)}
+.osT a{color:#ffc44d;text-decoration:none} .osT a:hover{text-decoration:underline} .osT .up{color:#3ee6a2} .osT .dn{color:#ff4f7d}
+.osT td.flashUp{animation:osUp 1.2s} .osT td.flashDn{animation:osDn 1.2s}
+@keyframes osUp{from{background:rgba(62,230,162,.35)}} @keyframes osDn{from{background:rgba(255,79,125,.35)}}
+.osHead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:10px} .osHead b{font:700 22px system-ui} .osHead span{color:#9aa2d0;font-size:12px}
+.osLive{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff3d6e;box-shadow:0 0 8px #ff3d6e;margin-right:5px;animation:osPulse 1.2s infinite}
+@keyframes osPulse{50%{opacity:.25}}
+.osSub{margin:16px 0 6px;font:600 11px system-ui;letter-spacing:.1em;color:#8f97c6;text-transform:uppercase}
+.osTerm{background:#020a04;color:#7dffc2;font:500 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;min-height:100%;margin:-12px -14px;padding:12px 14px;white-space:pre-wrap;word-break:break-word}
+.osTerm .r{color:#ff6b8a} .osTerm .y{color:#ffd56b} .osTerm .c{color:#45d4ff} .osTerm i{display:inline-block;width:8px;height:15px;background:#7dffc2;vertical-align:-2px;animation:osPulse 1s infinite}
+.osChat .msg p{color:#eef1ff}
+.cityStage .os ~ *{}
 .cityDetail{margin:10px 2px 0;font:500 13px var(--body);color:var(--muted);min-height:18px} .cityDetail b{color:var(--ink)}
 .cityCtl{display:grid;grid-template-columns:auto 1fr auto;gap:8px;margin-top:12px}
 .cityCtl .seg{display:flex;gap:4px;padding:4px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.05)}
@@ -656,7 +699,9 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
       <div class="cityBanner" id="cityBanner">Bot City is starting up</div><div class="cityPipe" id="cityPipe"></div><div class="cityLabels" id="cityLabels"></div>
       <canvas class="cityMap" id="cityMap" width="216" height="216" aria-label="City map: tap to go there"></canvas><div class="cityToast" id="cityToast"></div>
       <div class="speedo" id="speedo">0<small>KM/H</small></div>
-      <div class="cityBtns"><button type="button" id="driveBtn">🚗 Drive</button><button type="button" id="followBtn" hidden>🎥 Follow</button></div>
+      <div class="cityBtns"><button type="button" id="driveBtn">🚗 Drive</button><button type="button" id="followBtn" hidden>🎥 Follow</button><button type="button" id="pcBtn" hidden>🖥️ Use the PC</button></div>
+      <div class="os" id="bossOS" hidden><div class="osIcons" id="osIcons"></div><div id="osWins"></div><div class="osStart" id="osStart" hidden></div>
+        <div class="osBar"><button type="button" id="osStand" title="Stand up">⏻ Stand up</button><button type="button" class="osLogo" id="osStartBtn" title="Start">◆</button><span id="osTasks"></span><span id="osClock"></span></div></div>
       <div class="drivePad" id="drivePad" aria-label="Driving controls"><div><button type="button" data-k="left" aria-label="Steer left">◀</button><button type="button" data-k="right" aria-label="Steer right">▶</button></div><div><button type="button" data-k="down" aria-label="Brake or reverse">▼</button><button type="button" data-k="up" aria-label="Gas">▲</button></div></div>
       <button type="button" class="hqBtn" id="hqBtn">🏢 Visit HQ</button></div>
     <div class="cityDetail" id="cityDetail">Everything runs by itself. Drag to move around, two fingers to spin, pinch to zoom. Tap a building, a person or a car, or take a car for a drive.</div>
@@ -3004,14 +3049,130 @@ async function cityInit(){
   if(CITY.loading) return; CITY.loading = true;
   const stage = $("cityStage");
   let T, mod;
-  try{ [T, mod] = await Promise.all([import("https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js"), import(new URL("city.js", location.href).href)]); }
+  const FX = "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/";
+  const fxP = Promise.all(["postprocessing/EffectComposer.js", "postprocessing/RenderPass.js", "postprocessing/UnrealBloomPass.js", "postprocessing/OutputPass.js",
+    "environments/RoomEnvironment.js", "objects/Reflector.js"].map(f => import(FX + f))).then(ms => Object.assign({}, ...ms)).catch(() => null);
+  let fx = null;
+  try{ [T, mod, fx] = await Promise.all([import("https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js"), import(new URL("city.js", location.href).href), fxP]); }
   catch(e){ stage.classList.add("flat"); return; }
   try{
     CITY.world = mod.createCity(T, {stage, canvas:$("cityCanvas"), reduceMotion, isActive:() => document.body.dataset.on === "city",
-      onPick:cityPicked, onFrame:cityPlaceLabels, onToast:cityToast, minimap:$("cityMap"), bots:cityBots()});
+      onPick:cityPicked, onFrame:cityPlaceLabels, onToast:cityToast, minimap:$("cityMap"), bots:cityBots(), fx});
   }catch(e){ stage.classList.add("flat"); return; }
   CITY.ready = true; cityRender();
 }
+// ───────── BossOS: the PC in the HQ penthouse (README round 40). Live trades with prices straight from DexScreener ─────────
+const OS = {wins:{}, z:10, live:{}, prev:{}, timer:0, liveTimer:0, n:0};
+const OS_APPS = {trades:["📈", "Live Trades", 700, 430], board:["🏆", "Leaderboard", 560, 420], rug:["🛡", "Rug Desk", 620, 420], term:["⌨", "Terminal", 600, 380],
+  chart:["📊", "Team Chart", 620, 380], chat:["💬", "Team Chat", 460, 440]};
+$("osIcons").innerHTML = Object.entries(OS_APPS).map(([id, [ic, name]]) => `<button type="button" data-app="${id}"><i>${ic}</i>${name}</button>`).join("");
+$("osStart").innerHTML = `<p>Apps</p>` + Object.entries(OS_APPS).map(([id, [ic, name]]) => `<button type="button" data-app="${id}"><i>${ic}</i>${name}</button>`).join("")
+  + `<button type="button" data-app="stand"><i>⏻</i>Stand up</button>`;
+const osM = () => memeTeamOf(CITY.data && CITY.data.M);
+const osNarrow = () => $("bossOS").clientWidth < 640;
+function osOpen(){ $("bossOS").hidden = false; $("cityStage").classList.add("pc"); if(!Object.keys(OS.wins).length) osApp("trades"); osLive(); osTick();
+  clearInterval(OS.timer); OS.timer = setInterval(osTick, 1000); }
+function osClose(){ $("bossOS").hidden = true; $("osStart").hidden = true; clearInterval(OS.timer); }
+function osApp(id){
+  if(id === "stand") return osClose();
+  $("osStart").hidden = true;
+  let w = OS.wins[id];
+  if(!w){ const [ic, name, ww, hh] = OS_APPS[id], k = Object.keys(OS.wins).length;
+    w = document.createElement("div"); w.className = "osWin"; w.dataset.app = id;
+    w.innerHTML = `<div class="osTitle"><span>${ic}</span><b>${name}</b><button type="button" data-w="min" title="Minimise">—</button><button type="button" data-w="max" title="Maximise">▢</button><button type="button" class="x" data-w="x" title="Close">✕</button></div><div class="osBody"></div>`;
+    const W0 = $("bossOS").clientWidth, H0 = $("bossOS").clientHeight - 46;
+    Object.assign(w.style, {width:Math.min(ww, W0 - 20) + "px", height:Math.min(hh, H0 - 20) + "px", left:Math.max(10, Math.min(W0 - ww - 10, 110 + k * 28)) + "px", top:Math.max(8, Math.min(H0 - hh - 8, 14 + k * 26)) + "px"});
+    if(osNarrow()) w.classList.add("max");
+    const bar = w.querySelector(".osTitle");   // drag a window by its title bar
+    bar.addEventListener("pointerdown", e => { if(e.target.closest("button") || w.classList.contains("max")) return; bar.setPointerCapture(e.pointerId);
+      const sx = e.clientX - w.offsetLeft, sy = e.clientY - w.offsetTop, mv = ev => { w.style.left = Math.max(-w.offsetWidth + 80, ev.clientX - sx) + "px"; w.style.top = Math.max(0, ev.clientY - sy) + "px"; };
+      bar.addEventListener("pointermove", mv); bar.addEventListener("pointerup", () => bar.removeEventListener("pointermove", mv), {once:true}); });
+    bar.addEventListener("dblclick", () => w.classList.toggle("max"));
+    $("osWins").appendChild(w); OS.wins[id] = w; }
+  w.hidden = false; w.style.zIndex = ++OS.z; osRender(id); osTasks();
+}
+$("bossOS").addEventListener("pointerdown", e => { const w = e.target.closest(".osWin"); if(w) w.style.zIndex = ++OS.z;
+  if(!e.target.closest("#osStart, #osStartBtn")) $("osStart").hidden = true; });
+$("bossOS").addEventListener("click", e => {
+  const a = e.target.closest("[data-app]"); if(a) return osApp(a.dataset.app);
+  const b = e.target.closest("[data-w]"); if(b){ const w = b.closest(".osWin");
+    if(b.dataset.w === "x"){ w.remove(); delete OS.wins[w.dataset.app]; } else if(b.dataset.w === "min") w.hidden = true; else w.classList.toggle("max"); osTasks(); return; }
+  const t = e.target.closest("[data-task]"); if(t){ const w = OS.wins[t.dataset.task]; if(w.hidden || +w.style.zIndex < OS.z){ w.hidden = false; w.style.zIndex = ++OS.z; } else w.hidden = true; osTasks(); }
+});
+$("osStartBtn").addEventListener("click", e => { e.stopPropagation(); $("osStart").hidden = !$("osStart").hidden; });
+$("osStand").addEventListener("click", osClose);
+addEventListener("keydown", e => { if(e.key === "Escape" && !$("bossOS").hidden) osClose(); });
+function osTasks(){ $("osTasks").innerHTML = Object.entries(OS.wins).map(([id, w]) => `<button type="button" data-task="${id}" class="${w.hidden ? "" : "on"}" title="${OS_APPS[id][1]}">${OS_APPS[id][0]}</button>`).join(""); }
+function osTick(){ const d = new Date(); OS.n++;
+  $("osClock").innerHTML = `${d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"})}<br>${d.toLocaleDateString([], {month:"numeric", day:"numeric", year:"numeric"})}`;
+  if(OS.wins.term && !OS.wins.term.hidden) osRender("term");
+  if(OS.n % 10 === 0) osLive(); }
+const osPrice = v => !v ? "—" : v >= 1 ? "$" + v.toFixed(3) : "$" + v.toPrecision(3);
+function osRender(id){
+  const w = OS.wins[id]; if(!w) return; const body = w.querySelector(".osBody"), M = osM(), now = Date.now();
+  if(!M){ body.innerHTML = `<p>Waiting for the bots' first report…</p>`; return; }
+  const team = Object.entries(M.bots);
+  if(id === "trades"){
+    const pos = team.flatMap(([bid, b]) => b.positions.map(p => { const px = OS.live[p.mint] || (p.last && p.last.price) || p.entryPrice, v = p.qty * px * .99;
+      return {...p, bid, bot:b.name, px, v, pnl:v - p.stake}; })).sort((a, b) => Math.abs(b.pnl) - Math.abs(a.pnl));
+    const open = pos.reduce((a, p) => a + p.pnl, 0), fills = (M.tape || []).filter(e => e.bot !== "rugdesk").slice(0, 25);
+    body.innerHTML = `<div class="osHead"><b class="${open >= 0 ? "win" : "loss"}">Open P&L ${cityMoney(open)}</b><span>${pos.length} open positions · paper money</span>
+      <span>${OS.live._t ? `<i class="osLive"></i>live prices ${new Date(OS.live._t).toLocaleTimeString()}` : "prices from the bots' last run (live prices loading)"}</span></div>
+      <table class="osT"><tr><th>Bot</th><th>Coin</th><th>Size</th><th>Entry</th><th>Now</th><th>P&amp;L</th><th>%</th><th>Held</th></tr>`
+      + (pos.length ? pos.map(p => { const k = p.bid + p.mint, prev = OS.prev[k], fl = prev == null || prev === p.px ? "" : p.px > prev ? "flashUp" : "flashDn"; OS.prev[k] = p.px; const up = p.pnl >= 0;
+        return `<tr><td style="color:${cityColor(p.bid)}">${memeEsc(p.bot)}</td><td><a href="${memeEsc(p.url || "#")}" target="_blank" rel="noopener">${memeEsc(p.sym)}</a></td><td>$${p.stake.toFixed(2)}</td>
+          <td>${osPrice(p.entryPrice)}</td><td class="${fl}">${osPrice(p.px)}</td><td class="${up ? "up" : "dn"}">${cityMoney(p.pnl)}</td><td class="${up ? "up" : "dn"}">${up ? "▲" : "▼"}${Math.abs(p.pnl / p.stake * 100).toFixed(1)}%</td><td>${cityAgo(now - p.openedAt)}</td></tr>`; }).join("")
+        : `<tr><td colspan="8">No open positions right now.</td></tr>`) + `</table>
+      <p class="osSub">Recent fills</p><table class="osT"><tr><th>When</th><th>Bot</th><th>What happened</th></tr>`
+      + fills.map(e => `<tr><td>${new Date(e.t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}</td><td style="color:${cityColor(e.bot)}">${memeEsc(cityNameOf(M, e.bot))}</td>
+          <td class="${e.kind === "buy" ? "" : /\+\$/.test(e.txt || "") ? "up" : "dn"}" style="white-space:normal">${memeEsc(e.say || e.txt)}</td></tr>`).join("") + `</table>`;
+  }
+  else if(id === "board"){
+    const rows = team.map(([bid, b]) => ({bid, b, won:b.closed.filter(c => c.pnl > 0).length})).sort((x, y) => y.b.value - x.b.value);
+    body.innerHTML = `<table class="osT"><tr><th>#</th><th>Bot</th><th>Money</th><th>Today</th><th>Since start</th><th>Trades</th><th>Won</th><th>Shift</th></tr>` + rows.map(({bid, b, won}, k) => { const r = b.value / b.start - 1, td = b.day ? b.day.pnl || 0 : 0;
+      return `<tr><td>${k === 0 ? "👑" : k + 1}</td><td style="color:${cityColor(bid)}">${memeEsc(b.name)}</td><td>$${b.value.toFixed(2)}</td><td class="${td >= 0 ? "up" : "dn"}">${cityMoney(td)}</td>
+        <td class="${r >= 0 ? "up" : "dn"}">${r >= 0 ? "+" : ""}${(r * 100).toFixed(1)}%</td><td>${b.closed.length}</td><td>${won}</td><td>${memeEsc(b.shift || "on")}</td></tr>`; }).join("") + `</table>`;
+  }
+  else if(id === "rug"){
+    const rs = M.rugStats || {checked:0, passed:0, rejected:0};
+    body.innerHTML = `<div class="osHead"><b>🛡 ${rs.passed} passed · ${rs.rejected} rejected</b><span>last scan ${M.lastRun ? cityAgo(now - M.lastRun) + " ago" : ""} · no bot may buy a coin that fails</span></div>
+      <table class="osT"><tr><th>Coin</th><th>Pool</th><th>24h vol</th><th>Age</th><th>Verdict</th><th>Why</th></tr>` + (M.scan || []).filter(c => c.checked).map(c => {
+        const ok = c.passed && !c.warnings, v = ok ? `<span class="up">PASS</span>` : c.passed ? `<span style="color:#ffc44d">PARKED</span>` : `<span class="dn">REJECTED</span>`;
+        return `<tr><td><a href="${memeEsc(c.url || "#")}" target="_blank" rel="noopener">${memeEsc(c.sym)}</a></td><td>${memeUsd(c.liq)}</td><td>${memeUsd(c.vol24)}</td><td>${c.ageH < 48 ? c.ageH + "h" : Math.round(c.ageH / 24) + "d"}</td><td>${v}</td>
+          <td style="white-space:normal;color:#b9bfe8">${ok ? "every check passed" : memeEsc(c.fails.slice(0, 3).join(" · "))}</td></tr>`; }).join("") + `</table>`;
+  }
+  else if(id === "term"){
+    const lines = [...(M.tape || [])].slice(0, 30).reverse().map(e => `<span class="${e.kind === "rug" || e.kind === "reject" ? "r" : e.kind === "buy" ? "y" : ""}">[${new Date(e.t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}] ${memeEsc((cityNameOf(M, e.bot) || "").toLowerCase().replace(/ /g, "_"))}: ${memeEsc(e.say || e.txt)}</span>`);
+    const f = M.funnel; if(f) lines.push(`<span class="c">> scan ${new Date(f.t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}: ${f.found} found → ${f.checked} rug-checked → ${f.passed} passed → ${f.bought} bought</span>`);
+    const live = OS.live._t ? `<span class="c">> dexscreener: ${Object.keys(OS.live).length - 1} held coins priced live at ${new Date(OS.live._t).toLocaleTimeString()}</span>` : "";
+    const atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 30;
+    body.innerHTML = `<div class="osTerm">rugdesk@bot-city-hq:~$ tail -f team.log\n${lines.join("\n")}\n${live}\nrugdesk@bot-city-hq:~$ <i></i></div>`;
+    if(atBottom) body.scrollTop = body.scrollHeight;
+  }
+  else if(id === "chart"){
+    body.innerHTML = `<canvas width="1200" height="640" style="width:100%;height:100%;display:block"></canvas>`;
+    const c = body.querySelector("canvas"), g = c.getContext("2d"), W = 1200, H = 640, top = team.sort((a, b) => b[1].value - a[1].value).slice(0, 5);
+    const pts = new Map(); for(const [, b] of team) for(const [tt, v] of b.equity.slice(-300)) pts.set(Math.round(tt / 3e5), (pts.get(Math.round(tt / 3e5)) || 0) + v);
+    const eq = [...pts.entries()].sort((a, b) => a[0] - b[0]).slice(-300); g.fillStyle = "#0b0a18"; g.fillRect(0, 0, W, H);
+    if(eq.length > 1){ const vs = eq.map(e => e[1]), lo = Math.min(...vs), hi = Math.max(...vs), X = i => 60 + i / (eq.length - 1) * (W - 90), Y = v => H - 50 - (v - lo) / ((hi - lo) || 1) * (H - 140);
+      g.strokeStyle = "rgba(255,255,255,.07)"; g.fillStyle = "#8f97c6"; g.font = "22px system-ui"; for(let k = 0; k <= 4; k++){ const v = lo + (hi - lo) * k / 4, y = Y(v); g.beginPath(); g.moveTo(60, y); g.lineTo(W - 30, y); g.stroke(); g.fillText("$" + v.toFixed(0), 4, y + 7); }
+      const up = vs.at(-1) >= vs[0]; g.beginPath(); eq.forEach((e, i) => i ? g.lineTo(X(i), Y(e[1])) : g.moveTo(X(i), Y(e[1]))); g.strokeStyle = up ? "#3ee6a2" : "#ff4f7d"; g.lineWidth = 4; g.stroke();
+      g.fillStyle = "#eef1ff"; g.font = "bold 30px system-ui"; g.fillText(`Bot team $${vs.at(-1).toFixed(2)}`, 64, 48);
+      g.font = "22px system-ui"; top.forEach(([bid, b], k) => { g.fillStyle = cityColor(bid); g.fillText(`${b.name} $${b.value.toFixed(2)}`, 64 + k * 220, 84); }); }
+    else { g.fillStyle = "#8f97c6"; g.font = "28px system-ui"; g.fillText("Not enough history yet.", 60, 80); }
+  }
+  else if(id === "chat") body.innerHTML = `<div class="chat osChat">${$("chat").innerHTML}</div>`;
+}
+// live prices for every coin the bots hold (DexScreener, 30 coins per request); also fed to the 3D monitor
+async function osLive(){
+  const M = osM(); if(!M) return; const mints = [...new Set(Object.values(M.bots).flatMap(b => b.positions.map(p => p.mint)))]; if(!mints.length) return;
+  const out = {};
+  for(let i = 0; i < mints.length; i += 30){ const b = mints.slice(i, i + 30);
+    try{ const ps = await (await fetch(`https://api.dexscreener.com/tokens/v1/solana/${b.join(",")}`)).json();
+      for(const m of b){ const pr = memePickPair((ps || []).filter(p => p.baseToken && p.baseToken.address === m)); if(pr) out[m] = +pr.priceUsd; } }catch(e){} }
+  if(Object.keys(out).length){ out._t = Date.now(); OS.live = out; if(CITY.world) CITY.world.setLive(out); for(const id of ["trades", "term"]) if(OS.wins[id] && !$("bossOS").hidden) osRender(id); }
+}
+$("pcBtn").addEventListener("click", osOpen);
 // labels float above their buildings; overlapping ones stack; hidden while we're inside the HQ office
 function cityPlaceLabels(project, inOffice, info){
   const stage = $("cityStage"), W = stage.clientWidth, H = stage.clientHeight, placed = [], tags = [];
@@ -3044,9 +3205,12 @@ function cityPicked(e){
   else if(e.kind === "person" || e.kind === "car"){ $("cityDetail").innerHTML = e.text; CITY.pickRef = e.ref;
     if(CITY.world.mode !== "drive"){ $("followBtn").hidden = false; $("followBtn").textContent = `🎥 Follow this ${e.kind === "car" ? "car" : "person"}`; } }
   else if(e.kind === "landmark") $("cityDetail").innerHTML = e.text;
-  else if(e.kind === "view"){ $("hqBtn").textContent = e.office ? "← Back to the city" : "🏢 Visit HQ";
-    $("cityDetail").innerHTML = e.office ? "<b>HQ penthouse</b>: the boss is watching the whole meme bot team live. His screens mirror the real paper trades: team money, the leaderboard, the trade tape, every rug check and today's shifts."
-      : CITY_HELP; }
+  else if(e.kind === "view"){ $("hqBtn").textContent = e.office ? "← Leave HQ" : "🏢 Visit HQ"; $("pcBtn").hidden = !e.office; $("cityStage").classList.toggle("office", e.office);
+    $("cityDetail").innerHTML = e.office ? "<b>You're in the boss's chair</b>, top floor of HQ. Drag to look around (turn round for the lounge, look out of the glass at the city), pinch or scroll to zoom. The middle screen is your PC: tap it, or 🖥️ Use the PC, to see the live trades."
+      : CITY_HELP;
+    clearInterval(OS.liveTimer); if(e.office){ osLive(); OS.liveTimer = setInterval(osLive, 15000); } else osClose(); }
+  else if(e.kind === "pc") osOpen();
+  else if(e.kind === "hqbot") $("cityDetail").innerHTML = e.text;
   else if(e.kind === "mode"){ const m = e.mode;
     $("cityStage").classList.toggle("driving", m === "drive");
     $("driveBtn").textContent = m === "drive" ? "🅿️ Park" : "🚗 Drive";

@@ -1,0 +1,212 @@
+// The HQ penthouse (README round 40), imported by city.js. A glass box on top of the HQ tower, at roughly human scale
+// (1 unit ≈ 1 metre): you sit in the boss's chair at an executive desk facing the south window, with three monitors in front
+// of you. The middle one is the PC (tap it to use it: index.html opens the BossOS desktop); the left one charts the bot
+// team, the right one is a live terminal. Behind you: a lounge with a sofa, a holographic market globe, a bar and the
+// house robot, who looks out of the window. Everything is built from code; the screens are canvases redrawn with live data.
+export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R}){
+  const g = new T.Group(); g.position.y = OY; parent.add(g);
+  const W = 5.6, D = 5.6, H = 2.7, hw = W / 2, hd = D / 2;
+  const add = (geo, mat, x, y, z, ry = 0, rx = 0, rz = 0) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); g.add(m); return m; };
+  const std = (o) => new T.MeshStandardMaterial(o), phys = o => new T.MeshPhysicalMaterial(o);
+  const glow = (hex, s, op = 1) => { const m = new T.Sprite(new T.SpriteMaterial({map:glowTex, color:hex, blending:T.AdditiveBlending, transparent:true, depthWrite:false, opacity:op})); m.scale.set(s, s, 1); return m; };
+  const aniso = R.capabilities.getMaxAnisotropy();
+  const rnd = (() => { let a = 77; return () => (a = (a * 16807) % 2147483647) / 2147483647; })();
+
+  // ── surfaces ──
+  const marble = canvasTex(1024, 1024, (c, w, h) => { c.fillStyle = "#16141c"; c.fillRect(0, 0, w, h);
+    for(let k = 0; k < 90; k++){ c.strokeStyle = `rgba(${150 + rnd() * 80},${150 + rnd() * 70},${170 + rnd() * 60},${.04 + rnd() * .12})`; c.lineWidth = .6 + rnd() * 2.2;
+      c.beginPath(); let x = rnd() * w, y = rnd() * h; c.moveTo(x, y); for(let s = 0; s < 14; s++){ x += (rnd() - .5) * 120; y += (rnd() - .3) * 90; c.lineTo(x, y); } c.stroke(); }
+    c.strokeStyle = "rgba(0,0,0,.55)"; c.lineWidth = 3; for(let k = 0; k <= 4; k++){ c.beginPath(); c.moveTo(k * w / 4, 0); c.lineTo(k * w / 4, h); c.stroke(); c.beginPath(); c.moveTo(0, k * h / 4); c.lineTo(w, k * h / 4); c.stroke(); } });
+  marble.wrapS = marble.wrapT = T.RepeatWrapping; marble.repeat.set(1.4, 1.4); marble.anisotropy = aniso;
+  const wood = canvasTex(1024, 256, (c, w, h) => { const gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#3b2416"); gr.addColorStop(1, "#2a170d"); c.fillStyle = gr; c.fillRect(0, 0, w, h);
+    for(let k = 0; k < 160; k++){ c.strokeStyle = `rgba(${90 + rnd() * 60},${50 + rnd() * 30},${25 + rnd() * 15},${.15 + rnd() * .3})`; c.lineWidth = .5 + rnd() * 1.6;
+      const y = rnd() * h; c.beginPath(); c.moveTo(0, y); c.bezierCurveTo(w * .3, y + (rnd() - .5) * 18, w * .7, y + (rnd() - .5) * 18, w, y + (rnd() - .5) * 10); c.stroke(); } });
+  wood.anisotropy = aniso;
+  const leather = std({color:0x141218, roughness:.55, metalness:.05});
+  const steel = std({color:0x9aa0b4, roughness:.25, metalness:.9}), darkMetal = std({color:0x1b1c24, roughness:.35, metalness:.8});
+  const floorMat = std({map:marble, roughness:.3, metalness:.1, envMapIntensity:.25});
+  add(new T.BoxGeometry(W, .08, D), floorMat, 0, -.04, 0);
+  // the slab the penthouse sits on, with an LED edge you can see from the street
+  add(new T.BoxGeometry(W + .3, .35, D + .3), std({color:0x101018, roughness:.6, metalness:.5}), 0, -.26, 0);
+  for(const [x, z, w, d] of [[0, hd + .16, W + .3, .03], [0, -hd - .16, W + .3, .03], [hw + .16, 0, .03, D + .3], [-hw - .16, 0, .03, D + .3]])
+    add(new T.BoxGeometry(w, .04, d), new T.MeshBasicMaterial({color:0x45d4ff}), x, -.18, z);
+  // ceiling with light strips
+  add(new T.BoxGeometry(W, .1, D), std({color:0x0d0d14, roughness:.8}), 0, H + .05, 0);
+  for(const x of [-1.6, 0, 1.6]) add(new T.BoxGeometry(.05, .02, D - .8), new T.MeshBasicMaterial({color:0xcfe9ff}), x, H - .01, 0);
+  add(new T.BoxGeometry(W - .6, .02, .05), new T.MeshBasicMaterial({color:0xff4fa3}), 0, H - .01, -hd + .3);
+  // floor-to-ceiling glass with slim mullions
+  const glass = phys({color:0x9fd6ff, transparent:true, opacity:.08, roughness:.04, metalness:0, envMapIntensity:.08, depthWrite:false, side:T.DoubleSide});
+  const panes = [];
+  for(const [x, z, ry, len] of [[0, hd, 0, W], [0, -hd, Math.PI, W], [hw, 0, Math.PI / 2, D], [-hw, 0, -Math.PI / 2, D]]){
+    const p = add(new T.PlaneGeometry(len, H), glass, x, H / 2, z, ry); panes.push(p);
+    for(let k = 0; k <= 4; k++){ const o = -len / 2 + k * len / 4, m = add(new T.BoxGeometry(.05, H, .05), darkMetal, 0, H / 2, 0);
+      m.position.set(x + (ry === 0 || ry === Math.PI ? o : 0), H / 2, z + (ry === 0 || ry === Math.PI ? 0 : o)); }
+    const sill = add(new T.BoxGeometry(len, .06, .08), darkMetal, x, .03, z, ry); }
+
+  // ── the desk you sit at (facing the south window) ──
+  const DZ = 1.55;
+  add(new T.BoxGeometry(2.6, .06, .9), std({map:wood, roughness:.35, metalness:.05}), 0, .74, DZ);
+  add(new T.BoxGeometry(2.6, .02, .02), new T.MeshBasicMaterial({color:0xffb04d}), 0, .705, DZ - .45);   // amber under-glow strip
+  for(const x of [-1.2, 1.2]) add(new T.BoxGeometry(.06, .72, .8), steel, x, .36, DZ);
+  add(new T.BoxGeometry(2.3, .45, .03), std({map:wood, roughness:.4}), 0, .48, DZ + .4);
+  // three monitors: canvases are drawn by drawMonitors()
+  const mon = (w, h, cw, ch, x, z, ry) => { const tex = canvasTex(cw, ch, c => { c.fillStyle = "#05070d"; c.fillRect(0, 0, cw, ch); }); tex.anisotropy = aniso;
+    const grp = new T.Group(); grp.position.set(x, 1.12, z); grp.rotation.y = ry; g.add(grp);
+    const bez = new T.Mesh(new T.BoxGeometry(w + .03, h + .03, .03), std({color:0x08080c, roughness:.3, metalness:.6})); bez.position.z = .016; grp.add(bez);
+    const scr = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({map:tex, toneMapped:false})); scr.rotation.y = Math.PI; grp.add(scr);
+    const arm = new T.Mesh(new T.BoxGeometry(.05, .36, .05), steel); arm.position.set(0, -h / 2 - .14, .06); grp.add(arm);
+    const foot = new T.Mesh(new T.BoxGeometry(.32, .015, .22), steel); foot.position.set(0, -h / 2 - .32, .06); grp.add(foot);
+    const back = new T.PointLight(0x7fb8ff, 1.5, 1.6, 2); back.position.set(0, 0, -.25); grp.add(back);   // screen light on the desk
+    return {tex, scr, grp}; };
+  const main = mon(1.04, .62, 1600, 960, 0, DZ + .3, 0), left = mon(.7, .42, 1024, 614, -.98, DZ + .12, -.5), right = mon(.7, .42, 1024, 614, .98, DZ + .12, .5);
+  // keyboard (RGB), mouse, PC tower with a glass side, a mug, a desk lamp
+  add(new T.BoxGeometry(.46, .02, .15), std({color:0x15151c, roughness:.4}), 0, .78, DZ - .2);
+  const kbGlow = add(new T.BoxGeometry(.44, .004, .13), new T.MeshBasicMaterial({color:0x45d4ff, transparent:true, opacity:.22}), 0, .792, DZ - .2);
+  add(new T.CapsuleGeometry(.025, .04, 4, 8), std({color:0x15151c, roughness:.3}), .34, .785, DZ - .2, 0, Math.PI / 2);
+  add(new T.BoxGeometry(.28, .5, .5), darkMetal, 1.05, .25, DZ + .05);
+  const rgb = add(new T.BoxGeometry(.005, .42, .42), new T.MeshBasicMaterial({color:0xff4fa3, transparent:true, opacity:.7}), .905, .25, DZ + .05);
+  add(new T.CylinderGeometry(.04, .035, .1, 16), std({color:0xe8e4dc, roughness:.3}), -.62, .82, DZ - .15);
+  add(new T.CylinderGeometry(.08, .1, .02, 16), steel, -1.1, .78, DZ + .25);
+  add(new T.CylinderGeometry(.01, .01, .45, 8), steel, -1.1, 1, DZ + .25);
+  add(new T.ConeGeometry(.09, .1, 16, 1, true), std({color:0x22222a, roughness:.4, side:T.DoubleSide}), -1.1, 1.22, DZ + .2);
+  const lampL = new T.PointLight(0xffc98a, 6, 4, 2); lampL.position.set(-1.1, 1.15, DZ + .1); g.add(lampL);
+  // your chair: you sit in it, so only the arm-rests show at the bottom of the view
+  const chair = new T.Group(); chair.position.set(0, 0, .35); g.add(chair);
+  for(const x of [-.32, .32]){ const a = new T.Mesh(new T.BoxGeometry(.07, .05, .45), leather); a.position.set(x, .68, .05); chair.add(a); }
+  { const s = new T.Mesh(new T.BoxGeometry(.6, .12, .55), leather); s.position.y = .5; chair.add(s);
+    const b = new T.Mesh(new T.BoxGeometry(.58, .85, .1), leather); b.position.set(0, 1.0, -.3); b.rotation.x = -.12; chair.add(b);
+    const st = new T.Mesh(new T.CylinderGeometry(.04, .04, .4, 12), steel); st.position.y = .25; chair.add(st);
+    for(let k = 0; k < 5; k++){ const leg = new T.Mesh(new T.BoxGeometry(.04, .03, .32), steel); leg.position.set(Math.sin(k * 1.257) * .16, .05, Math.cos(k * 1.257) * .16); leg.rotation.y = k * 1.257; chair.add(leg); } }
+
+  // ── the lounge behind you ──
+  const fabric = std({color:0x2a2440, roughness:.9});
+  add(new T.BoxGeometry(2.2, .42, .85), fabric, -.4, .21, -1.9);
+  add(new T.BoxGeometry(2.2, .5, .2), fabric, -.4, .55, -2.25);
+  for(const x of [-1.45, .65]) add(new T.BoxGeometry(.18, .55, .85), fabric, x, .28, -1.9);
+  add(new T.BoxGeometry(1.1, .05, .6), std({color:0x0b0b10, roughness:.05, metalness:.3}), -.4, .4, -1.05);
+  for(const [x, z] of [[-.9, -1.3], [.1, -1.3], [-.9, -.8], [.1, -.8]]) add(new T.CylinderGeometry(.015, .015, .38, 8), steel, x, .19, z);
+  add(new T.PlaneGeometry(2.6, 1.8), std({color:0x3a1f46, roughness:1}), -.4, .005, -1.3, 0, -Math.PI / 2);   // rug
+  // a holographic market globe over the coffee table
+  const holo = new T.Group(); holo.position.set(-.4, .82, -1.05); g.add(holo);
+  holo.add(new T.Mesh(new T.SphereGeometry(.22, 20, 14), new T.MeshBasicMaterial({color:0x45d4ff, wireframe:true, transparent:true, opacity:.35, blending:T.AdditiveBlending, depthWrite:false})));
+  { const pts = []; for(let k = 0; k < 120; k++){ const a = rnd() * Math.PI * 2, e = (rnd() - .5) * Math.PI; pts.push(Math.cos(a) * Math.cos(e) * .23, Math.sin(e) * .23, Math.sin(a) * Math.cos(e) * .23); }
+    const pg = new T.BufferGeometry(); pg.setAttribute("position", new T.Float32BufferAttribute(pts, 3));
+    holo.add(new T.Points(pg, new T.PointsMaterial({color:0xff4fa3, size:.02, transparent:true, opacity:.9, blending:T.AdditiveBlending, depthWrite:false}))); }
+  const holoBeam = add(new T.CylinderGeometry(.2, .05, .38, 20, 1, true), new T.MeshBasicMaterial({color:0x45d4ff, transparent:true, opacity:.12, blending:T.AdditiveBlending, depthWrite:false, side:T.DoubleSide}), -.4, .6, -1.05);
+  // the bar on the north wall: shelves of glowing bottles
+  add(new T.BoxGeometry(1.6, 1, .5), std({color:0x121218, roughness:.25, metalness:.4}), 1.6, .5, -2.4);
+  add(new T.BoxGeometry(1.6, .04, .55), std({color:0xd8d4e8, roughness:.1, metalness:.2}), 1.6, 1.02, -2.4);
+  add(new T.BoxGeometry(1.7, 1.2, .05), std({color:0x0a0a10, roughness:.4}), 1.6, 1.85, -2.76);
+  for(const y of [1.45, 1.85, 2.25]){ add(new T.BoxGeometry(1.5, .02, .2), new T.MeshBasicMaterial({color:0xffb04d}), 1.6, y - .02, -2.66);
+    for(let k = 0; k < 9; k++){ const c = [0x7dffc2, 0xffc44d, 0xff4fa3, 0x45d4ff, 0xffffff][k % 5];
+      add(new T.CylinderGeometry(.03, .035, .2 + rnd() * .1, 10), std({color:c, emissive:c, emissiveIntensity:.35, roughness:.1, transparent:true, opacity:.8}), .95 + k * .16, y + .1, -2.64); } }
+  // a tall plant and a floor lamp in the corners
+  add(new T.CylinderGeometry(.18, .14, .45, 16), std({color:0xd8d4e0, roughness:.4}), -2.35, .22, 2.3);
+  for(let k = 0; k < 9; k++){ const l = add(new T.ConeGeometry(.12, .9, 6), std({color:0x1f6b3a, roughness:.6}), -2.35 + (rnd() - .5) * .3, .85 + rnd() * .3, 2.3 + (rnd() - .5) * .3);
+    l.rotation.set((rnd() - .5) * .9, 0, (rnd() - .5) * .9); }
+  add(new T.CylinderGeometry(.015, .015, 1.6, 8), steel, 2.4, .8, -1.2);
+  add(new T.SphereGeometry(.14, 16, 12), new T.MeshBasicMaterial({color:0xffe2b0}), 2.4, 1.65, -1.2);
+  const lampF = new T.PointLight(0xffd8a0, 10, 6, 2); lampF.position.set(2.4, 1.6, -1.2); g.add(lampF);
+  for(const [x, z] of [[-1.4, 1.2], [1.4, 1.2], [-1.4, -1.4], [1.4, -1.4]]){ const l = new T.PointLight(0xcfe0ff, 9, 6, 2); l.position.set(x, H - .25, z); g.add(l); }
+  const fill = new T.HemisphereLight(0x9fb4ff, 0x2a1830, .9); fill.position.y = 2; g.add(fill);   // soft bounce light inside the glass box
+  // ── the house robot: stands at the east window looking out over the city ──
+  const bot = new T.Group(); bot.position.set(2.15, 0, .2); bot.rotation.y = Math.PI / 2; g.add(bot);
+  const suit = std({color:0x1a1c26, roughness:.45, metalness:.2}), chrome = std({color:0xc8cee0, roughness:.18, metalness:1});
+  for(const x of [-.1, .1]){ const leg = new T.Mesh(new T.CapsuleGeometry(.07, .7, 4, 10), suit); leg.position.set(x, .45, 0); bot.add(leg); }
+  const torso = new T.Mesh(new T.CapsuleGeometry(.2, .45, 6, 14), suit); torso.position.y = 1.15; torso.scale.z = .7; bot.add(torso);
+  const tie = new T.Mesh(new T.BoxGeometry(.05, .3, .01), std({color:0xff3d6e, emissive:0x661020})); tie.position.set(0, 1.22, .145); bot.add(tie);
+  const neck = new T.Mesh(new T.CylinderGeometry(.05, .06, .1, 12), chrome); neck.position.y = 1.52; bot.add(neck);
+  const head = new T.Group(); head.position.y = 1.68; bot.add(head);
+  head.add(new T.Mesh(new T.SphereGeometry(.14, 24, 18), chrome));
+  const visor = new T.Mesh(new T.CapsuleGeometry(.035, .14, 4, 12), new T.MeshBasicMaterial({color:0x45d4ff})); visor.rotation.z = Math.PI / 2; visor.position.set(0, .02, .12); head.add(visor);
+  const armL = new T.Group(), armR = new T.Group(); armL.position.set(-.27, 1.38, 0); armR.position.set(.27, 1.38, 0); bot.add(armL, armR);
+  for(const a of [armL, armR]){ const m = new T.Mesh(new T.CapsuleGeometry(.055, .5, 4, 10), suit); m.position.y = -.3; a.add(m);
+    const hand = new T.Mesh(new T.SphereGeometry(.05, 12, 10), chrome); hand.position.y = -.6; a.add(hand); }
+  const coffee = new T.Mesh(new T.CylinderGeometry(.035, .03, .09, 12), std({color:0xe8e4dc})); coffee.position.set(0, -.62, .06); armR.add(coffee);
+
+  // ── the monitors' content ──
+  const money = v => (v >= 0 ? "+$" : "−$") + Math.abs(v).toFixed(2);
+  const ago = ms => { const m = Math.max(0, Math.round(ms / 6e4)); return m < 60 ? `${m}m` : m < 1440 ? `${Math.floor(m / 60)}h${String(m % 60).padStart(2, "0")}` : `${Math.floor(m / 1440)}d`; };
+  const wall = document.createElement("canvas"); wall.width = 1600; wall.height = 960;
+  { const c = wall.getContext("2d"), gr = c.createLinearGradient(0, 0, 0, 960); gr.addColorStop(0, "#160a3a"); gr.addColorStop(.6, "#3a0f5c"); gr.addColorStop(1, "#ff4fa3");
+    c.fillStyle = gr; c.fillRect(0, 0, 1600, 960);
+    for(let x = 0; x < 1600; x += 18 + rnd() * 40){ const h = 140 + rnd() * 420, w = 20 + rnd() * 60; c.fillStyle = "#0b0620"; c.fillRect(x, 960 - h, w, h);
+      for(let y = 960 - h + 8; y < 960; y += 14) for(let xx = x + 4; xx < x + w - 4; xx += 10) if(rnd() < .35){ c.fillStyle = rnd() < .5 ? "#ffb35c" : "#7fd8ff"; c.fillRect(xx, y, 4, 6); } } }
+  const rr = (c, x, y, w, h, r) => { c.beginPath(); c.roundRect(x, y, w, h, r); };
+  const posValue = (p, live) => { const px = live && live[p.mint]; return px ? p.qty * px * .99 : p.last ? p.last.value : p.stake; };
+  function drawMain(M, live, tick){
+    const c = main.tex.userData.c.getContext("2d"), W2 = 1600, H2 = 960; c.drawImage(wall, 0, 0);
+    // window: Live Trades
+    const X = 60, Y = 46, WW = 1480, WH = 790; c.fillStyle = "rgba(14,14,24,.94)"; rr(c, X, Y, WW, WH, 16); c.fill();
+    c.fillStyle = "#1d1d2c"; rr(c, X, Y, WW, 56, 16); c.fill(); c.fillRect(X, Y + 30, WW, 26);
+    c.font = "600 26px system-ui, sans-serif"; c.fillStyle = "#eaf0ff"; c.textBaseline = "middle"; c.fillText("📈  Live Trades · BossOS", X + 24, Y + 29);
+    c.fillStyle = "#8b95bd"; c.font = "26px system-ui"; c.fillText("—    ▢    ✕", X + WW - 170, Y + 29);
+    if(!M || !M.bots){ c.fillStyle = "#8b95bd"; c.font = "30px system-ui"; c.fillText("Waiting for the bots' first report…", X + 40, Y + 120); }
+    else {
+      const pos = Object.entries(M.bots).flatMap(([id, b]) => b.positions.map(p => ({...p, bot:b.name, v:posValue(p, live)}))).map(p => ({...p, pnl:p.v - p.stake})).sort((a, b) => Math.abs(b.pnl) - Math.abs(a.pnl));
+      const open = pos.reduce((a, p) => a + p.pnl, 0);
+      c.font = "700 34px system-ui"; c.fillStyle = open >= 0 ? "#3ee6a2" : "#ff4f7d"; c.fillText(`Open P&L ${money(open)}`, X + 30, Y + 104);
+      c.font = "500 24px system-ui"; c.fillStyle = "#b9bfe8"; c.fillText(`${pos.length} open positions · prices ${live && live._t ? "live " + new Date(live._t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"}) : "from the last bot run"}`, X + 450, Y + 104);
+      if(tick % 2){ c.fillStyle = "#ff3d6e"; c.beginPath(); c.arc(X + WW - 50, Y + 104, 9, 0, 7); c.fill(); }
+      const cols = [["BOT", 0], ["COIN", 330], ["SIZE", 560], ["NOW", 720], ["P&L", 900], ["%", 1100], ["HELD", 1260]];
+      c.font = "600 22px ui-monospace, monospace"; c.fillStyle = "#6f78a8"; for(const [h, x] of cols) c.fillText(h, X + 30 + x, Y + 158);
+      c.font = "26px ui-monospace, monospace";
+      pos.slice(0, 13).forEach((p, k) => { const y = Y + 204 + k * 44, up = p.pnl >= 0;
+        if(k % 2 === 0){ c.fillStyle = "rgba(255,255,255,.03)"; c.fillRect(X + 16, y - 21, WW - 32, 42); }
+        c.fillStyle = "#eaf0ff"; c.fillText(p.bot.slice(0, 16), X + 30, y); c.fillStyle = "#ffc44d"; c.fillText(String(p.sym).slice(0, 10), X + 360, y);
+        c.fillStyle = "#b9bfe8"; c.fillText(`$${p.stake.toFixed(2)}`, X + 590, y); c.fillText(`$${p.v.toFixed(2)}`, X + 750, y);
+        c.fillStyle = up ? "#3ee6a2" : "#ff4f7d"; c.fillText(money(p.pnl), X + 930, y); c.fillText(`${up ? "▲" : "▼"}${Math.abs(p.pnl / p.stake * 100).toFixed(1)}%`, X + 1130, y);
+        c.fillStyle = "#8b95bd"; c.fillText(ago(Date.now() - p.openedAt), X + 1290, y); });
+      if(!pos.length){ c.fillStyle = "#8b95bd"; c.fillText("No open positions right now.", X + 30, Y + 210); }
+    }
+    // taskbar
+    c.fillStyle = "rgba(10,10,18,.88)"; c.fillRect(0, H2 - 72, W2, 72);
+    const icons = ["#45d4ff", "#ffc44d", "#7dffc2", "#ff4fa3", "#b07bff", "#3ee6a2"];
+    icons.forEach((col, k) => { const x = W2 / 2 - icons.length * 34 + k * 68; c.fillStyle = k === 0 ? "rgba(255,255,255,.12)" : "transparent"; rr(c, x - 4, H2 - 64, 58, 58, 10); c.fill();
+      c.fillStyle = col; rr(c, x + 8, H2 - 52, 34, 34, 8); c.fill(); });
+    c.fillStyle = "#eaf0ff"; c.font = "500 24px system-ui"; c.fillText(new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"}), W2 - 140, H2 - 36);
+    main.tex.needsUpdate = true;
+  }
+  function drawLeft(M){
+    const c = left.tex.userData.c.getContext("2d"), w = 1024, h = 614; c.fillStyle = "#060812"; c.fillRect(0, 0, w, h);
+    if(!M || !M.bots){ left.tex.needsUpdate = true; return; }
+    const team = Object.values(M.bots), total = team.reduce((a, b) => a + (b.value ?? b.cash), 0), start = team.reduce((a, b) => a + b.start, 0), up = total >= start;
+    c.fillStyle = "#ffc44d"; c.font = "700 30px system-ui"; c.textBaseline = "middle"; c.fillText("BOT TEAM · PAPER", 30, 40);
+    c.fillStyle = up ? "#3ee6a2" : "#ff4f7d"; c.font = "800 70px system-ui"; c.fillText(`$${total.toFixed(2)}`, 30, 115);
+    c.font = "600 28px system-ui"; c.fillText(`${money(total - start)} since start`, 32, 172);
+    const pts = new Map(); for(const b of team) for(const [tt, v] of b.equity.slice(-200)) pts.set(Math.round(tt / 3e5), (pts.get(Math.round(tt / 3e5)) || 0) + v);
+    const eq = [...pts.entries()].sort((a, b) => a[0] - b[0]).map(e => e[1]).slice(-200);
+    if(eq.length > 1){ const lo = Math.min(...eq), hi = Math.max(...eq), X = i => 30 + i / (eq.length - 1) * (w - 60), Y = v => h - 40 - (v - lo) / ((hi - lo) || 1) * 330;
+      const gr = c.createLinearGradient(0, h - 370, 0, h - 40); gr.addColorStop(0, up ? "rgba(62,230,162,.35)" : "rgba(255,79,125,.35)"); gr.addColorStop(1, "rgba(0,0,0,0)");
+      c.beginPath(); eq.forEach((v, i) => i ? c.lineTo(X(i), Y(v)) : c.moveTo(X(i), Y(v))); c.lineTo(X(eq.length - 1), h - 40); c.lineTo(30, h - 40); c.fillStyle = gr; c.fill();
+      c.beginPath(); eq.forEach((v, i) => i ? c.lineTo(X(i), Y(v)) : c.moveTo(X(i), Y(v))); c.strokeStyle = up ? "#3ee6a2" : "#ff4f7d"; c.lineWidth = 4; c.stroke(); }
+    left.tex.needsUpdate = true;
+  }
+  const termLines = []; let termSeen = 0;
+  function drawRight(M, tick){
+    const c = right.tex.userData.c.getContext("2d"), w = 1024, h = 614; c.fillStyle = "#020a04"; c.fillRect(0, 0, w, h);
+    if(M && M.tape){ const fresh = M.tape.filter(e => e.t > termSeen).slice(0, 12).reverse();
+      for(const e of fresh) termLines.push({txt:`[${new Date(e.t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}] ${e.say || e.txt}`, col:e.kind === "rug" || e.kind === "reject" ? "#ff6b8a" : e.kind === "buy" ? "#ffd56b" : "#7dffc2"});
+      if(fresh.length) termSeen = Math.max(...M.tape.map(e => e.t));
+      if(M.funnel && tick % 20 === 0) termLines.push({txt:`> scan: ${M.funnel.found} found → ${M.funnel.checked} rug-checked → ${M.funnel.passed} passed → ${M.funnel.bought} bought`, col:"#45d4ff"}); }
+    while(termLines.length > 15) termLines.shift();
+    c.font = "24px ui-monospace, monospace"; c.textBaseline = "top"; c.fillStyle = "#3ee6a2"; c.fillText("rugdesk@hq:~$ tail -f team.log", 22, 16);
+    termLines.forEach((l, k) => { c.fillStyle = l.col; c.fillText(l.txt.slice(0, 74), 22, 56 + k * 36); });
+    if(tick % 2) { c.fillStyle = "#3ee6a2"; c.fillRect(22, 56 + termLines.length * 36, 14, 26); }
+    right.tex.needsUpdate = true;
+  }
+
+  return {
+    group:g, OY, eye:new T.Vector3(0, OY + 1.22, .2), panes,
+    pickPC:[main.scr], pickBot:[torso],
+    setSeated(on){ chair.children.forEach((c, i) => { c.visible = !on || i < 2; }); },   // you're in it: only the arm-rests show
+    drawMonitors(M, live, tick){ drawMain(M, live, tick); if(tick % 4 === 0) drawLeft(M); drawRight(M, tick); },
+    animate(t){
+      holo.rotation.y = t * .5; holoBeam.material.opacity = .1 + .05 * Math.sin(t * 3);
+      rgb.material.color.setHSL((t * .08) % 1, 1, .55); kbGlow.material.color.setHSL((t * .08 + .5) % 1, 1, .55);
+      head.rotation.y = Math.sin(t * .23) * .9; head.rotation.x = Math.sin(t * .5) * .06;   // looks around, now and then back at you
+      armR.rotation.x = -.6 - Math.max(0, Math.sin(t * .4)) * .9;   // sips his coffee
+      armL.rotation.x = Math.sin(t * .3) * .08; bot.position.y = Math.sin(t * 1.3) * .006;
+    },
+  };
+}
