@@ -290,9 +290,12 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .cityHead b{display:block;font:800 18px var(--body);letter-spacing:.14em;background:linear-gradient(90deg,#ffc44d,#ff4fa3,#7b6bff);-webkit-background-clip:text;background-clip:text;color:transparent}
 .cityHead span{font:500 11px var(--mono);color:var(--muted)}
 .cityMode{font:700 11px var(--mono);letter-spacing:.12em;padding:6px 10px;border-radius:999px;border:1px solid #45d4ff;color:#45d4ff}
-.cityStage{position:relative;height:clamp(360px,62vh,560px);border-radius:16px;overflow:hidden;touch-action:pan-y;
+.cityStage{position:relative;height:clamp(420px,70vh,640px);border-radius:16px;overflow:hidden;
   background:radial-gradient(120% 80% at 50% 0%,#3a1fb8 0%,#1b0f6b 45%,#0a0630 100%)}
-.cityStage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cityStage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.cityLabels.away{opacity:0;pointer-events:none} .cityLabels{transition:opacity .4s}
+.hqBtn{position:absolute;right:10px;bottom:10px;z-index:3;padding:9px 14px;border-radius:999px;border:1.5px solid #45d4ff;background:rgba(14,10,48,.88);color:#bff3ff;font:800 12px var(--body);cursor:pointer;box-shadow:0 0 14px rgba(69,212,255,.45)}
+.cityStage.flat .hqBtn{display:none}
 .cityBanner{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:3;white-space:nowrap;max-width:calc(100% - 20px);overflow:hidden;text-overflow:ellipsis;
   padding:8px 14px;border-radius:999px;font:800 12px var(--body);letter-spacing:.06em;color:#ffe08a;background:rgba(20,12,60,.82);
   border:1.5px solid #ffc44d;box-shadow:0 0 18px rgba(255,196,77,.55)}
@@ -305,7 +308,7 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 .cityLbl b{font:800 11px var(--body);letter-spacing:.08em;color:var(--c)} .cityLbl span{font:600 10px var(--body);color:#d8dcff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cityLbl i{font:700 11px var(--mono);font-style:normal} .cityLbl.off{filter:saturate(.35) brightness(.8)} .cityLbl.sel{outline:2px solid #fff}
 .cityStage.flat .cityLabels{position:static;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:56px 10px 10px}
-.cityStage.flat .cityLbl{position:static;transform:none!important;max-width:none}
+.cityStage.flat .cityLbl{position:static;transform:none!important;max-width:none;opacity:1!important} .cityStage.flat .hqLbl{display:none}
 .cityDetail{margin:10px 2px 0;font:500 13px var(--body);color:var(--muted);min-height:18px} .cityDetail b{color:var(--ink)}
 .cityCtl{display:grid;grid-template-columns:auto 1fr auto;gap:8px;margin-top:12px}
 .cityCtl .seg{display:flex;gap:4px;padding:4px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.05)}
@@ -612,8 +615,9 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   <section class="card cityCard" id="cityCard" data-page="city" hidden>
     <div class="cityHead"><div><b>BOT CITY</b><span id="cityWorkers">loading…</span></div><span class="cityMode" id="cityMode">PAPER MONEY</span></div>
     <div class="cityStage" id="cityStage"><canvas id="cityCanvas" aria-label="Bot City: each bot is a tower"></canvas>
-      <div class="cityBanner" id="cityBanner">Bot City is starting up</div><div class="cityLabels" id="cityLabels"></div></div>
-    <div class="cityDetail" id="cityDetail">Everything runs by itself. Tap a tower to see what that bot is doing.</div>
+      <div class="cityBanner" id="cityBanner">Bot City is starting up</div><div class="cityLabels" id="cityLabels"></div>
+      <button type="button" class="hqBtn" id="hqBtn">🏢 Visit HQ</button></div>
+    <div class="cityDetail" id="cityDetail">Everything runs by itself. Tap a building, a person or a car.</div>
     <div class="cityCtl" id="cityCtl">
       <div class="seg" aria-label="Bots on or off"><button type="button" data-set="on:true">On</button><button type="button" data-set="on:false">Off</button></div>
       <div class="seg" aria-label="Risk"><button type="button" data-set="risk:low">Low risk</button><button type="button" data-set="risk:normal">Normal</button><button type="button" data-set="risk:high">High</button></div>
@@ -2922,93 +2926,34 @@ const CITY_BOTS = [
 ];
 async function cityInit(){
   if(CITY.loading) return; CITY.loading = true;
-  const stage = $("cityStage"), cv = $("cityCanvas");
-  let T, R;
-  try{ T = await import("https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js");
-    R = new T.WebGLRenderer({canvas:cv, antialias:true, alpha:true, powerPreference:"low-power"}); }
+  const stage = $("cityStage");
+  let T, mod;
+  try{ [T, mod] = await Promise.all([import("https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js"), import(new URL("city.js", location.href).href)]); }
   catch(e){ stage.classList.add("flat"); return; }
-  R.setPixelRatio(Math.min(1.5, devicePixelRatio || 1)); R.outputColorSpace = T.SRGBColorSpace;
-  const scene = new T.Scene(); scene.fog = new T.FogExp2(0x1b0f6b, .07);
-  const cam = new T.PerspectiveCamera(42, 1, .1, 80);
-  scene.add(new T.HemisphereLight(0x9d8cff, 0x0a0630, 1.3));
-  const tex = draw => { const c = document.createElement("canvas"); draw(c, c.getContext("2d")); const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; return t; };
-  const winTex = tex((c, g) => { c.width = 64; c.height = 128; g.fillStyle = "#0b0a2a"; g.fillRect(0, 0, 64, 128);
-    for(let y = 4; y < 124; y += 8) for(let x = 4; x < 60; x += 8) if(Math.random() < .55){ const w = Math.random();
-      g.globalAlpha = .55 + Math.random() * .45; g.fillStyle = w < .7 ? "#ffe9a8" : w < .9 ? "#ffffff" : "#8fd8ff"; g.fillRect(x, y, 4, 4); } });
-  winTex.magFilter = T.NearestFilter;
-  const gridTex = tex((c, g) => { c.width = c.height = 128; g.fillStyle = "#150c52"; g.fillRect(0, 0, 128, 128);
-    g.strokeStyle = "rgba(170,130,255,.4)"; g.lineWidth = 2; g.strokeRect(0, 0, 128, 128); });
-  gridTex.wrapS = gridTex.wrapT = T.RepeatWrapping; gridTex.repeat.set(30, 30);
-  const glowTex = tex((c, g) => { c.width = c.height = 64; const r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(.3, "rgba(255,255,255,.4)"); r.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = r; g.fillRect(0, 0, 64, 64); });
-  const ground = new T.Mesh(new T.PlaneGeometry(60, 60), new T.MeshBasicMaterial({map:gridTex}));
-  ground.rotation.x = -Math.PI / 2; scene.add(ground);
-  for(const [r, col] of [[3.8, 0xff4fa3], [6.8, 0x7b6bff]]){
-    const ring = new T.Mesh(new T.RingGeometry(r, r + .06, 96), new T.MeshBasicMaterial({color:col, transparent:true, opacity:.85, side:T.DoubleSide}));
-    ring.rotation.x = -Math.PI / 2; ring.position.y = .01; scene.add(ring); }
-  const box = new T.BoxGeometry(1, 1, 1); box.translate(0, .5, 0);
-  const fillMat = new T.MeshStandardMaterial({map:winTex, emissiveMap:winTex, emissive:0xffffff, emissiveIntensity:.85, color:0x2a2470, roughness:.8});
-  const N = 170, inst = new T.InstancedMesh(box, fillMat, N), m4 = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(), ps = new T.Vector3();
-  for(let k = 0; k < N;){ const x = (Math.random() - .5) * 28, z = (Math.random() - .5) * 28, d = Math.hypot(x, z); if(d < 5) continue;
-    // low blocks near the plaza so the bot towers stand out, a taller skyline further back
-    const w = .4 + Math.random() * .5, h = d < 9 ? .3 + Math.random() * .9 : .6 + Math.random() * 2.2;
-    m4.compose(ps.set(Math.round(x * 1.3) / 1.3, 0, Math.round(z * 1.3) / 1.3), q, sc.set(w, h, w)); inst.setMatrixAt(k++, m4); }
-  scene.add(inst);
-  for(const b of CITY_BOTS){
-    const g = new T.Group(); g.position.set(b.pos[0], 0, b.pos[1]);
-    const mat = new T.MeshStandardMaterial({map:winTex, emissiveMap:winTex, emissive:b.color, emissiveIntensity:1.4, color:0x1c1850, roughness:.6});
-    let y = 0; const picks = [];
-    for(const [w, f] of [[.95, .55], [.68, .3], [.42, .15]]){ const m = new T.Mesh(box, mat); m.scale.set(w, b.h * f, w); m.position.y = y; g.add(m); picks.push(m); y += b.h * f; }
-    const tip = new T.Sprite(new T.SpriteMaterial({map:glowTex, color:b.color, blending:T.AdditiveBlending, transparent:true, depthWrite:false}));
-    tip.scale.set(1, 1, 1); tip.position.y = y + .15; g.add(tip);
-    const ring = new T.Mesh(new T.TorusGeometry(.95, .035, 8, 48), new T.MeshBasicMaterial({color:b.color, transparent:true, opacity:.9}));
-    ring.rotation.x = Math.PI / 2; ring.position.y = .06; g.add(ring);
-    const beam = new T.Mesh(new T.CylinderGeometry(.1, .1, 30, 12, 1, true),
-      new T.MeshBasicMaterial({color:0xffd56b, transparent:true, opacity:0, blending:T.AdditiveBlending, depthWrite:false}));
-    beam.position.y = 15; g.add(beam); scene.add(g);
-    CITY.towers[b.id] = {...b, mat, tip, ring, beam, top:y + .45, picks};
-  }
-  const ray = new T.Raycaster(), v2 = new T.Vector2(), tmp = new T.Vector3();
-  let ang = .6, last = 0, drag = null;
-  const resize = () => { const w = stage.clientWidth, h = stage.clientHeight; if(!w) return; R.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); };
-  new ResizeObserver(resize).observe(stage); resize();
-  stage.addEventListener("pointerdown", e => { if(e.target.closest(".cityLbl")) return; drag = {x:e.clientX, a:ang, moved:false}; });
-  addEventListener("pointermove", e => { if(!drag) return; const dx = e.clientX - drag.x; if(Math.abs(dx) > 5) drag.moved = true; ang = drag.a - dx * .008; });
-  addEventListener("pointerup", e => {
-    if(drag && !drag.moved){ const r = cv.getBoundingClientRect(); v2.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
-      ray.setFromCamera(v2, cam); const hit = ray.intersectObjects(Object.values(CITY.towers).flatMap(t => t.picks))[0];
-      if(hit) citySelect(Object.keys(CITY.towers).find(k => CITY.towers[k].picks.includes(hit.object))); }
-    drag = null; });
-  (function loop(ts){
-    requestAnimationFrame(loop);
-    if(document.body.dataset.on !== "city" || document.hidden || !stage.clientWidth) return;
-    if(ts - last < (reduceMotion ? 250 : 33)) return;
-    const dt = last ? Math.min(.1, (ts - last) / 1000) : .033; last = ts; const t = ts / 1000;
-    if(!drag && !reduceMotion) ang += dt * .07;
-    const rad = stage.clientWidth < 500 ? 10 : 8.5;   // aerial view, like looking down on a city at night
-    cam.position.set(Math.sin(ang) * rad, 8.2, Math.cos(ang) * rad); cam.lookAt(0, 1.1, 0);
-    const placed = [];
-    for(const tw of Object.values(CITY.towers)){
-      const st = tw.state || {}, fresh = st.beamUntil && Date.now() < st.beamUntil;
-      tw.ring.material.opacity = st.on ? .55 + .4 * Math.sin(t * 3 + tw.pos[0]) : .12;
-      tw.ring.scale.setScalar(st.on ? 1 + .07 * Math.sin(t * 3) : 1);
-      tw.mat.emissiveIntensity = st.on ? 1.4 : .4;
-      tw.beam.material.color.setHex(st.beamGood === false ? 0xff3d6e : 0xffd56b);
-      tw.beam.material.opacity = fresh ? .32 + .18 * Math.sin(t * 6) : Math.max(0, tw.beam.material.opacity - dt);
-      tw.tip.material.opacity = st.on ? .65 + .35 * Math.sin(t * 2 + tw.pos[1]) : .2;
-      const el = document.getElementById("cl-" + tw.id);
-      if(el){ tmp.set(tw.pos[0], tw.top, tw.pos[1]).project(cam);
-        placed.push({el, x:(tmp.x * .5 + .5) * stage.clientWidth, y:(-tmp.y * .5 + .5) * stage.clientHeight, w:el.offsetWidth, h:el.offsetHeight}); }
-    }
-    // labels sit above their tower; if two would overlap, the lower one moves down below the other
-    placed.sort((a, b) => a.y - b.y);
-    const W = stage.clientWidth;
-    placed.forEach((a, i) => { a.x = Math.max(4, Math.min(W - a.w - 4, a.x - a.w / 2)); a.y = Math.max(50, a.y - a.h - 8);
-      for(let j = 0; j < i; j++){ const o = placed[j]; if(a.x < o.x + o.w + 4 && a.x + a.w + 4 > o.x && a.y < o.y + o.h + 4 && a.y + a.h > o.y) a.y = o.y + o.h + 4; }
-      a.el.style.transform = `translate(${a.x.toFixed(0)}px,${a.y.toFixed(0)}px)`; });
-    R.render(scene, cam);
-  })(0);
+  try{
+    CITY.world = mod.createCity(T, {stage, canvas:$("cityCanvas"), reduceMotion, isActive:() => document.body.dataset.on === "city",
+      onPick:cityPicked, onFrame:cityPlaceLabels});
+  }catch(e){ stage.classList.add("flat"); return; }
   CITY.ready = true; cityRender();
+}
+// labels float above their buildings; overlapping ones stack; hidden while we're inside the HQ office
+function cityPlaceLabels(project, inOffice){
+  const stage = $("cityStage"), W = stage.clientWidth, placed = [];
+  $("cityLabels").classList.toggle("away", inOffice);
+  if(inOffice) return;
+  for(const el of $("cityLabels").children){ const q = project(el.dataset.tower); if(!q || q.behind){ el.style.opacity = 0; continue; }
+    el.style.opacity = 1; placed.push({el, x:q.x, y:q.y, w:el.offsetWidth, h:el.offsetHeight}); }
+  placed.sort((a, b) => a.y - b.y);
+  placed.forEach((a, i) => { a.x = Math.max(4, Math.min(W - a.w - 4, a.x - a.w / 2)); a.y = Math.max(50, a.y - a.h - 6);
+    for(let j = 0; j < i; j++){ const o = placed[j]; if(a.x < o.x + o.w + 4 && a.x + a.w + 4 > o.x && a.y < o.y + o.h + 4 && a.y + a.h > o.y) a.y = o.y + o.h + 4; }
+    a.el.style.transform = `translate(${a.x.toFixed(0)}px,${a.y.toFixed(0)}px)`; });
+}
+function cityPicked(e){
+  if(e.kind === "tower") citySelect(e.id);
+  else if(e.kind === "person" || e.kind === "car") $("cityDetail").innerHTML = e.text;
+  else if(e.kind === "view"){ $("hqBtn").textContent = e.office ? "← Back to the city" : "🏢 Visit HQ";
+    $("cityDetail").innerHTML = e.office ? "<b>HQ penthouse</b>: the boss is watching the meme bot live. His screens mirror the real paper trades: money, open positions, the trade tape, the rug scanner and today's goal."
+      : "Everything runs by itself. Tap a building, a person or a car."; }
 }
 async function loadCity(){
   if(document.body.dataset.on !== "city") return;
@@ -3038,9 +2983,10 @@ function cityRender(){
   if(L){ const val = L.balance + L.trades.filter(t => t.status === "open").reduce((s, t) => s + t.stake, 0);
     st.ai = {on:false, value:val, earned:val - L.start, line:"closed · no edge after costs",
       detail:"<b>AI calls</b>: closed for good. Tested every fix; none beat the fees."}; }
-  for(const [id, s] of Object.entries(st)) if(CITY.towers[id]) CITY.towers[id].state = s;
+  if(CITY.world){ CITY.world.setStates(st); if(M) CITY.world.setMeme(M); }
   CITY.state = st;
-  $("cityLabels").innerHTML = CITY_BOTS.filter(b => st[b.id]).map(b => { const s = st[b.id];
+  $("cityLabels").innerHTML = `<button type="button" class="cityLbl on hqLbl" id="cl-hq" data-tower="hq" style="--c:#45d4ff"><b>★ HQ · THE BOSS</b><span>watching 5 screens</span><i>tap to visit</i></button>`
+    + CITY_BOTS.filter(b => st[b.id]).map(b => { const s = st[b.id];
     return `<button type="button" class="cityLbl ${s.on ? "on" : "off"} ${CITY.sel === b.id ? "sel" : ""}" id="cl-${b.id}" data-tower="${b.id}" style="--c:${b.css}">
       <b>${b.id === "meme" ? "★ " : ""}${b.name}</b><span>${memeEsc(s.line)}</span><i class="${s.earned >= 0 ? "win" : "loss"}">earned ${cityMoney(s.earned)}</i></button>`; }).join("");
   const m = st.meme, goal = M && M.settings ? M.settings.dailyGoalPct : 10, workers = Object.values(st).filter(s => s.on).length;
@@ -3053,10 +2999,12 @@ function cityRender(){
   cityControls();
 }
 function citySelect(id){
-  if(!id) return; CITY.sel = id; cityRender();
-  if(id === "meme") $("memeBotCard").scrollIntoView({behavior:reduceMotion ? "auto" : "smooth", block:"start"});
+  if(!id) return;
+  if(id === "hq"){ if(CITY.world) CITY.world.flyTo("office"); return; }
+  CITY.sel = id; cityRender();   // stay in the 3D scene: the info line under it says what the bot is doing
 }
 document.addEventListener("click", e => { const b = e.target.closest(".cityLbl[data-tower]"); if(b) citySelect(b.dataset.tower); });
+$("hqBtn").addEventListener("click", () => { if(CITY.world) CITY.world.flyTo(CITY.world.inOffice ? "city" : "office"); });
 setInterval(loadCity, 60000);
 
 // owner-only controls: saved to paper/settings.json in the repo with the owner's GitHub key (kept on this device only)

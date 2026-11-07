@@ -676,9 +676,33 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   file every loop, so a change takes effect within ~5 minutes. Real money stays locked: it needs a funded Solana wallet
   and swap code that can't be tested without real money, and the meme bot hasn't shown an edge on paper yet.
 
+### Round 36: a living city, and the boss's office
+
+- Owner's request: a 3D, interactive city full of AIs with homes and jobs, moving cars, people going to work and to the
+  gas station, and an HQ penthouse where you can see the boss at his monitors, which mirror the real trades.
+- New file `city.js` (an ES module the City tab imports along with three.js; the rest of the site doesn't load it):
+  - a 7×7 street grid with lane lines and streetlights; downtown offices around HQ; one company building per paper bot
+    (Meme bot, Trend bot, Arena, AI calls) with the shift ring and trade beam from round 35; a gas station (canopy,
+    pumps, store, sign), a café, shops with neon awnings, a park, and neighbourhoods of houses with roofs
+  - 72 AI citizens, each with a name, a home, and a job (Meme bot rug-checker, Trend bot analyst, barista, gas station
+    clerk, HQ assistant…): they walk the sidewalks to work, go inside, run errands (gas station, café, shops, park) and
+    walk home
+  - 26 cars with headlights driving on the right, turning at intersections; sometimes one pulls into the gas station,
+    fills up and drives off
+  - HQ: the tallest tower, topped by a glass penthouse. Inside, the boss (a robot in a suit) sits at his desk, typing,
+    glancing between five monitors drawn from `paper/meme.json`: money and equity chart, open positions, the trade
+    tape, the rug scanner and today's goal/brake. "Visit HQ" (or tapping HQ) flies the camera in; "Back to the city"
+    flies out.
+  - drag to spin, pinch or scroll to zoom, tap a building, person or car (people and cars count within ~26 px of the
+    tap, since they're a few pixels wide from above). The layout is seeded, so it's the same city every visit.
+- Tested in Chrome (software 3D): renders, citizens and cars move, taps identify cars and buildings, the office view shows
+  the boss and all five live screens, no page errors. The simulation costs ~19 ms of JavaScript per second while the
+  City tab is open and stops when it isn't. Without WebGL the City tab falls back to flat cards.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
+- `city.js`: the 3D Bot City (streets, citizens, cars, HQ office), loaded by the City tab
 - `tradingview/TrenchAI_Direction.pine`: the indicator (paste into TradingView)
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)
 - `research/experiments*.py`: tests of candidate upgrades; `research/train.py`: trains the Experience brain
