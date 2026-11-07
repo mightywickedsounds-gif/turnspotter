@@ -55,7 +55,7 @@ body[data-mood="up"]{--mood:var(--up)} body[data-mood="down"]{--mood:var(--down)
 @keyframes ping{0%{box-shadow:0 0 0 0 rgba(62,230,162,.55)}80%,100%{box-shadow:0 0 0 10px rgba(62,230,162,0)}}
 
 /* ticker */
-body[data-on="auto"] .watch,body[data-on="arena"] .watch,body[data-on="meme"] .watch{display:none}
+body[data-on="auto"] .watch,body[data-on="arena"] .watch,body[data-on="meme"] .watch,body[data-on="city"] .watch{display:none}
 #botTiles{display:none}
 .watch{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .watch::-webkit-scrollbar{display:none}
@@ -285,6 +285,40 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
 #mvTxt b{font-family:var(--mono)}
 .arenaBanner{margin:0 0 12px;font:700 15px var(--body)}
 .arenaList{display:grid;gap:10px}
+.cityCard{padding:12px}
+.cityHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.cityHead b{display:block;font:800 18px var(--body);letter-spacing:.14em;background:linear-gradient(90deg,#ffc44d,#ff4fa3,#7b6bff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cityHead span{font:500 11px var(--mono);color:var(--muted)}
+.cityMode{font:700 11px var(--mono);letter-spacing:.12em;padding:6px 10px;border-radius:999px;border:1px solid #45d4ff;color:#45d4ff}
+.cityStage{position:relative;height:clamp(360px,62vh,560px);border-radius:16px;overflow:hidden;touch-action:pan-y;
+  background:radial-gradient(120% 80% at 50% 0%,#3a1fb8 0%,#1b0f6b 45%,#0a0630 100%)}
+.cityStage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cityBanner{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:3;white-space:nowrap;max-width:calc(100% - 20px);overflow:hidden;text-overflow:ellipsis;
+  padding:8px 14px;border-radius:999px;font:800 12px var(--body);letter-spacing:.06em;color:#ffe08a;background:rgba(20,12,60,.82);
+  border:1.5px solid #ffc44d;box-shadow:0 0 18px rgba(255,196,77,.55)}
+.cityBanner.locked{color:#7dffc2;border-color:#3ee6a2;box-shadow:0 0 18px rgba(62,230,162,.55)}
+.cityBanner.brake,.cityBanner.off{color:#ff8fae;border-color:#ff4f7d;box-shadow:0 0 18px rgba(255,79,125,.5)}
+.cityLabels{position:absolute;inset:0;z-index:2;pointer-events:none}
+.cityLbl{position:absolute;left:0;top:0;pointer-events:auto;display:grid;gap:1px;text-align:center;padding:5px 9px;border-radius:10px;cursor:pointer;
+  background:rgba(14,10,48,.86);border:1.5px solid var(--c);box-shadow:0 0 14px color-mix(in srgb,var(--c) 55%,transparent);color:var(--ink);font:inherit;
+  transition:opacity .3s;max-width:150px}
+.cityLbl b{font:800 11px var(--body);letter-spacing:.08em;color:var(--c)} .cityLbl span{font:600 10px var(--body);color:#d8dcff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cityLbl i{font:700 11px var(--mono);font-style:normal} .cityLbl.off{filter:saturate(.35) brightness(.8)} .cityLbl.sel{outline:2px solid #fff}
+.cityStage.flat .cityLabels{position:static;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:56px 10px 10px}
+.cityStage.flat .cityLbl{position:static;transform:none!important;max-width:none}
+.cityDetail{margin:10px 2px 0;font:500 13px var(--body);color:var(--muted);min-height:18px} .cityDetail b{color:var(--ink)}
+.cityCtl{display:grid;grid-template-columns:auto 1fr auto;gap:8px;margin-top:12px}
+.cityCtl .seg{display:flex;gap:4px;padding:4px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.05)}
+.cityCtl .seg button{flex:1;padding:9px 10px;border-radius:9px;border:0;background:transparent;color:var(--muted);font:700 12px var(--body);cursor:pointer;white-space:nowrap}
+.cityCtl .seg button[aria-pressed="true"]{background:var(--ink);color:#0a0d18}
+.cityCtl .seg button[data-set="on:false"][aria-pressed="true"]{background:var(--down);color:#fff}
+.cityCtl .seg button[data-set="on:true"][aria-pressed="true"]{background:var(--up);color:#04130c}
+@media (max-width:460px){ .cityCtl{grid-template-columns:1fr 1fr} .cityCtl .seg:nth-child(2){grid-column:1/-1;order:3} }
+.cityMsg{margin:8px 2px 0;font:500 12px var(--body);color:var(--muted);min-height:16px}
+.ownerBox{margin-top:10px;padding:12px;border-radius:12px;border:1px dashed var(--edge);display:grid;gap:8px}
+.ownerBox p{margin:0;font:500 12px/1.5 var(--body);color:var(--muted)} .ownerBox a{color:var(--ink)}
+.ownerBox div{display:flex;gap:8px} .ownerBox input{flex:1;min-width:0;padding:10px 12px;border-radius:10px;border:1px solid var(--edge);background:rgba(140,155,255,.05);color:var(--ink);font:500 13px var(--mono)}
+.ownerBox button{padding:0 16px;border-radius:10px;border:0;background:var(--up);color:#04130c;font:700 13px var(--body);cursor:pointer}
 .memeForm{display:flex;gap:8px}
 .memeForm input{flex:1;min-width:0;padding:12px 14px;border-radius:12px;border:1px solid var(--edge);background:rgba(140,155,255,.05);color:var(--ink);font:500 14px var(--mono)}
 .memeForm button{padding:0 18px;border-radius:12px;border:0;background:var(--up);color:#04130c;font:700 14px var(--body);cursor:pointer}
@@ -544,7 +578,7 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
   </header>
 
   <nav class="pages" id="pages" aria-label="Sections">
-    <button type="button" data-page="live" aria-current="page">Live</button><button type="button" data-page="meme">Meme</button><button type="button" data-page="bot">Scalper bot</button><button type="button" data-page="arena">Bots</button>
+    <button type="button" data-page="city" aria-current="page">City</button><button type="button" data-page="live">Live</button><button type="button" data-page="meme">Rug check</button>
   </nav>
 
   <nav class="watch" id="watch" aria-label="Pick a coin"></nav>
@@ -575,20 +609,36 @@ body[data-mood] .call{color:var(--mood);text-shadow:0 0 44px color-mix(in srgb,v
     </details>
   </section>
 
+  <section class="card cityCard" id="cityCard" data-page="city" hidden>
+    <div class="cityHead"><div><b>BOT CITY</b><span id="cityWorkers">loading…</span></div><span class="cityMode" id="cityMode">PAPER MONEY</span></div>
+    <div class="cityStage" id="cityStage"><canvas id="cityCanvas" aria-label="Bot City: each bot is a tower"></canvas>
+      <div class="cityBanner" id="cityBanner">Bot City is starting up</div><div class="cityLabels" id="cityLabels"></div></div>
+    <div class="cityDetail" id="cityDetail">Everything runs by itself. Tap a tower to see what that bot is doing.</div>
+    <div class="cityCtl" id="cityCtl">
+      <div class="seg" aria-label="Bots on or off"><button type="button" data-set="on:true">On</button><button type="button" data-set="on:false">Off</button></div>
+      <div class="seg" aria-label="Risk"><button type="button" data-set="risk:low">Low risk</button><button type="button" data-set="risk:normal">Normal</button><button type="button" data-set="risk:high">High</button></div>
+      <div class="seg" aria-label="Money"><button type="button" data-set="mode:paper">Paper</button><button type="button" data-set="mode:real">Real 🔒</button></div>
+    </div>
+    <p class="cityMsg" id="cityMsg"></p>
+    <div class="ownerBox" id="ownerBox" hidden>
+      <p><b>Only you can change the bots.</b> Make a GitHub key once: open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → new fine-grained token</a>, pick only the <b>turnspotter</b> repository, set <b>Contents</b> to <b>Read and write</b>, create it, and paste it here. It stays on this phone only.</p>
+      <div><input id="ownerKey" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false"><button type="button" id="ownerSave">Save</button></div>
+    </div>
+  </section>
   <section class="card" id="memeCheckCard" data-page="meme" hidden>
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Rug check</h2><span class="record">before you buy</span></div>
     <form class="memeForm" id="memeForm"><input id="memeIn" placeholder="Paste a Solana coin address or DexScreener link" autocomplete="off" spellcheck="false"><button type="submit">Check</button></form>
     <div id="memeResult"></div>
     <p class="note">Checks the coin live on RugCheck and DexScreener: can the dev print or freeze coins, is the liquidity locked, do whales or insiders hold too much, can people sell. Passing rules out the obvious rugs. It doesn't make a coin safe, and most meme coins still go to zero.</p>
   </section>
-  <section class="card" id="memeBotCard" data-page="meme" hidden>
+  <section class="card" id="memeBotCard" data-page="city" hidden>
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Meme bot</h2><span class="record" id="memeMeta">loading…</span></div>
     <div class="scoreRow"><div><b>Paper balance</b><span id="memeSub">$50 of fake money · buys only coins that pass every rug check and are rising</span></div><div class="money" id="memeBal">—</div></div>
     <p class="memeSub">Holding</p><div class="memeList" id="memePos"></div>
     <p class="memeSub">Recent trades</p><div class="memeList" id="memeHist"></div>
     <p class="memeSub">Trending coins it just checked · tap one to see why</p><div class="memeList" id="memeScan"></div>
   </section>
-  <section class="card" id="scoreCard" data-page="arena" hidden>
+  <section class="card" id="scoreCard" data-page="city" hidden>
     <div class="rowHead"><h2><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Scoreboard</h2><span class="record" id="scoreMeta">loading…</span></div>
     <div class="scoreTbl" id="scoreTbl"></div>
     <p class="note">Every bot started with $50 of fake money. The test that matters: did it beat simply buying Bitcoin on the same day and holding it?</p>
@@ -2772,7 +2822,7 @@ async function btcOn(t){
   return BTCDAY[day];
 }
 async function loadScore(){
-  if(document.body.dataset.on !== "arena") return;
+  if(document.body.dataset.on !== "city") return;
   const get = f => fetch(`paper/${f}.json?` + Date.now(), {cache:"no-store"}).then(r => r.json()).catch(() => null);
   const [L, T, A, M] = await Promise.all([get("ledger"), get("trend"), get("arena"), get("meme")]);
   const rows = [];
@@ -2840,7 +2890,7 @@ async function memeCheck(text){
 }
 $("memeForm").addEventListener("submit", e => { e.preventDefault(); memeCheck($("memeIn").value.trim()); });
 async function loadMeme(){
-  if(document.body.dataset.on !== "meme") return;
+  if(document.body.dataset.on !== "city") return;
   try{
     const L = await (await fetch("paper/meme.json?" + Date.now(), {cache:"no-store"})).json();
     const openVal = L.positions.reduce((s, p) => s + (p.last ? p.last.value : p.stake), 0), value = L.balance + openVal, chg = value / L.start - 1;
@@ -2860,8 +2910,200 @@ async function loadMeme(){
   }catch(e){ $("memeMeta").textContent = "starting up"; $("memeScan").innerHTML = `<p class="note">The meme bot's first scan is on its way from GitHub. Meanwhile, paste any coin above to check it yourself.</p>`; }
 }
 document.addEventListener("click", e => { const r = e.target.closest(".memeRow[data-mint]"); if(!r) return;
-  $("memeIn").value = r.dataset.mint; memeCheck(r.dataset.mint); $("memeCheckCard").scrollIntoView({behavior:reduceMotion ? "auto" : "smooth"}); });
+  showPage("meme"); $("memeIn").value = r.dataset.mint; memeCheck(r.dataset.mint); $("memeCheckCard").scrollIntoView({behavior:reduceMotion ? "auto" : "smooth"}); });
 setInterval(loadMeme, 60000);
+// ───────── Bot City: every bot is a tower in a neon city; owner-only controls (README round 35) ─────────
+const CITY = {loading:false, ready:false, towers:{}, data:null, set:null, sel:null};
+const CITY_BOTS = [
+  {id:"meme",  name:"MEME BOT",  color:0xffc44d, css:"#ffc44d", pos:[0, 0],      h:4.4},
+  {id:"trend", name:"TREND BOT", color:0x45d4ff, css:"#45d4ff", pos:[-2.6, 1.4], h:3.3},
+  {id:"arena", name:"ARENA",     color:0xb07bff, css:"#b07bff", pos:[2.6, 1.2],  h:2.9},
+  {id:"ai",    name:"AI CALLS",  color:0x6b7299, css:"#8b95bd", pos:[1.5, -2.6], h:2.1},
+];
+async function cityInit(){
+  if(CITY.loading) return; CITY.loading = true;
+  const stage = $("cityStage"), cv = $("cityCanvas");
+  let T, R;
+  try{ T = await import("https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js");
+    R = new T.WebGLRenderer({canvas:cv, antialias:true, alpha:true, powerPreference:"low-power"}); }
+  catch(e){ stage.classList.add("flat"); return; }
+  R.setPixelRatio(Math.min(1.5, devicePixelRatio || 1)); R.outputColorSpace = T.SRGBColorSpace;
+  const scene = new T.Scene(); scene.fog = new T.FogExp2(0x1b0f6b, .07);
+  const cam = new T.PerspectiveCamera(42, 1, .1, 80);
+  scene.add(new T.HemisphereLight(0x9d8cff, 0x0a0630, 1.3));
+  const tex = draw => { const c = document.createElement("canvas"); draw(c, c.getContext("2d")); const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; return t; };
+  const winTex = tex((c, g) => { c.width = 64; c.height = 128; g.fillStyle = "#0b0a2a"; g.fillRect(0, 0, 64, 128);
+    for(let y = 4; y < 124; y += 8) for(let x = 4; x < 60; x += 8) if(Math.random() < .55){ const w = Math.random();
+      g.globalAlpha = .55 + Math.random() * .45; g.fillStyle = w < .7 ? "#ffe9a8" : w < .9 ? "#ffffff" : "#8fd8ff"; g.fillRect(x, y, 4, 4); } });
+  winTex.magFilter = T.NearestFilter;
+  const gridTex = tex((c, g) => { c.width = c.height = 128; g.fillStyle = "#150c52"; g.fillRect(0, 0, 128, 128);
+    g.strokeStyle = "rgba(170,130,255,.4)"; g.lineWidth = 2; g.strokeRect(0, 0, 128, 128); });
+  gridTex.wrapS = gridTex.wrapT = T.RepeatWrapping; gridTex.repeat.set(30, 30);
+  const glowTex = tex((c, g) => { c.width = c.height = 64; const r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(.3, "rgba(255,255,255,.4)"); r.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = r; g.fillRect(0, 0, 64, 64); });
+  const ground = new T.Mesh(new T.PlaneGeometry(60, 60), new T.MeshBasicMaterial({map:gridTex}));
+  ground.rotation.x = -Math.PI / 2; scene.add(ground);
+  for(const [r, col] of [[3.8, 0xff4fa3], [6.8, 0x7b6bff]]){
+    const ring = new T.Mesh(new T.RingGeometry(r, r + .06, 96), new T.MeshBasicMaterial({color:col, transparent:true, opacity:.85, side:T.DoubleSide}));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = .01; scene.add(ring); }
+  const box = new T.BoxGeometry(1, 1, 1); box.translate(0, .5, 0);
+  const fillMat = new T.MeshStandardMaterial({map:winTex, emissiveMap:winTex, emissive:0xffffff, emissiveIntensity:.85, color:0x2a2470, roughness:.8});
+  const N = 170, inst = new T.InstancedMesh(box, fillMat, N), m4 = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(), ps = new T.Vector3();
+  for(let k = 0; k < N;){ const x = (Math.random() - .5) * 28, z = (Math.random() - .5) * 28, d = Math.hypot(x, z); if(d < 5) continue;
+    // low blocks near the plaza so the bot towers stand out, a taller skyline further back
+    const w = .4 + Math.random() * .5, h = d < 9 ? .3 + Math.random() * .9 : .6 + Math.random() * 2.2;
+    m4.compose(ps.set(Math.round(x * 1.3) / 1.3, 0, Math.round(z * 1.3) / 1.3), q, sc.set(w, h, w)); inst.setMatrixAt(k++, m4); }
+  scene.add(inst);
+  for(const b of CITY_BOTS){
+    const g = new T.Group(); g.position.set(b.pos[0], 0, b.pos[1]);
+    const mat = new T.MeshStandardMaterial({map:winTex, emissiveMap:winTex, emissive:b.color, emissiveIntensity:1.4, color:0x1c1850, roughness:.6});
+    let y = 0; const picks = [];
+    for(const [w, f] of [[.95, .55], [.68, .3], [.42, .15]]){ const m = new T.Mesh(box, mat); m.scale.set(w, b.h * f, w); m.position.y = y; g.add(m); picks.push(m); y += b.h * f; }
+    const tip = new T.Sprite(new T.SpriteMaterial({map:glowTex, color:b.color, blending:T.AdditiveBlending, transparent:true, depthWrite:false}));
+    tip.scale.set(1, 1, 1); tip.position.y = y + .15; g.add(tip);
+    const ring = new T.Mesh(new T.TorusGeometry(.95, .035, 8, 48), new T.MeshBasicMaterial({color:b.color, transparent:true, opacity:.9}));
+    ring.rotation.x = Math.PI / 2; ring.position.y = .06; g.add(ring);
+    const beam = new T.Mesh(new T.CylinderGeometry(.1, .1, 30, 12, 1, true),
+      new T.MeshBasicMaterial({color:0xffd56b, transparent:true, opacity:0, blending:T.AdditiveBlending, depthWrite:false}));
+    beam.position.y = 15; g.add(beam); scene.add(g);
+    CITY.towers[b.id] = {...b, mat, tip, ring, beam, top:y + .45, picks};
+  }
+  const ray = new T.Raycaster(), v2 = new T.Vector2(), tmp = new T.Vector3();
+  let ang = .6, last = 0, drag = null;
+  const resize = () => { const w = stage.clientWidth, h = stage.clientHeight; if(!w) return; R.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); };
+  new ResizeObserver(resize).observe(stage); resize();
+  stage.addEventListener("pointerdown", e => { if(e.target.closest(".cityLbl")) return; drag = {x:e.clientX, a:ang, moved:false}; });
+  addEventListener("pointermove", e => { if(!drag) return; const dx = e.clientX - drag.x; if(Math.abs(dx) > 5) drag.moved = true; ang = drag.a - dx * .008; });
+  addEventListener("pointerup", e => {
+    if(drag && !drag.moved){ const r = cv.getBoundingClientRect(); v2.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+      ray.setFromCamera(v2, cam); const hit = ray.intersectObjects(Object.values(CITY.towers).flatMap(t => t.picks))[0];
+      if(hit) citySelect(Object.keys(CITY.towers).find(k => CITY.towers[k].picks.includes(hit.object))); }
+    drag = null; });
+  (function loop(ts){
+    requestAnimationFrame(loop);
+    if(document.body.dataset.on !== "city" || document.hidden || !stage.clientWidth) return;
+    if(ts - last < (reduceMotion ? 250 : 33)) return;
+    const dt = last ? Math.min(.1, (ts - last) / 1000) : .033; last = ts; const t = ts / 1000;
+    if(!drag && !reduceMotion) ang += dt * .07;
+    const rad = stage.clientWidth < 500 ? 10 : 8.5;   // aerial view, like looking down on a city at night
+    cam.position.set(Math.sin(ang) * rad, 8.2, Math.cos(ang) * rad); cam.lookAt(0, 1.1, 0);
+    const placed = [];
+    for(const tw of Object.values(CITY.towers)){
+      const st = tw.state || {}, fresh = st.beamUntil && Date.now() < st.beamUntil;
+      tw.ring.material.opacity = st.on ? .55 + .4 * Math.sin(t * 3 + tw.pos[0]) : .12;
+      tw.ring.scale.setScalar(st.on ? 1 + .07 * Math.sin(t * 3) : 1);
+      tw.mat.emissiveIntensity = st.on ? 1.4 : .4;
+      tw.beam.material.color.setHex(st.beamGood === false ? 0xff3d6e : 0xffd56b);
+      tw.beam.material.opacity = fresh ? .32 + .18 * Math.sin(t * 6) : Math.max(0, tw.beam.material.opacity - dt);
+      tw.tip.material.opacity = st.on ? .65 + .35 * Math.sin(t * 2 + tw.pos[1]) : .2;
+      const el = document.getElementById("cl-" + tw.id);
+      if(el){ tmp.set(tw.pos[0], tw.top, tw.pos[1]).project(cam);
+        placed.push({el, x:(tmp.x * .5 + .5) * stage.clientWidth, y:(-tmp.y * .5 + .5) * stage.clientHeight, w:el.offsetWidth, h:el.offsetHeight}); }
+    }
+    // labels sit above their tower; if two would overlap, the lower one moves down below the other
+    placed.sort((a, b) => a.y - b.y);
+    const W = stage.clientWidth;
+    placed.forEach((a, i) => { a.x = Math.max(4, Math.min(W - a.w - 4, a.x - a.w / 2)); a.y = Math.max(50, a.y - a.h - 8);
+      for(let j = 0; j < i; j++){ const o = placed[j]; if(a.x < o.x + o.w + 4 && a.x + a.w + 4 > o.x && a.y < o.y + o.h + 4 && a.y + a.h > o.y) a.y = o.y + o.h + 4; }
+      a.el.style.transform = `translate(${a.x.toFixed(0)}px,${a.y.toFixed(0)}px)`; });
+    R.render(scene, cam);
+  })(0);
+  CITY.ready = true; cityRender();
+}
+async function loadCity(){
+  if(document.body.dataset.on !== "city") return;
+  const get = f => fetch(`paper/${f}.json?` + Date.now(), {cache:"no-store"}).then(r => r.json()).catch(() => null);
+  const [M, T, A, L, S] = await Promise.all([get("meme"), get("trend"), get("arena"), get("ledger"), get("settings")]);
+  CITY.data = {M, T, A, L}; if(S && !CITY.saving) CITY.set = S;
+  cityRender();
+}
+const cityMoney = v => (v >= 0 ? "+$" : "−$") + Math.abs(v).toFixed(2);
+function cityRender(){
+  const d = CITY.data; if(!d) return;
+  const {M, T, A, L} = d, st = {};
+  if(M){ const val = M.balance + M.positions.reduce((s, p) => s + (p.last ? p.last.value : p.stake), 0), shift = M.shift || "on";
+    const lastC = M.closed.at(-1), lastOpen = Math.max(0, ...M.positions.map(p => p.openedAt)), lt = Math.max(lastC ? lastC.closedAt : 0, lastOpen);
+    st.meme = {on:shift === "on", value:val, earned:val - M.start, today:M.day ? M.day.pnl || 0 : 0, shift, beamUntil:lt ? lt + 15 * 60e3 : 0,
+      beamGood:!(lastC && lastC.closedAt === lt && lastC.pnl < 0),
+      line:shift === "locked" ? "profit locked · off duty" : shift === "brake" ? "profit brake hit · off duty" : shift === "off" ? "switched off"
+        : M.positions.length ? "holding " + M.positions.map(p => p.sym).slice(0, 3).join(", ") : "on shift · watching",
+      detail:`<b>Meme bot</b>: ${M.positions.length} coin${M.positions.length === 1 ? "" : "s"} held, ${M.closed.length} trades done, ${cityMoney(val - M.start)} since it started. It buys only coins that pass every rug check.`}; }
+  if(T){ const val = T.equity.length ? T.equity.at(-1).value : T.start, held = Object.keys(T.holdings), lt = T.trades.length ? T.trades.at(-1).t : 0;
+    st.trend = {on:held.length > 0, value:val, earned:val - T.start, beamUntil:lt ? lt + 30 * 60e3 : 0,
+      line:held.length ? "holding " + held.join(", ") : "waiting · coins in a downtrend",
+      detail:`<b>Trend bot</b>: holds coins only while they're above their 50-day average. ${held.length ? "Holding " + held.join(", ") : "Every coin is below it, so it's sitting in cash"}.`}; }
+  if(A){ const bots = Object.values(A.bots), val = bots.reduce((s, b) => s + b.balance, 0), best = [...bots].sort((a, b) => b.balance - a.balance)[0];
+    st.arena = {on:true, value:val, earned:val - A.start * bots.length, line:"5 workers · leader " + best.name,
+      detail:`<b>Arena</b>: 5 one-minute Bitcoin strategies racing each other. Leader: ${best.name} at $${best.balance.toFixed(2)}.`}; }
+  if(L){ const val = L.balance + L.trades.filter(t => t.status === "open").reduce((s, t) => s + t.stake, 0);
+    st.ai = {on:false, value:val, earned:val - L.start, line:"closed · no edge after costs",
+      detail:"<b>AI calls</b>: closed for good. Tested every fix; none beat the fees."}; }
+  for(const [id, s] of Object.entries(st)) if(CITY.towers[id]) CITY.towers[id].state = s;
+  CITY.state = st;
+  $("cityLabels").innerHTML = CITY_BOTS.filter(b => st[b.id]).map(b => { const s = st[b.id];
+    return `<button type="button" class="cityLbl ${s.on ? "on" : "off"} ${CITY.sel === b.id ? "sel" : ""}" id="cl-${b.id}" data-tower="${b.id}" style="--c:${b.css}">
+      <b>${b.id === "meme" ? "★ " : ""}${b.name}</b><span>${memeEsc(s.line)}</span><i class="${s.earned >= 0 ? "win" : "loss"}">earned ${cityMoney(s.earned)}</i></button>`; }).join("");
+  const m = st.meme, goal = M && M.settings ? M.settings.dailyGoalPct : 10, workers = Object.values(st).filter(s => s.on).length;
+  $("cityBanner").className = "cityBanner " + (m ? m.shift : "");
+  $("cityBanner").textContent = !m ? "Bot City is starting up" : m.shift === "locked" ? `🔒 PROFIT LOCKED ${cityMoney(m.today)} · OFF DUTY`
+    : m.shift === "brake" ? `🛑 PROFIT BRAKE ${cityMoney(m.today)} · OFF DUTY` : m.shift === "off" ? "⏻ MEME BOT SWITCHED OFF"
+    : M.day ? `DAILY GOAL ${cityMoney(m.today)} / +$${(M.day.startEq * goal / 100).toFixed(2)} · ON SHIFT` : `DAILY GOAL +${goal}% · ON SHIFT`;
+  $("cityWorkers").textContent = `${workers} worker${workers === 1 ? "" : "s"} on shift · paper money`;
+  if(CITY.sel && st[CITY.sel]) $("cityDetail").innerHTML = st[CITY.sel].detail;
+  cityControls();
+}
+function citySelect(id){
+  if(!id) return; CITY.sel = id; cityRender();
+  if(id === "meme") $("memeBotCard").scrollIntoView({behavior:reduceMotion ? "auto" : "smooth", block:"start"});
+}
+document.addEventListener("click", e => { const b = e.target.closest(".cityLbl[data-tower]"); if(b) citySelect(b.dataset.tower); });
+setInterval(loadCity, 60000);
+
+// owner-only controls: saved to paper/settings.json in the repo with the owner's GitHub key (kept on this device only)
+const OWNER = {key:"turnspotter-gh-token", repo:"mightywickedsounds-gif/turnspotter", pending:null};
+const RISKS = {low:{dailyGoalPct:5, dailyLossPct:5}, normal:{dailyGoalPct:10, dailyLossPct:10}, high:{dailyGoalPct:20, dailyLossPct:15}};
+const citySet = () => CITY.set || {on:true, mode:"paper", risk:"normal", dailyGoalPct:10, dailyLossPct:10};
+function cityControls(){
+  const s = citySet();
+  document.querySelectorAll("#cityCtl [data-set]").forEach(b => { const [k, v] = b.dataset.set.split(":"); b.setAttribute("aria-pressed", String(String(s[k]) === v)); });
+  $("cityMode").textContent = s.mode === "real" ? "REAL MONEY" : "PAPER MONEY";
+}
+$("cityCtl").addEventListener("click", e => {
+  const b = e.target.closest("[data-set]"); if(!b) return;
+  const [k, v] = b.dataset.set.split(":");
+  if(k === "mode" && v === "real"){ $("cityMsg").textContent = "🔒 Real money unlocks after the paper test: the meme bot has to prove itself first."; return; }
+  const next = {...citySet()}; next[k] = k === "on" ? v === "true" : v; if(k === "risk") Object.assign(next, RISKS[v]);
+  saveSettings(next);
+});
+async function saveSettings(next){
+  let tok = null; try{ tok = localStorage.getItem(OWNER.key); }catch(e){}
+  if(!tok){ OWNER.pending = next; $("ownerBox").hidden = false; $("cityMsg").textContent = "Only you can change the bots: add your GitHub key once (below)."; return; }
+  $("cityMsg").textContent = "Saving…"; CITY.saving = true;
+  try{
+    const url = `https://api.github.com/repos/${OWNER.repo}/contents/paper/settings.json`, H = {Authorization:"Bearer " + tok, Accept:"application/vnd.github+json"};
+    const cur = await fetch(url + "?ref=main", {headers:H});
+    if(cur.status === 401 || cur.status === 403) throw {auth:true};
+    const sha = cur.ok ? (await cur.json()).sha : undefined;
+    const text = JSON.stringify({on:next.on, mode:next.mode, risk:next.risk, dailyGoalPct:next.dailyGoalPct, dailyLossPct:next.dailyLossPct, updatedAt:new Date().toISOString()}, null, 1) + "\n";
+    const r = await fetch(url, {method:"PUT", headers:H, body:JSON.stringify({message:`Settings: ${next.on ? "on" : "off"}, ${next.risk} risk, ${next.mode}`,
+      content:btoa(unescape(encodeURIComponent(text))), sha, branch:"main"})});
+    if(r.status === 401 || r.status === 403 || r.status === 404) throw {auth:true};
+    if(!r.ok) throw new Error("GitHub answered " + r.status);
+    CITY.set = next; cityControls(); $("cityMsg").textContent = "Saved ✓ The bot follows it within 5 minutes.";
+  }catch(e){
+    if(e && e.auth){ try{ localStorage.removeItem(OWNER.key); }catch(_){} OWNER.pending = next; $("ownerBox").hidden = false;
+      $("cityMsg").textContent = "That key can't edit the repo. Make one with Contents: Read and write (below)."; }
+    else $("cityMsg").textContent = "Couldn't save: " + (e.message || "network problem") + ". Try again.";
+  }
+  CITY.saving = false;
+}
+$("ownerSave").addEventListener("click", () => {
+  const v = $("ownerKey").value.trim(); if(!v) return;
+  try{ localStorage.setItem(OWNER.key, v); }catch(e){}
+  $("ownerKey").value = ""; $("ownerBox").hidden = true;
+  if(OWNER.pending){ const n = OWNER.pending; OWNER.pending = null; saveSettings(n); }
+});
+
 
 
 // ───────── Multiverse: 100 possible next minutes, coloured by how a Trench trade from here would end ─────────
@@ -3487,15 +3729,15 @@ function showPage(name){
   try{ localStorage.setItem("turnspotter-page", name); }catch(e){}
   if(name === "practice" && !$("pane-whatif").hidden) runWhatIf();
   if(name === "bot") tableInit();
-  if(name === "arena"){ loadArena(); loadScore(); }
-  if(name === "meme") loadMeme();
+  if(name === "arena") loadArena();
+  if(name === "city"){ cityInit(); loadCity(); loadMeme(); loadScore(); }
   window.scrollTo({top:0, behavior:reduceMotion ? "auto" : "smooth"});
 }
 $("pages").addEventListener("click", e => { const b = e.target.closest("button[data-page]"); if(b) showPage(b.dataset.page); });
 $("botTabs").addEventListener("click", e => { const b = e.target.closest("button[data-bpane]"); if(!b) return;
   document.querySelectorAll("#botCard .bpane").forEach(p => p.hidden = p.dataset.bpane !== b.dataset.bpane);
   $("botTabs").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); });
-try{ const pg = localStorage.getItem("turnspotter-page"); showPage(document.querySelector(`#pages button[data-page="${pg}"]`) ? pg : "live"); }catch(e){ showPage("live"); }   // "flow" is now part of Market
+try{ const pg = localStorage.getItem("turnspotter-page"); showPage(document.querySelector(`#pages button[data-page="${pg}"]`) ? pg : "city"); }catch(e){ showPage("city"); }   // "flow" is now part of Market
 renderWatch();
 loadHistory();
 </script>

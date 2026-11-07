@@ -1,0 +1,7 @@
+{
+ "on": true,
+ "mode": "paper",
+ "risk": "normal",
+ "dailyGoalPct": 10,
+ "dailyLossPct": 10
+}

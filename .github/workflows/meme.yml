@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [paper/meme.mjs, .github/workflows/meme.yml]
+    paths: [paper/meme.mjs, .github/workflows/meme.yml]   # settings.json changes are read each loop, no restart needed
 permissions:
   contents: write
   actions: write      # lets each run queue the next one (GitHub's cron timer skips hours at a time)
@@ -44,6 +44,8 @@ jobs:
           timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD
           end=$((SECONDS + 20400)); saved=-900
           while true; do
+            # pick up the owner's latest settings (on/off, risk, goal/brake: paper/settings.json, set from the City tab)
+            timeout 30 git fetch -q origin main && git checkout -q FETCH_HEAD -- paper/settings.json 2>/dev/null || true
             out=$(timeout 200 node paper/meme.mjs 2>&1) || true; echo "$out"
             if echo "$out" | grep -q TRADES_CHANGED || [ $((SECONDS - saved)) -ge 900 ] || [ $SECONDS -ge $end ]; then
               save; saved=$SECONDS

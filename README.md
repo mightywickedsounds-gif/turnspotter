@@ -657,6 +657,25 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   in the file: they no longer cost CPU or data, and the Live tab still uses pieces of them (the coin picker, the trade
   stream), so removing them is a refactor of its own.
 
+### Round 35: Bot City, fully automatic with three switches
+
+- The owner's direction (two Instagram reels: an AI trading terminal and a 3D neon city of trading bots): everything
+  automatic, almost no options. The site now opens on **City**; the menu is just City · Live · Rug check. The Scalper bot
+  and the old Bots tab are off the menu (their code stays in the file).
+- **Bot City** (three.js, same CDN as the robot table): each bot is a tower. Meme bot (gold), trend bot (blue), Arena
+  (violet), AI calls (grey, closed). Floating labels show what each is doing and what it has earned; a pulsing ring
+  means on shift; a light beam fires for 15 minutes after a trade (gold = buy or win, red = loss). A banner shows the
+  meme bot's daily goal, or PROFIT LOCKED / PROFIT BRAKE · OFF DUTY. Drag to spin, tap a tower for details. Without
+  WebGL it falls back to flat cards. Below it: the meme bot's holdings and the scoreboard.
+- **Shift rules in `paper/meme.mjs`** (tested on a copy of the live ledger): a shift starts at midnight UTC. Up the daily
+  goal: it sells everything, PROFIT LOCKED, off duty until midnight. Down the daily loss limit: PROFIT BRAKE, sells
+  everything, off duty. Switched off: no new buys; open positions keep their stops and targets.
+- **Three switches, owner only**: On/Off, Risk (low = 5% stakes, goal +5%, brake −5%; normal = 10% / +10% / −10%;
+  high = 20% / +20% / −15%) and Paper/Real. They save `paper/settings.json` through the GitHub API with the owner's
+  fine-grained key (Contents read/write on this repo only), which stays in that phone's browser. `meme.yml` re-reads the
+  file every loop, so a change takes effect within ~5 minutes. Real money stays locked: it needs a funded Solana wallet
+  and swap code that can't be tested without real money, and the meme bot hasn't shown an edge on paper yet.
+
 ## Files
 
 - `index.html`: the live web page (the website itself)

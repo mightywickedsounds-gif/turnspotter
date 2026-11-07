@@ -15,6 +15,11 @@ const CFG = {start:50, stakePct:.10, minStake:2, maxOpen:4, feePct:1, tp:.40, sl
   maxPump:{h1:50, h6:300},   // skip vertical pumps: buying the top makes you exit liquidity
   reportsPerRun:12, reportTtlMin:30, rugLiqDrop:.60};
 const FILE = new URL("./meme.json", import.meta.url);
+// Owner settings, changed from the site's City tab (paper/settings.json): on/off, risk, daily goal and loss limit.
+// "real" mode isn't built yet: the bot always paper-trades (README round 35).
+const SET = Object.assign({on:true, mode:"paper", risk:"normal", dailyGoalPct:10, dailyLossPct:10},
+  (() => { try{ return JSON.parse(fs.readFileSync(new URL("./settings.json", import.meta.url), "utf8")); }catch(e){ return {}; } })());
+CFG.stakePct = {low:.05, normal:.10, high:.20}[SET.risk] || .10;
 const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const code = html.split("/*MEME-START*/")[1].split("/*MEME-END*/")[0];
 const { memeChecks, memePickPair, memeTrim, MEME_RULES } = new Function(`${code}; return { memeChecks, memePickPair, memeTrim, MEME_RULES };`)();
@@ -96,7 +101,9 @@ for(const p of [...L.positions]){
     else if(ret <= CFG.sl) reason = "stop loss";
     else if(now - p.openedAt >= CFG.maxHoldH * 36e5) reason = "24 h time limit";
   }
-  if(!reason) continue;
+  if(reason) await sell(p, reason, pair, proceeds);
+}
+async function sell(p, reason, pair, proceeds){
   const pnl = proceeds - p.stake;
   L.balance = +(L.balance + proceeds).toFixed(4);
   L.positions.splice(L.positions.indexOf(p), 1);
@@ -107,13 +114,31 @@ for(const p of [...L.positions]){
 }
 if(L.closed.length > 500) L.closed.splice(0, L.closed.length - 500);
 
+// 5b) the shift (README round 35): a new shift starts at midnight UTC. Up the daily goal -> sell everything,
+//     PROFIT LOCKED, off duty for the day. Down the daily limit -> PROFIT BRAKE: sell everything, off duty.
+const eqNow = () => L.balance + L.positions.reduce((s, p) => s + (p.last ? p.last.value : p.stake), 0);
+const today = new Date(now).toISOString().slice(0, 10);
+if(!L.day || L.day.date !== today) L.day = {date:today, startEq:+eqNow().toFixed(2), status:"on"};
+if(L.day.status === "on" && L.positions.every(p => p.last)){
+  const r = eqNow() / L.day.startEq - 1;
+  const why = r >= SET.dailyGoalPct / 100 ? "daily goal: profit locked" : r <= -SET.dailyLossPct / 100 ? "profit brake: daily loss limit" : null;
+  if(why){
+    L.day.status = why.startsWith("daily goal") ? "locked" : "brake";
+    for(const p of [...L.positions]){ const pair = pairOf[p.mint]; await sell(p, why, pair, pair ? sellValue(p, pair) : 0); }
+    L.day.endedAt = now; L.day.result = +(eqNow() - L.day.startEq).toFixed(2);
+    await alert(L.day.status === "locked" ? `🔒 PROFIT LOCKED +$${L.day.result.toFixed(2)}` : `🛑 Profit brake hit: $${L.day.result.toFixed(2)}`,
+      `Meme bot is off duty until midnight UTC · paper balance $${L.balance.toFixed(2)}`, L.day.status === "locked" ? "lock" : "octagonal_sign");
+  }
+}
+const canTrade = SET.on && L.day.status === "on";
+
 // 6) open new positions: every critical check passes, no warnings, and real upward momentum
 const recent = m => L.closed.some(c => c.mint === m && now - c.closedAt < CFG.cooldownH * 36e5);
 const picks = L.scan.filter(c => c.checked && c.passed && !c.warnings && c.chg.h1 >= CFG.momentum.h1 && c.chg.h6 >= CFG.momentum.h6
   && c.chg.h1 <= CFG.maxPump.h1 && c.chg.h6 <= CFG.maxPump.h6
   && c.h1.buys > c.h1.sells && !L.positions.some(p => p.mint === c.mint) && !recent(c.mint));
 for(const c of picks){
-  if(L.positions.length >= CFG.maxOpen) break;
+  if(!canTrade || L.positions.length >= CFG.maxOpen) break;
   const stake = +Math.max(CFG.minStake, L.balance * CFG.stakePct).toFixed(2); if(L.balance < stake) break;
   const pair = pairOf[c.mint], afterFee = stake * (1 - CFG.feePct / 100), eff = +pair.priceUsd * (1 + impact(afterFee, pair.liquidity.usd));
   L.balance = +(L.balance - stake).toFixed(4);
@@ -128,6 +153,9 @@ function memeUsdLocal(v){ return v >= 1e6 ? "$" + (v / 1e6).toFixed(1) + "M" : "
 const openVal = L.positions.reduce((s, p) => s + (p.last ? p.last.value : p.stake), 0);
 L.equity.push({t:now, v:+(L.balance + openVal).toFixed(2)});
 if(L.equity.length > 3000) L.equity.splice(0, L.equity.length - 3000);
+L.day.pnl = +(eqNow() - L.day.startEq).toFixed(2);
+L.shift = !SET.on ? "off" : L.day.status;   // on / locked / brake / off
+L.settings = SET;
 L.lastRun = now;
 fs.writeFileSync(FILE, JSON.stringify(L));
 if(L.positions.map(p => p.mint).join() + "|" + L.closed.length !== before) console.log("TRADES_CHANGED");
