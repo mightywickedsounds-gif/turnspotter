@@ -156,7 +156,7 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R, mobile = f
   const coffee = part(new T.CylinderGeometry(.035, .03, .1, 14), std({color:0xeae6de, roughness:.4}), 0, -.31, .05, armR.el);
 
   // ── Ava's corner office (south-east): frosted glass, her desk, the work-chat TV on the outside of her wall ──
-  const frost = phys({color:0xf2f4ff, transparent:true, opacity:.32, roughness:.55, metalness:0, envMapIntensity:.05, depthWrite:false, side:T.DoubleSide});
+  const frost = phys({color:0xf2f4ff, transparent:true, opacity:.13, roughness:.55, metalness:0, envMapIntensity:.05, depthWrite:false, side:T.DoubleSide});
   const band = std({color:0x1b1b22, roughness:.4, metalness:.6});
   const AX = 1.45, AZ = .35;   // west wall at x = AX (from z = AZ to the south glass), north wall at z = AZ (with a door gap)
   add(new T.PlaneGeometry(hd - AZ, H), frost, AX, H / 2, (AZ + hd) / 2, Math.PI / 2);
@@ -165,25 +165,26 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R, mobile = f
   add(new T.BoxGeometry(.04, H, .04), band, AX, H / 2, AZ); add(new T.BoxGeometry(.04, H, .04), band, AX + .75, H / 2, AZ);   // door frame (the gap is the door)
   const plate = canvasTex(512, 96, c => { c.fillStyle = "#101016"; c.fillRect(0, 0, 512, 96); c.fillStyle = "#e8d9a8"; c.font = "600 40px system-ui, sans-serif"; c.textBaseline = "middle"; c.fillText("AVA · FRONT DESK", 24, 50); });
   add(new T.PlaneGeometry(.5, .095), new T.MeshBasicMaterial({map:plate}), AX - .025, 1.55, AZ + .35, -Math.PI / 2);
-  // the work-chat TV, mounted on the outside of her west wall, facing your desk
+  // the work-chat TV, on a stand to the right of your desk
   const tvTex = canvasTex(1280, 720, c => { c.fillStyle = "#05060c"; c.fillRect(0, 0, 1280, 720); }); tvTex.anisotropy = aniso;
-  const tvGrp = new T.Group(); tvGrp.position.set(AX - .05, 1.6, 1.05); tvGrp.rotation.y = -Math.PI / 2; g.add(tvGrp);
+  const tvGrp = new T.Group(); tvGrp.position.set(-1.95, 1.3, 1.15); tvGrp.rotation.y = Math.atan2(1.95, -.95); g.add(tvGrp);   // on a floor stand to your right, angled at your chair
+  add(new T.CylinderGeometry(.03, .03, 1.0, 12), steel, -1.95, .5, 1.15); add(new T.CylinderGeometry(.22, .25, .03, 28), std({color:0x111114, roughness:.2, metalness:.5}), -1.95, .015, 1.15);
   { const bz = new T.Mesh(new T.BoxGeometry(1.36, .79, .04), std({color:0x08080b, roughness:.3, metalness:.5})); bz.position.z = -.02; tvGrp.add(bz);
     const sc = new T.Mesh(new T.PlaneGeometry(1.3, .73), new T.MeshBasicMaterial({map:tvTex, toneMapped:false})); sc.position.z = .001; tvGrp.add(sc); tvGrp.userData.screen = sc; }
   // her desk, chair, monitor and plant
   const avaDesk = std({color:0xe9e4da, roughness:.35});
-  add(new T.BoxGeometry(.6, .04, 1.1), avaDesk, 1.95, .74, 2.2).castShadow = true;
-  for(const z of [1.68, 2.7]) add(new T.BoxGeometry(.56, .72, .03), avaDesk, 1.95, .36, z);
-  { const m = new T.Group(); m.position.set(1.8, 1.0, 2.2); m.rotation.y = Math.PI / 2; g.add(m);
+  add(new T.BoxGeometry(.6, .04, 1.1), avaDesk, 1.95, .74, 1.6).castShadow = true;
+  for(const z of [1.08, 2.1]) add(new T.BoxGeometry(.56, .72, .03), avaDesk, 1.95, .36, z);
+  { const m = new T.Group(); m.position.set(1.8, 1.0, 1.98); m.rotation.y = Math.PI / 2; g.add(m);
     m.add(new T.Mesh(new T.BoxGeometry(.5, .3, .02), std({color:0x0b0b10, roughness:.3, metalness:.5})));
     const s2 = new T.Mesh(new T.PlaneGeometry(.47, .27), new T.MeshBasicMaterial({color:0x2a3a7a})); s2.position.z = .011; m.add(s2);
     const leg = new T.Mesh(new T.BoxGeometry(.03, .2, .03), steel); leg.position.y = -.24; m.add(leg); }
-  { const ch = new T.Group(); ch.position.set(2.42, 0, 2.2); g.add(ch);
+  { const ch = new T.Group(); ch.position.set(2.42, 0, 1.5); g.add(ch);
     const seat = new T.Mesh(new T.BoxGeometry(.46, .07, .44), std({color:0x3a2a30, roughness:.6})); seat.position.y = .47; ch.add(seat);
     const back = new T.Mesh(new T.BoxGeometry(.06, .55, .42), std({color:0x3a2a30, roughness:.6})); back.position.set(.21, .8, 0); ch.add(back);
     const st = new T.Mesh(new T.CylinderGeometry(.03, .03, .42, 10), steel); st.position.y = .22; ch.add(st); }
   // Ava: blonde, cream sleeveless blouse, dark pencil skirt, headset; she types, and lifts a hand to the headset on a call
-  const ava = new T.Group(); ava.position.set(2.4, 0, 2.2); ava.rotation.y = -Math.PI / 2; g.add(ava);   // faces west, towards you
+  const ava = new T.Group(); ava.position.set(2.4, 0, 1.5); ava.rotation.y = -Math.PI / 2; g.add(ava);   // faces west, towards you
   const skin = std({color:0xf1c9ab, roughness:.55}), blouse = std({color:0xf3ece0, roughness:.7}), skirt = std({color:0x1d1e2a, roughness:.6}), hair = std({color:0xe8c872, roughness:.45, metalness:.05});
   const ap = (geo, mat, x, y, z, parent2 = ava) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; parent2.add(m); return m; };
   { // seated legs: thighs forward, shins down, heels
@@ -289,9 +290,11 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R, mobile = f
     }
     // taskbar
     c.fillStyle = "rgba(10,10,18,.88)"; c.fillRect(0, H2 - 72, W2, 72);
-    const icons = ["#45d4ff", "#ffc44d", "#7dffc2", "#ff4fa3", "#b07bff", "#3ee6a2"];
-    icons.forEach((col, k) => { const x = W2 / 2 - icons.length * 34 + k * 68; c.fillStyle = k === 0 ? "rgba(255,255,255,.12)" : "transparent"; rr(c, x - 4, H2 - 64, 58, 58, 10); c.fill();
-      c.fillStyle = col; rr(c, x + 8, H2 - 52, 34, 34, 8); c.fill(); });
+    // the same app icons as the BossOS desktop: a coloured tile with the app's symbol
+    const icons = [["📈", "#1f8a5b"], ["👥", "#4a154b"], ["📋", "#b03a48"], ["📥", "#2563eb"], ["🧠", "#c2306e"], ["⌨️", "#1b1f2a"], ["🏆", "#b8862a"]];
+    icons.forEach(([em, col], k) => { const x = W2 / 2 - icons.length * 34 + k * 68; c.fillStyle = k === 0 ? "rgba(255,255,255,.14)" : "transparent"; rr(c, x - 4, H2 - 66, 62, 62, 12); c.fill();
+      c.fillStyle = col; rr(c, x + 3, H2 - 59, 48, 48, 11); c.fill();
+      c.font = "28px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(em, x + 27, H2 - 34); c.textAlign = "left"; });
     c.fillStyle = "#eaf0ff"; c.font = "500 24px system-ui"; c.fillText(new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"}), W2 - 140, H2 - 36);
     main.tex.needsUpdate = true;
   }

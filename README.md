@@ -880,10 +880,11 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
   - In a one-day simulation: the ambitious, less honest bots inflated 11–24 reports, 6 were caught and learned to fear
     audits; the honest ones never cheated; tips and appeals flowed through Ava.
 - **The penthouse:** Ava has a frosted-glass corner office (desk, monitor, headset; blonde, cream blouse, pencil
-  skirt; she types and lifts a hand to her headset when a message comes in), the **work-chat TV** hangs on her wall
-  facing your desk, and a **work phone** lies on your desk showing her escalations (it glows when something waits; tap
+  skirt; she types and lifts a hand to her headset when a message comes in), the **work-chat TV** stands on a floor stand
+  to the right of your desk, and a **work phone** lies on your desk showing her escalations (it glows when something waits; tap
   it to open the inbox). Max the robot moved to the east window.
-- **BossOS** got three apps: **Work Chat** (the bots, HR and Ava), **HR · Report Cards** (reported vs actual grade:
+- **BossOS** got three apps (and every app now has a real icon, a coloured tile with its symbol, on the desktop,
+  Start menu, taskbar and the 3D monitor): **Work Chat** (the bots, HR and Ava), **HR · Report Cards** (reported vs actual grade:
   your x-ray, audits, pay, strikes, honesty and what each bot was thinking) and **Inbox (Ava)** with Approve / Deny.
 - Honest note: the bots' "competent human" judgement is expected-value reasoning plus personality, not a mind; and
   the HR game never touches the trading rules except the 6-hour buying suspension.

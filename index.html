@@ -356,7 +356,9 @@ h2 svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--cyan);stroke-widt
   -webkit-mask:linear-gradient(transparent,#000 35%);mask:linear-gradient(transparent,#000 35%)}
 .osIcons{position:absolute;left:10px;top:10px;display:grid;grid-template-columns:repeat(1,84px);gap:6px;z-index:1}
 .osIcons button{display:grid;justify-items:center;gap:4px;padding:8px 4px;border:1px solid transparent;border-radius:8px;background:none;color:#fff;font:500 11.5px system-ui;cursor:pointer;text-shadow:0 1px 3px #000}
-.osIcons button:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15)} .osIcons i{font-style:normal;font-size:26px;line-height:1}
+.osIcons button:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15)}
+.osTile{display:grid;place-items:center;width:42px;height:42px;border-radius:11px;background:linear-gradient(160deg,color-mix(in srgb,var(--t) 70%,#fff),var(--t) 55%);box-shadow:0 2px 8px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.25);font-style:normal;font-size:22px!important;line-height:1}
+.osBar .osTile{width:30px;height:30px;border-radius:8px;font-size:16px!important} .osStart .osTile{width:40px;height:40px} .osIcons i{font-style:normal;font-size:26px;line-height:1}
 .osWin{position:absolute;min-width:260px;display:flex;flex-direction:column;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.14);
   background:rgba(18,16,34,.86);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 18px 50px rgba(0,0,0,.55)}
 .osWin.max{inset:0 0 46px 0!important;width:auto!important;height:auto!important;border-radius:0}
@@ -3075,12 +3077,15 @@ async function cityInit(){
     $("cityFull").onclick = () => { try{ localStorage.removeItem("turnspotter-lite"); }catch(_){} location.reload(); }; }
 }
 // ───────── BossOS: the PC in the HQ penthouse (README round 40). Live trades with prices straight from DexScreener ─────────
+// each app's icon: its symbol on a coloured tile, like a phone or Windows app
+const OS_TILE = {trades:"#1f8a5b", board:"#b8862a", rug:"#1f7a6a", term:"#1b1f2a", chart:"#3b5bdb", chat:"#7b4bd6", lab:"#c2306e", workchat:"#4a154b", hr:"#b03a48", inbox:"#2563eb"};
+const osTile = (id, ic) => `<i class="osTile" style="--t:${OS_TILE[id] || "#333"}">${ic}</i>`;
 const OS = {wins:{}, z:10, live:{}, prev:{}, timer:0, liveTimer:0, n:0, decided:{}, note:""};
 const OS_APPS = {trades:["📈", "Live Trades", 700, 430], board:["🏆", "Leaderboard", 560, 420], rug:["🛡", "Rug Desk", 620, 420], term:["⌨", "Terminal", 600, 380],
   chart:["📊", "Team Chart", 620, 380], chat:["💬", "Team Chat", 460, 440], lab:["🧠", "AI Lab", 720, 440],
   workchat:["👥", "Work Chat", 520, 460], hr:["📋", "HR · Report Cards", 760, 460], inbox:["📥", "Inbox (Ava)", 560, 440]};
-$("osIcons").innerHTML = Object.entries(OS_APPS).map(([id, [ic, name]]) => `<button type="button" data-app="${id}"><i>${ic}</i>${name}</button>`).join("");
-$("osStart").innerHTML = `<p>Apps</p>` + Object.entries(OS_APPS).map(([id, [ic, name]]) => `<button type="button" data-app="${id}"><i>${ic}</i>${name}</button>`).join("")
+$("osIcons").innerHTML = Object.entries(OS_APPS).map(([id, [ic, name]]) => `<button type="button" data-app="${id}">${osTile(id, ic)}${name}</button>`).join("");
+$("osStart").innerHTML = `<p>Apps</p>` + Object.entries(OS_APPS).map(([id, [ic, name]]) => `<button type="button" data-app="${id}">${osTile(id, ic)}${name}</button>`).join("")
   + `<button type="button" data-app="stand"><i>⏻</i>Stand up</button>`;
 const osM = () => memeTeamOf(CITY.data && CITY.data.M);
 const osNarrow = () => $("bossOS").clientWidth < 640;
@@ -3116,7 +3121,7 @@ $("bossOS").addEventListener("click", e => {
 $("osStartBtn").addEventListener("click", e => { e.stopPropagation(); $("osStart").hidden = !$("osStart").hidden; });
 $("osStand").addEventListener("click", osClose);
 addEventListener("keydown", e => { if(e.key === "Escape" && !$("bossOS").hidden) osClose(); });
-function osTasks(){ $("osTasks").innerHTML = Object.entries(OS.wins).map(([id, w]) => `<button type="button" data-task="${id}" class="${w.hidden ? "" : "on"}" title="${OS_APPS[id][1]}">${OS_APPS[id][0]}</button>`).join(""); }
+function osTasks(){ $("osTasks").innerHTML = Object.entries(OS.wins).map(([id, w]) => `<button type="button" data-task="${id}" class="${w.hidden ? "" : "on"}" title="${OS_APPS[id][1]}">${osTile(id, OS_APPS[id][0])}</button>`).join(""); }
 function osTick(){ const d = new Date(); OS.n++;
   $("osClock").innerHTML = `${d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"})}<br>${d.toLocaleDateString([], {month:"numeric", day:"numeric", year:"numeric"})}`;
   if(OS.wins.term && !OS.wins.term.hidden) osRender("term");
