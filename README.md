@@ -889,6 +889,28 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - Honest note: the bots' "competent human" judgement is expected-value reasoning plus personality, not a mind; and
   the HR game never touches the trading rules except the 6-hour buying suspension.
 
+### Round 44: real office conversations (Claude), working window buttons, no glare
+
+- **Fixed:** the minimise / maximise / close buttons on BossOS windows did nothing (each window is tagged with its app
+  name, so a tap on its buttons was read as "open this app" again); the neon glow effect is now off inside the
+  penthouse (it turned the ceiling lights and screens into glare) and the ceiling downlights are dimmer.
+- **The bots really talk now** (new `paper/talk.mjs`, run every ~15 minutes in the meme loop): Claude writes the next
+  stretch of the work-group chat, 6–10 messages of actual conversation between the 32 bots (each with its own
+  personality: honesty, ambition, how chatty it is, its trading style), Ava and HR, about what really happened since
+  the last time (every bot's money, holdings, report card, strikes and rules; recent trades; audits; the scan). They
+  carry threads forward, and keep a **team notebook** (`L.hr.memory`) of lessons, rivalries and open questions that
+  feeds the next conversation, so the office builds on itself.
+- **Talk turns into learning, safely:** a bot can pitch a change to its own rules in the chat (take-profit, stop, hold,
+  buyer ratio, pool size). The next bot run tests every pitch on that bot's own trade history and adopts it only if it
+  wins on both halves (same bar as self-training), and the bot reports the result back in the chat.
+- The conversation shows in BossOS → Work Chat, on the TV next to your desk, and in the City page's Team chat.
+- Uses the official Anthropic SDK (`@anthropic-ai/sdk` 1.6.0, installed by the workflow), structured JSON output, a
+  cached system prompt (the cast and rules), `effort: low`, and server-side refusal fallback. Model `claude-opus-5-5`
+  by default (`TALK_MODEL` to change it). It needs an `ANTHROPIC_API_KEY` Actions secret; without it the canned
+  HR chatter carries on. Not run live here (no API key in this session); the request was built and checked with
+  `TALK_DRY=1` on simulated data. Cost estimate: about 4 cents a turn on Opus 5.5 (~$4/day at every 15 minutes), or
+  about a tenth of a cent on Haiku 5.5 (~10 cents/day).
+
 ## Files
 
 - `index.html`: the live web page (the website itself)
@@ -899,6 +921,7 @@ The self-check pause and the Memory brain were dropped, because both hurt with t
 - `research/backtest.py`: walk-forward test of the model (`python3 backtest.py`)
 - `research/experiments*.py`: tests of candidate upgrades; `research/train.py`: trains the Experience brain
 - `research/data/`: 2023–2026 candles for all five coins, plus the last 45 days of 1-minute candles (refreshed weekly)
+- `paper/talk.mjs`: the AI-written office chat (Claude), team notebook and rule pitches
 - `paper/hr.mjs`: the HR office (report cards, audits, paychecks, peer learning, Ava's inbox); `paper/decisions.json`: the boss's answers
 - `paper/echo.mjs`: Echo, the phone assistant (evening briefing and heads-up calls through Bland)
 - `paper/`: the paper bots and their files: `trader.mjs` (AI calls, paused), `trend.mjs` (50-day trends), `arena.mjs` (Bot Arena), `meme.mjs` (the 16-bot rug-checked meme team)

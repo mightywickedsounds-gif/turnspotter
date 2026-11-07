@@ -667,7 +667,7 @@ export function createCity(T, {stage, canvas, minimap, reduceMotion, isActive, o
     if((mode === "drive" || mode === "follow") && t - districtAt > .5){ districtAt = t; const d = DISTRICT(view.tx, view.tz); if(d !== lastDistrict){ if(lastDistrict) toast(`Now entering ${d}`); lastDistrict = d; } }
     // render: with neon bloom when the device keeps up; drops to plain rendering if it can't hold ~18 fps
     if(bloom){ bloom.strength = mode === "office" ? .3 : .85; bloom.threshold = mode === "office" ? .92 : .6; }   // keep the screens sharp in the office
-    if(composer && quality.bloom) composer.render(); else R.render(scene, cam);
+    if(composer && quality.bloom && mode !== "office") composer.render(); else R.render(scene, cam);   // no neon glow indoors: it turned lights and screens into glare
     quality.acc += dt; quality.n++;
     if(quality.acc > 4){ const fps = quality.n / quality.acc; quality.acc = 0; quality.n = 0;
       if(fps < 18 && quality.bloom && !quality.forced){ quality.bloom = false; if(mirror){ mirror.visible = false; roads.material.transparent = false; roads.material.needsUpdate = true; } } }

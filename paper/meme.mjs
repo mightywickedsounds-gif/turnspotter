@@ -307,6 +307,20 @@ for(const s of STRATS){ const b = L.bots[s.id]; if(s.fixed || s.random) continue
 }
 for(const [id, B] of Object.entries(brain.bots)){ const b = L.bots[id]; if(!b){ delete brain.bots[id]; continue; }
   const keys = new Set(b.positions.map(pkey)); for(const k of Object.keys(B.paths)) if(!keys.has(k)) delete B.paths[k]; }
+// ── ideas pitched in the AI-written work chat (paper/talk.mjs): each is tested on the pitching bot's own trades and
+// adopted only if it wins on both halves of its history, same bar as self-training; the bot reports back either way ──
+if(L.hr && L.hr.proposals && L.hr.proposals.length){
+  const LIM = {tp:[.05, 2], sl:[-.6, -.03], holdH:[1, 96], buyRatio:[1, 3], minLiq:[0, 1e6]};
+  for(const pr of L.hr.proposals.splice(0)){ const b = L.bots[pr.bot], s = STRATS.find(x => x.id === pr.bot); if(!b || !b.gene || !s || s.random || !LIM[pr.field]) continue;
+    const ls = brainOf(pr.bot).lessons, cand = {...b.gene, h1:b.gene.h1 ? [...b.gene.h1] : null, [pr.field]:+clamp(+pr.value, ...LIM[pr.field]).toFixed(pr.field === "minLiq" ? 0 : 3)};
+    const post = text => L.hr.chat.unshift({t:now, from:pr.bot, to:null, kind:"learn", text});
+    if(ls.length < CFG.learn.minLessons){ post(`Re my idea (${pr.field} → ${cand[pr.field]}): not enough finished trades yet to test it properly (${ls.length}/${CFG.learn.minLessons}). Parking it.`); continue; }
+    const A = ls.filter((_, i) => i % 2 === 0), B2 = ls.filter((_, i) => i % 2 === 1), gain = (score(cand, ls) - score(b.gene, ls)) / ls.length;
+    if(gain >= CFG.learn.minGain && score(cand, A) > score(b.gene, A) && score(cand, B2) > score(b.gene, B2)){
+      const what = describe(b.gene, cand); b.gene = cand; if(b.train){ b.train.gen++; b.train.last = {t:now, kept:false, txt:`from the team chat: ${what}`}; }
+      post(`Tested the idea from the chat on my last ${ls.length} trades: ${what} is +${(gain * 100).toFixed(1)}% per trade and held up on both halves. Switched. 🧠`); }
+    else post(`Tested my ${pr.field} idea on my last ${ls.length} trades: ${(gain * 100).toFixed(1)}% per trade, didn't hold up on both halves. Keeping my rules.`); }
+}
 // ── the HR office: report cards, audits, paychecks, learning from colleagues, Ava's inbox (paper/hr.mjs) ──
 const hrStats = runHR(L, {now, today, STRATS, say, brainOf, score, minLessons:CFG.learn.minLessons, minGain:CFG.learn.minGain, describe, decisions:DECISIONS});
 // the Rug Desk: announces coins it rejected or cleared this run (only freshly checked ones, so it doesn't repeat itself)

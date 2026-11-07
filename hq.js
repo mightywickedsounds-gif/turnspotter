@@ -38,7 +38,7 @@ export function buildPenthouse(T, {parent, OY, glowTex, canvasTex, R, mobile = f
   // ceiling with light strips
   const ceilMat = std({color:0x1a1a20, roughness:.95});
   add(new T.BoxGeometry(W, .1, D), ceilMat, 0, H + .05, 0);
-  for(const x of [-1.6, 0, 1.6]) for(const z of [-1.5, .2, 1.8]){ const d = add(new T.CircleGeometry(.07, 20), new T.MeshBasicMaterial({color:0xfff4e0}), x, H - .005, z, 0, Math.PI / 2);
+  for(const x of [-1.6, 0, 1.6]) for(const z of [-1.5, .2, 1.8]){ const d = add(new T.CircleGeometry(.07, 20), new T.MeshBasicMaterial({color:0xb8b2a6}), x, H - .005, z, 0, Math.PI / 2);
     const rim = add(new T.RingGeometry(.07, .095, 24), std({color:0x3a3a42, metalness:.8, roughness:.3, side:T.DoubleSide}), x, H - .004, z, 0, Math.PI / 2); }
   add(new T.BoxGeometry(W - .6, .02, .05), new T.MeshBasicMaterial({color:0xff4fa3}), 0, H - .01, -hd + .3);
   // floor-to-ceiling glass with slim mullions

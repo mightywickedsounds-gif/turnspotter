@@ -3037,10 +3037,12 @@ async function loadMeme(){
     // Team chat: the trade tape, written by the bots themselves
     const byName = Object.fromEntries(Object.entries(M.bots).map(([id, b]) => [b.name, id]));
     const tape = (raw.tape || []).map(e => ({...e, bot:e.bot || byName[Object.keys(byName).find(n => (e.txt || "").startsWith(n + " ")) || ""] || "hunter",
-      say:e.say || e.txt, kind:e.kind || (/ sold /.test(e.txt || "") ? "sell" : "buy")})).slice(0, 40);
+      say:e.say || e.txt, kind:e.kind || (/ sold /.test(e.txt || "") ? "sell" : "buy")})).slice(0, 40)
+      .concat(((raw.hr && raw.hr.chat) || []).map(c => ({t:c.t, bot:c.from, to:c.to, say:c.text, kind:c.kind || "talk"})))   // the office conversation too
+      .sort((x, y) => y.t - x.t).slice(0, 60);
     $("chatMeta").textContent = tape.length ? `${tape.length} messages` : "";
-    $("chat").innerHTML = tape.length ? tape.map(e => `<div class="msg ${memeEsc(e.kind)}" data-bot="${memeEsc(e.bot)}" style="--c:${e.bot === "rugdesk" ? "#3ee6a2" : cityColor(e.bot)}">
-      <span class="ava">${botAvatar(e.bot)}</span><div><b>${memeEsc(cityNameOf(M, e.bot))}</b><time>${cityAgo(now - e.t)}${cityAgo(now - e.t) === "just now" ? "" : " ago"}</time><p>${memeEsc(e.say)}</p></div></div>`).join("")
+    $("chat").innerHTML = tape.length ? tape.map(e => `<div class="msg ${memeEsc(e.kind)}" data-bot="${memeEsc(e.bot)}" style="--c:${e.bot === "rugdesk" ? "#3ee6a2" : e.bot === "hr" ? "#ff6b8a" : e.bot === "ava" ? "#ffd88a" : cityColor(e.bot)}">
+      <span class="ava">${botAvatar(e.bot)}</span><div><b>${memeEsc(cityNameOf(M, e.bot))}${e.to ? ` → ${memeEsc(cityNameOf(M, e.to))}` : ""}</b><time>${cityAgo(now - e.t)}${cityAgo(now - e.t) === "just now" ? "" : " ago"}</time><p>${memeEsc(e.say)}</p></div></div>`).join("")
       : `<p class="note">No messages yet: the bots post when they trade.</p>`;
   }catch(e){ $("memeMeta").textContent = "starting up"; $("roster").innerHTML = `<p class="note">The bots' first shift report is on its way from GitHub.</p>`; }
 }
@@ -3113,8 +3115,9 @@ function osApp(id){
 $("bossOS").addEventListener("pointerdown", e => { const w = e.target.closest(".osWin"); if(w) w.style.zIndex = ++OS.z;
   if(!e.target.closest("#osStart, #osStartBtn")) $("osStart").hidden = true; });
 $("bossOS").addEventListener("click", e => {
-  const a = e.target.closest("[data-app]"); if(a) return osApp(a.dataset.app);
-  const b = e.target.closest("[data-w]"); if(b){ const w = b.closest(".osWin");
+  const b = e.target.closest("[data-w]");
+  const a = !b && e.target.closest("button[data-app]"); if(a) return osApp(a.dataset.app);   // (each window also carries data-app, so only buttons launch apps)
+  if(b){ const w = b.closest(".osWin");
     if(b.dataset.w === "x"){ w.remove(); delete OS.wins[w.dataset.app]; } else if(b.dataset.w === "min") w.hidden = true; else w.classList.toggle("max"); osTasks(); return; }
   const t = e.target.closest("[data-task]"); if(t){ const w = OS.wins[t.dataset.task]; if(w.hidden || +w.style.zIndex < OS.z){ w.hidden = false; w.style.zIndex = ++OS.z; } else w.hidden = true; osTasks(); }
 });
@@ -3184,7 +3187,7 @@ function osRender(id){
   else if(id === "workchat"){   // the bots' own group chat (HR, Ava and colleagues), newest first, plus their trade posts
     const H = M.hr || {chat:[]}, items = [...H.chat.map(c => ({...c, src:"hr"})), ...(M.tape || []).filter(e => e.bot !== "rugdesk").slice(0, 40).map(e => ({t:e.t, from:e.bot, kind:e.kind, text:e.say || e.txt, src:"tape"}))]
       .sort((a, b) => b.t - a.t).slice(0, 70);
-    body.innerHTML = `<div class="osHead"><b># work-chat</b><span>${Object.keys(M.bots).length} employees · HR · Ava (front desk) · also on the TV on Ava's wall</span></div><div class="chat osChat">`
+    body.innerHTML = `<div class="osHead"><b># work-chat</b><span>${Object.keys(M.bots).length} employees · HR · Ava (front desk) · also on the TV next to your desk</span></div><div class="chat osChat">`
       + (items.length ? items.map(m => `<div class="msg ${memeEsc(m.kind || "")}" data-bot="${memeEsc(m.from)}" style="--c:${m.from === "hr" ? "#ff6b8a" : m.from === "ava" ? "#ffd88a" : cityColor(m.from)}">
         <span class="ava">${botAvatar(m.from)}</span><div><b>${memeEsc(cityNameOf(M, m.from))}${m.to ? ` → ${memeEsc(cityNameOf(M, m.to))}` : ""}</b><time>${cityAgo(now - m.t)}</time><p>${memeEsc(m.text)}</p></div></div>`).join("")
         : `<p class="note">Quiet so far: the first report cards arrive with the bots' next run.</p>`) + `</div>`;

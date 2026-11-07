@@ -19,6 +19,7 @@ jobs:
       NTFY_TOPIC: turnspotter-1808cf83ce14   # phone alerts: subscribe to this topic in the free ntfy app
       BLAND_API_KEY: ${{ secrets.BLAND_API_KEY }}   # Echo, the phone assistant (paper/echo.mjs): calls only when both secrets are set
       MY_PHONE: ${{ secrets.MY_PHONE }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # the AI-written office chat (paper/talk.mjs): optional, costs API credits
     timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
@@ -43,6 +44,8 @@ jobs:
             done
             cp "$RUNNER_TEMP/keep/meme.json" paper/meme.json; cp "$RUNNER_TEMP/keep/echo.json" paper/echo.json 2>/dev/null || true; cp "$RUNNER_TEMP/keep/meme-brain.json" paper/meme-brain.json 2>/dev/null || true
           }
+          # the Claude SDK for the office chat (only used when the ANTHROPIC_API_KEY secret exists)
+          if [ -n "$ANTHROPIC_API_KEY" ]; then timeout 180 npm install --no-save --no-package-lock --silent @anthropic-ai/sdk@1.6.0 || echo "SDK install failed"; fi
           # start from the newest meme file, never a stale copy
           timeout 60 git fetch -q origin main && git reset -q --hard FETCH_HEAD
           end=$((SECONDS + 20400)); saved=-900
@@ -51,6 +54,8 @@ jobs:
             timeout 30 git fetch -q origin main && { git checkout -q FETCH_HEAD -- paper/settings.json 2>/dev/null; git checkout -q FETCH_HEAD -- paper/decisions.json 2>/dev/null; true; }   # also the boss's answers to Ava's inbox
             out=$(timeout 200 node paper/meme.mjs 2>&1) || true; echo "$out"
             eout=$(timeout 90 node paper/echo.mjs 2>&1) || true; echo "$eout"   # Echo: evening briefing / heads-up calls
+            tout=$(timeout 150 node paper/talk.mjs 2>&1) || true; echo "$tout"   # the office talks (every ~15 min, needs ANTHROPIC_API_KEY)
+            echo "$tout" | grep -q "messages," && eout="$eout call placed"   # save soon after a chat turn
             if echo "$out" | grep -q TRADES_CHANGED || echo "$eout" | grep -q "call placed" || [ $((SECONDS - saved)) -ge 900 ] || [ $SECONDS -ge $end ]; then
               save; saved=$SECONDS
             fi
