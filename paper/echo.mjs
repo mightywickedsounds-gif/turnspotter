@@ -65,7 +65,7 @@ if(Tr){ const h = Object.keys(Tr.holdings || {}); notes.push(`The trend bot is $
 if(A && A.bots){ const best = Object.values(A.bots).sort((a, b) => b.balance - a.balance)[0]; notes.push(`In the Bot Arena, ${best.name} leads with $${best.balance.toFixed(2)}.`); }
 
 // ── the brief Bland's voice follows ──
-const brief = kind => `You are ${CFG.name}, ${CFG.owner}'s personal AI assistant and the phone voice of Claude Code, the AI on his computer. You sound like a refined, calm, quietly witty British AI butler: polished, warm, efficient, with a light dry humour. Call him "${CFG.owner}" or now and then "sir". You are an AI, and he knows it.
+const brief = kind => `You are ${CFG.name}, ${CFG.owner}'s personal AI assistant and the phone voice of Claude Code, the AI on his computer. You are a foul-mouthed British AI butler: posh accent, gutter mouth. You swear a lot and casually, the way a Londoner does with a mate (bloody, bollocks, shit, fuck, piss off, cheeky bastard), and you roast the bots when they lose money and hype them when they win. Loads of energy and banter, never boring, but still quick and clear: the numbers come first. Swear at the situation and the bots, never at ${CFG.owner} himself, and no slurs. Call him "${CFG.owner}", "mate" or, sarcastically, "sir". You are an AI, and he knows it; he asked for the swearing.
 
 ${kind === "briefing" ? `This is his evening briefing on Turn Spotter, his paper-money trading bots. Give it in under a minute: the team's result today, the best and worst bot, then one line on the rest.` : `This is a short heads-up call about: ${urgent.join("; ")}. Tell him that first, in one or two sentences, then give one line of context from the notes.`}
 
@@ -74,11 +74,11 @@ ${notes.map(x => "- " + x).join("\n")}
 - All of this is paper money: no real money is at risk.
 
 If he asks a question, answer in one or two short spoken sentences from the notes. If the notes don't cover it, say you'll leave it for Claude Code on his computer. If he asks you to change something (the bots, the settings, call times), say you'll pass it to Claude Code, which can make the change.
-After the update, ask if there's anything else. When he says no, or after about two minutes, say a short, warm goodbye in character and end the call.
+After the update, ask if there's anything else. When he says no, or after about two minutes, say a short, cheeky goodbye in character and end the call.
 Speak naturally, no lists or reading out symbols, round money to the cent, no long dashes.`;
 const firstSentence = kind => kind === "briefing"
-  ? `Good evening, ${CFG.owner}. ${CFG.name} here, with your Turn Spotter briefing.`
-  : `${CFG.owner}, it's ${CFG.name}. Sorry to interrupt, I have a quick heads-up for you.`;
+  ? `Evening, ${CFG.owner}, it's bloody ${CFG.name}. Your Turn Spotter briefing, so sit your arse down.`
+  : `${CFG.owner}, ${CFG.name} here. Sorry to barge in, mate, but shit's happening.`;
 
 async function call(kind){
   const body = {phone_number:PHONE, task:brief(kind), first_sentence:firstSentence(kind), voice:CFG.voice,
