@@ -8,7 +8,7 @@
   "feePct": 1,
   "minStake": 1
  },
- "lastT": 1794016740000,
+ "lastT": 1794017100000,
  "bots": {
   "scalper": {
    "name": "Scalper",
@@ -9869,25 +9869,23 @@
     {
      "t": 1794016859477,
      "v": 19.44
+    },
+    {
+     "t": 1794017161593,
+     "v": 19.44
     }
    ]
   },
   "fader": {
    "name": "Streak Fader",
    "desc": "Bets against 5 same-colour candles in a row",
-   "balance": 32.6304,
-   "trades": 334,
-   "wins": 120,
+   "balance": 32.6778,
+   "trades": 335,
+   "wins": 121,
    "busts": 0,
    "best": 0.7747,
    "worst": -1.1174,
    "recent": [
-    {
-     "t": 1793963520000,
-     "dir": 1,
-     "pnl": -0.1438,
-     "busted": false
-    },
     {
      "t": 1793966280000,
      "dir": 1,
@@ -10000,6 +9998,12 @@
      "t": 1794016320000,
      "dir": -1,
      "pnl": -0.0829,
+     "busted": false
+    },
+    {
+     "t": 1794016980000,
+     "dir": -1,
+     "pnl": 0.0474,
      "busted": false
     }
    ],
@@ -19731,37 +19735,23 @@
     {
      "t": 1794016859477,
      "v": 32.63
+    },
+    {
+     "t": 1794017161593,
+     "v": 32.68
     }
    ]
   },
   "breakout": {
    "name": "Breakout Bro",
    "desc": "Trades the break of a tight 30-minute range",
-   "balance": 31.505,
-   "trades": 536,
-   "wins": 183,
+   "balance": 31.4134,
+   "trades": 539,
+   "wins": 184,
    "busts": 0,
    "best": 0.9521,
    "worst": -0.491,
    "recent": [
-    {
-     "t": 1794002280000,
-     "dir": 1,
-     "pnl": 0.0282,
-     "busted": false
-    },
-    {
-     "t": 1794002460000,
-     "dir": 1,
-     "pnl": 0.1836,
-     "busted": false
-    },
-    {
-     "t": 1794004620000,
-     "dir": -1,
-     "pnl": -0.0823,
-     "busted": false
-    },
     {
      "t": 1794005220000,
      "dir": -1,
@@ -19862,6 +19852,24 @@
      "t": 1794016620000,
      "dir": 1,
      "pnl": -0.0602,
+     "busted": false
+    },
+    {
+     "t": 1794016860000,
+     "dir": 1,
+     "pnl": -0.0208,
+     "busted": false
+    },
+    {
+     "t": 1794016920000,
+     "dir": 1,
+     "pnl": 0.038,
+     "busted": false
+    },
+    {
+     "t": 1794016980000,
+     "dir": 1,
+     "pnl": -0.1088,
      "busted": false
     }
    ],
@@ -29593,25 +29601,23 @@
     {
      "t": 1794016859477,
      "v": 31.5
+    },
+    {
+     "t": 1794017161593,
+     "v": 31.41
     }
    ]
   },
   "bull": {
    "name": "Always Bullish",
    "desc": "Bets UP every 30 minutes, no matter what",
-   "balance": 23.7961,
-   "trades": 405,
-   "wins": 129,
+   "balance": 23.8382,
+   "trades": 406,
+   "wins": 130,
    "busts": 0,
    "best": 1.1101,
    "worst": -1.0556,
    "recent": [
-    {
-     "t": 1793980800000,
-     "dir": 1,
-     "pnl": -0.4768,
-     "busted": false
-    },
     {
      "t": 1793982600000,
      "dir": 1,
@@ -29725,6 +29731,12 @@
      "dir": 1,
      "pnl": 0.0279,
      "busted": false
+    },
+    {
+     "t": 1794016800000,
+     "dir": 1,
+     "pnl": 0.0421,
+     "busted": false
     }
    ],
    "equity": [
@@ -39455,25 +39467,23 @@
     {
      "t": 1794016859477,
      "v": 23.8
+    },
+    {
+     "t": 1794017161593,
+     "v": 23.84
     }
    ]
   },
   "flipper": {
    "name": "Coin Flipper",
    "desc": "Random direction every 30 minutes: the control",
-   "balance": 33.1123,
-   "trades": 405,
-   "wins": 160,
+   "balance": 33.1709,
+   "trades": 406,
+   "wins": 161,
    "busts": 0,
    "best": 1.0017,
    "worst": -1.7316,
    "recent": [
-    {
-     "t": 1793980800000,
-     "dir": -1,
-     "pnl": 0.5789,
-     "busted": false
-    },
     {
      "t": 1793982600000,
      "dir": 1,
@@ -39587,6 +39597,12 @@
      "dir": -1,
      "pnl": -0.1053,
      "busted": false
+    },
+    {
+     "t": 1794016800000,
+     "dir": 1,
+     "pnl": 0.0586,
+     "busted": false
     }
    ],
    "equity": [
@@ -49317,11 +49333,15 @@
     {
      "t": 1794016859477,
      "v": 33.11
+    },
+    {
+     "t": 1794017161593,
+     "v": 33.17
     }
    ]
   }
  },
- "lastRun": 1794016859477,
- "price": 75933.38,
+ "lastRun": 1794017161593,
+ "price": 75938.81,
  "src": "Coinbase"
 }
